@@ -17,13 +17,22 @@ class BlockTarget {
   String name;
   String type;
 
-  late int life;
+  late int _life;
   late int level;
 
   BoardComponent? body;
   BoardPosition position;
+
+  int get life => _life;
+
+  set life(int value) {
+    _life = value;
+
+    body?.life.text = "$value";
+  }
+
   BlockTarget(this.name, this.position, this.type) {
-    life = 1;
+    _life = 1;
     level = 1;
   }
 
@@ -83,6 +92,8 @@ class BoardSystem {
     });
 
     Map<String, BlockTarget> tempVos = {};
+
+    // Array = {};
 
     checkBlockPoint(BlockTarget block, PointType point) {
       bool reduceBlockImpact(BlockTarget target) {
