@@ -10,7 +10,7 @@ class BoardComponent extends ShapeComponent with HasGameReference<MainScene> {
     required ComponentKey key,
     required Vector2 position,
   }) : super(
-          key: key,
+          // key: key,
           anchor: Anchor.center,
           position: position,
         );
@@ -24,6 +24,16 @@ class BoardComponent extends ShapeComponent with HasGameReference<MainScene> {
       ),
     ),
   );
+  late TextComponent level = TextComponent(
+    text: "1",
+    textRenderer: TextPaint(
+      style: TextStyle(
+        fontSize: 20,
+        color: BasicPalette.yellow.color,
+      ),
+    ),
+    position: Vector2(50, 10),
+  );
 
   @override
   void onMount() {
@@ -31,6 +41,65 @@ class BoardComponent extends ShapeComponent with HasGameReference<MainScene> {
     size = Vector2(60, 60);
     debugMode = true;
     add(life);
+    add(level);
+  }
+
+  List<SequenceEffect> _tasks = [];
+  bool _onEffect = false;
+
+  checkTask() {
+    if (_onEffect) {
+      return;
+    }
+    if (_tasks.isNotEmpty) {
+      var first = _tasks.first;
+      // start
+      _onEffect = true;
+      add(first);
+      _tasks.removeAt(0);
+    } else {
+      _onEffect = false;
+    }
+  }
+
+  lifeTo(int num) {
+    // var pos = getGroundPositionAt(p.x, p.y);
+    EffectController duration(double x) => EffectController(duration: x);
+
+    _tasks.add(
+      SequenceEffect(
+        [
+          OpacityEffect.to(1, duration(0)),
+        ],
+        onComplete: () {
+          // change life;
+          life.text = "$num";
+          _onEffect = false;
+          checkTask();
+        },
+      ),
+    );
+    checkTask();
+  }
+
+  levelTo(int num) {
+    // var pos = getGroundPositionAt(p.x, p.y);
+    EffectController duration(double x) => EffectController(duration: x);
+
+    _tasks.add(
+      SequenceEffect(
+        [
+          OpacityEffect.to(1, duration(0)),
+        ],
+        onComplete: () {
+          // change life;
+          level.text = "$num";
+          _onEffect = false;
+          checkTask();
+        },
+      ),
+    );
+    checkTask();
   }
 
   moveTo(int x, int y, PointType point) {
@@ -38,23 +107,33 @@ class BoardComponent extends ShapeComponent with HasGameReference<MainScene> {
     EffectController duration(double x) => EffectController(duration: x);
     // this.add()
     var p = point.toPosition();
-    add(SequenceEffect([
-      MoveEffect.to(
-        pos,
-        duration(0.2),
+    _tasks.add(
+      SequenceEffect(
+        [
+          MoveEffect.to(
+            pos,
+            duration(0.2),
+          ),
+          MoveEffect.by(
+            Vector2(-8 * p.x.toDouble(), -8 * p.y.toDouble()),
+            EffectController(
+              duration: 0.16,
+              reverseDuration: 0.16,
+              // startDelay: 0.2,
+              atMinDuration: 0.2,
+              curve: Curves.ease,
+              infinite: false,
+            ),
+          ),
+        ],
+        onComplete: () {
+          _onEffect = false;
+          checkTask();
+        },
       ),
-      MoveEffect.by(
-        Vector2(-8 * p.x.toDouble(), -8 * p.y.toDouble()),
-        EffectController(
-          duration: 0.16,
-          reverseDuration: 0.16,
-          // startDelay: 0.2,
-          atMinDuration: 0.2,
-          curve: Curves.ease,
-          infinite: false,
-        ),
-      )
-    ]));
+    );
+
+    checkTask();
   }
 
   dead() {

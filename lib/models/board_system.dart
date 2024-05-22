@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_game_2048_fight/elements/board_component.dart';
 
 class BoardSize {
@@ -18,28 +20,33 @@ class BlockTarget {
   String type;
 
   late int _life;
-  late int level;
+  late int _level;
 
   BoardComponent? body;
   BoardPosition position;
 
   int get life => _life;
-
   set life(int value) {
     _life = value;
+    body?.lifeTo(value);
+  }
 
-    body?.life.text = "$value";
+  int get level => _level;
+  set level(int value) {
+    _level = value;
+    body?.levelTo(value);
   }
 
   BlockTarget(this.name, this.position, this.type) {
     _life = 1;
-    level = 1;
+    _level = 1;
   }
 
   BlockTarget copy() {
     var item = BlockTarget(name, position, type);
     item.life = life;
     item.body = body;
+    item.level = level;
     return item;
   }
 
@@ -57,6 +64,11 @@ class BoardSystem {
   BoardSize size;
   BoardSystem(this.size);
 
+  int step = 0;
+
+  bool openMerge = false;
+  bool openInner = false;
+
   late Map<String, BlockTarget> vos = {};
 
   addBlock(BlockTarget block) {
@@ -67,6 +79,47 @@ class BoardSystem {
 
   getBlockKey(BoardPosition pos) {
     return "B_${pos.x}_${pos.y}";
+  }
+
+  BlockTarget? createRandomTarget() {
+    // 从当前所占领的 5x5 格子中
+    // 去除掉 已经占用的 格子，
+    // 随机返回一个 没被占用的格子
+    Map<String, BoardPosition> allTargets = {};
+
+    // 创建 5x5 格子
+    for (int x = 1; x < 6; x++) {
+      for (int y = 1; y < 6; y++) {
+        var pos = BoardPosition(x, y);
+        var key = getBlockKey(pos);
+        allTargets[key] = pos;
+      }
+    }
+    print(allTargets.length);
+
+    vos.forEach((key, value) {
+      allTargets.remove(key);
+    });
+
+    print(allTargets.length);
+
+    // // 随机选择一个未被占用的格子
+    List<BoardPosition> list = allTargets.values.toList();
+
+    if (list.isNotEmpty) {
+      var random = Random();
+      int index = random.nextInt(list.length);
+      print(index);
+      var life = index % 3 + 1;
+      step += 1;
+      var name = "Enemy_$step";
+      var pos = list[index];
+      var type = "ENEMY";
+      var block = BlockTarget(name, pos, type);
+      block.life = life;
+      return block;
+    }
+    return null;
   }
 
   slideTo(PointType point) {
@@ -93,13 +146,12 @@ class BoardSystem {
 
     Map<String, BlockTarget> tempVos = {};
 
-    // Array = {};
-
     checkBlockPoint(BlockTarget block, PointType point) {
       bool reduceBlockImpact(BlockTarget target) {
-        // TODO get the act from block
-        var act = 1;
-        target.life -= act;
+        if (block.type != target.type) {
+          var act = 1;
+          target.life -= act;
+        }
         return target.life > 0;
       }
 
@@ -119,7 +171,22 @@ class BoardSystem {
           if (item != null) {
             // 处理 伤害
             print("need do impack with: ${item.name}");
-            // 判断是否死亡
+
+            // check grow
+            if (openMerge &&
+                item.type == block.type &&
+                item.level == block.level) {
+              block.life += item.life;
+              block.level += item.level;
+              item.dead();
+              tempVos.remove(key);
+              if (openInner) {
+                return getPointPosition(newPos);
+              } else {
+                return pos;
+              }
+              // continue move
+            }
             var isAlive = reduceBlockImpact(item);
             if (isAlive) {
               return pos;
@@ -139,10 +206,10 @@ class BoardSystem {
       print("${block.name} ${block.life} ${pos.x} - ${pos.y}");
 
       // copy block
-      var newBlock = block.copy();
+      var newBlock = block;
+
       newBlock.moveTo(pos.x, pos.y, point);
       var key = getBlockKey(pos);
-      print(key);
       tempVos[key] = newBlock;
     }
 
@@ -153,22 +220,7 @@ class BoardSystem {
     vos.clear();
 
     // 更新
-
     vos = tempVos;
-
-    tempVos.forEach((key, value) {
-      print("temp $key");
-      vos[key] = value;
-    });
-
-    print(vos);
-
-    // 对所有 block 进行遍历
-    // 收集 需要的 action
-    //     move
-    //     impact
-
-    // 更新 block 新的位置
   }
 }
 
