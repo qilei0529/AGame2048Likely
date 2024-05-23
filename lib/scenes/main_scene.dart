@@ -321,7 +321,7 @@ class RoundedRectComponent extends PositionComponent with HasPaint {
   }
 }
 
-class Block extends ShapeComponent {
+class Block extends ShapeComponent with HasGameReference {
   Block(Vector2 position)
       : super(
           anchor: Anchor.center,

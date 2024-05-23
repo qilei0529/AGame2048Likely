@@ -1,0 +1,17 @@
+{
+  "name": "level 1",
+
+  "steps": [
+    {
+      "index": 0,
+      "blocks": [
+        {
+          "type": "Hero",
+          "position": [1, 4],
+          "life": 4,
+          "level": 1
+        }
+      ]
+    }
+  ]
+}

@@ -1,21 +1,30 @@
-import 'dart:math';
+import 'package:flutter/material.dart';
+
+// frame
 import 'package:flame/components.dart';
 
-// 背景 
-// class Background extends SpriteComponent {
-//   Background({required super.sprite})
-//       : super(
-//           anchor: Anchor.center,
-//           position: Vector2(0, 0),
-//         );
+// scene
+import 'package:flutter_game_2048_fight/scenes/game_scene.dart';
 
-//   @override
-//   void onMount() {
-//     super.onMount();
+class Background extends RectangleComponent
+    with HasGameReference<TheGameScene> {
+  late Color color;
 
-//     size = Vector2.all(max(
-//       // game.camera.visibleWorldRect.width,
-//       // game.camera.visibleWorldRect.height,
-//     ));
-//   }
-// }
+  Background({
+    super.position,
+    super.size,
+    Color? color,
+  }) {
+    this.color = color ?? Colors.white60;
+    super.anchor = Anchor.center;
+  }
+  @override
+  void onMount() {
+    var bg = RectangleComponent();
+    bg.setColor(color);
+    var size = game.camera.visibleWorldRect;
+    bg.size = Vector2(size.width, size.height);
+    add(bg);
+    super.onMount();
+  }
+}

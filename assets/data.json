@@ -1,0 +1,29 @@
+{
+  "name": "level 1",
+
+  "steps": [
+    {
+      "index": 0,
+      "blocks": [
+        {
+          "type": "Hero",
+          "position": [2, 3],
+          "life": 4,
+          "level": 1
+        },
+        {
+          "type": "Enemy",
+          "position": [4, 1],
+          "life": 1,
+          "level": 1
+        },
+        {
+          "type": "Enemy",
+          "position": [4, 2],
+          "life": 3,
+          "level": 1
+        }
+      ]
+    }
+  ]
+}
