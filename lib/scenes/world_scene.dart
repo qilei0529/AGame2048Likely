@@ -3,7 +3,6 @@ import 'dart:async';
 // frame
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_game_2048_fight/models/game_system.dart';
 import 'package:flutter_game_2048_fight/models/system/block.dart';
 import 'package:flutter_game_2048_fight/models/system/board.dart';
 
@@ -27,6 +26,8 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
   // 当前 step
   late GameStepData currentStep;
 
+  late Map<String, BlockComponent> vos = {};
+
   WorldScene({required this.level});
 
   renderStepBlock(GameStepData step) {
@@ -48,7 +49,9 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
           color: Colors.blue.shade400,
         );
       }
-      item.body = block;
+
+      // item.body = block;
+      vos[item.id] = block;
 
       block.debugMode = true;
       block.debugColor = Colors.black26;
@@ -62,7 +65,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     if (step != null) {
       currentStep = GameStepData(size: step.size);
       for (var block in step.blocks) {
-        currentStep.blocks.add(
+        currentStep.addBlock(
           (block as BoardItem).copy(),
         );
       }
@@ -118,12 +121,8 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
 
     // 获取 排序
     List<BoardItem> blocklist = [];
-
-    var blocks = currentStep.blocks;
-    if (blocks != null) {
-      blocks.forEach((element) {
-        blocklist.add(element as BoardItem);
-      });
+    for (var element in currentStep.blocks) {
+      blocklist.add(element as BoardItem);
     }
 
     blocklist.sort((a, b) {
@@ -174,23 +173,24 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
       var pos = getPointPosition(block.position);
       print("${block.name} ${block.life} ${pos.x} - ${pos.y}");
 
-      // // copy block
-      var newBlock = block as BoardItem;
-
       var position = getBoardPositionAt(pos.x, pos.y);
-      print("move to ${position}");
-      if (newBlock.body != null) {
-        var body = newBlock.body as BlockComponent;
+
+      var body = vos[block.id];
+      if (body != null) {
         body.position = position;
+        print("move to ${position}");
       }
       // newBlock.moveTo(pos.x, pos.y, point);
       var key = getBlockKey(pos);
-      tempVos[key] = newBlock;
+      tempVos[key] = block;
     }
 
     for (var block in blocklist) {
       checkBlockPoint(block, point);
     }
+
+    currentStep.vos.clear();
+    currentStep.vos.addAll(tempVos);
   }
 
   initControl() {

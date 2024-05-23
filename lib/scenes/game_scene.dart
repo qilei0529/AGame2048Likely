@@ -33,7 +33,7 @@ class TheGameScene extends FlameGame {
   Future<GameLevelData> loadLevel() async {
     var data = await loadData();
     var name = data["name"];
-    List<dynamic> steps = data["steps"] as List<dynamic>;
+    List<dynamic>? steps = data["steps"];
     var level = GameLevelData(name: name);
     if (steps != null) {
       for (var item in steps) {
@@ -74,8 +74,7 @@ class TheGameScene extends FlameGame {
             }
 
             // add block to step.blocks
-            step.blocks.add(block);
-            // print(block);
+            step.addBlock(block);
           }
         }
       }

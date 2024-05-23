@@ -86,12 +86,14 @@ class GameStepData {
   late String id; // uuid
 
   // 所有物件
-  late List<BlockData> blocks;
+  late Map<String, BlockData> vos;
 
   late GamePoint point;
 
   // 所有行为
   late List<GameActionData> actions;
+
+  List<BlockData> get blocks => vos.values.toList();
 
   GameStepData({
     String? id,
@@ -100,8 +102,12 @@ class GameStepData {
     this.id = id ?? const Uuid().v4().toString();
     this.size = size ?? BoardSize(5, 5);
 
-    blocks = [];
+    vos = {};
     actions = [];
+  }
+
+  addBlock(BlockData block) {
+    vos[block.id] = block;
   }
 }
 
