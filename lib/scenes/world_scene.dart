@@ -1,8 +1,8 @@
 import 'dart:async';
-
 // frame
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_game_2048_fight/models/game_system.dart';
 import 'package:flutter_game_2048_fight/models/system/block.dart';
 import 'package:flutter_game_2048_fight/models/system/board.dart';
 
@@ -28,56 +28,73 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
 
   late Map<String, BlockComponent> vos = {};
 
+  late GameSystem system = GameSystem();
+
   WorldScene({required this.level});
 
-  renderStepBlock(GameStepData step) {
-    for (var data in step.blocks) {
-      var item = data as BoardItem;
-      var pos = item.position;
-      var position = getBoardPositionAt(pos.x, pos.y);
-      BlockComponent block;
-      if (item.type == BlockType.enmey) {
-        block = BlockComponent(
-          key: ComponentKey.named(item.id),
-          position: position,
-          color: Colors.red.shade400,
-        );
-      } else {
-        block = BlockComponent(
-          key: ComponentKey.named(item.id),
-          position: position,
-          color: Colors.blue.shade400,
-        );
-      }
+  late TextComponent stepLabel;
 
-      // item.body = block;
-      vos[item.id] = block;
+  late BlockComponent popup;
 
-      block.debugMode = true;
-      block.debugColor = Colors.black26;
-      board.add(block);
+  initBlocks() {
+    for (var item in system.blocks) {
+      addBlock(item);
     }
+  }
+
+  addBlock(BoardItem item) {
+    var pos = item.position;
+    var position = getBoardPositionAt(pos.x, pos.y);
+
+    var color = Colors.blue.shade400;
+    if (item.type == BlockType.enemy) {
+      color = Colors.red.shade400;
+    }
+    var block = BlockComponent(
+      key: ComponentKey.named(item.id),
+      position: position,
+      color: color,
+    );
+    block.debugMode = true;
+    block.debugColor = Colors.black26;
+    block.setLife(item.life);
+    block.point = item.point;
+    board.add(block);
+
+    // link vos with block ref
+    vos[item.id] = block;
   }
 
   gameStart() {
     // 初始化 英雄
-    var step = level.getStepData(0);
-    if (step != null) {
-      currentStep = GameStepData(size: step.size);
-      for (var block in step.blocks) {
-        currentStep.addBlock(
-          (block as BoardItem).copy(),
-        );
-      }
-      renderStepBlock(currentStep);
-    }
+    system.setLevel(level);
+    initBlocks();
+    system.gameStart();
   }
 
   gamePlay() {}
 
   gamePause() {}
 
-  gameRestart() {}
+  gameRestart() {
+    system.gameRestart();
+    popup.removeFromParent();
+
+    vos.forEach((key, value) {
+      value.removeFromParent();
+    });
+
+    system.jumpToStep(0);
+    initBlocks();
+    system.gameStart();
+  }
+
+  gameOver() {
+    system.gameOver();
+
+    initPopup();
+    add(popup);
+  }
 
   initHeader() {
     var size = game.camera.viewport.size;
@@ -117,12 +134,85 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
   }
 
   actionSlide(GamePoint point) {
-    // system.
+    if (system.status != GameStatus.play) {
+      return;
+    }
 
+    system.actionSlide(point);
+    // run turn move
+    runActions();
+    system.checkAttack();
+    // run attack injour
+    runActions();
+    system.checkDead();
+    // run attack dead
+    runActions();
+
+    // check next step
+    system.checkStep();
+    runActions();
+
+    updateStep();
+  }
+
+  updateStep() {
+    stepLabel.text = "step: ${system.step}";
+  }
+
+  runActions() {
+    var actions = system.actions;
+    for (var action in actions) {
+      var type = action.type;
+      var item = system.getBlock(action.target);
+      // print("action: ${action.type} $block $body");
+      if (item != null) {
+        var block = vos[action.target];
+        if (block != null) {
+          // 处理 turn
+          if (type == GameActionType.turn) {
+            item.point = action.point!;
+            block.point = action.point!;
+          }
+          if (type == GameActionType.move) {
+            var pos = action.position!;
+            item.position = pos;
+            // block.position = getBoardPositionAt(pos.x, pos.y);
+            block.moveTo(pos.x, pos.y);
+          }
+          if (type == GameActionType.attack) {
+            print("${item.id} attck: -> ");
+            block.attack();
+          }
+          if (type == GameActionType.injure) {
+            print("${item.id} injour: <- ");
+            item.life += action.life!;
+            // block.setLife(item.life);
+            block.lifeTo(item.life);
+          }
+          if (type == GameActionType.dead) {
+            print("${item.id} injour: <- ");
+            system.removeBlock(item);
+            // block.removeFromParent();
+            block.dead();
+            if (item.type == BlockType.hero) {
+              gameOver();
+            }
+          }
+        }
+        if (type == GameActionType.create) {
+          print("${item.id} create");
+          addBlock(item);
+        }
+      }
+    }
+    system.actions.clear();
+  }
+
+  checkPoint(GamePoint point) {
     // 获取 排序
     List<BoardItem> blocklist = [];
     for (var element in currentStep.blocks) {
-      blocklist.add(element as BoardItem);
+      blocklist.add(element);
     }
 
     blocklist.sort((a, b) {
@@ -143,7 +233,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     Map<String, BoardItem> tempVos = {};
     var size = currentStep.size;
 
-    checkBlockPoint(BoardItem block, GamePoint point) {
+    checkBlockPoint(BoardItem leftBlock, GamePoint point) {
       // 获取 某一个方向上的位置。
       BoardPosition getPointPosition(BoardPosition pos) {
         // 获取 新位置
@@ -156,41 +246,56 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
         } else {
           // 判断 当前位置是否 有对象
           var key = getBlockKey(newPos);
-          var item = tempVos[key];
-          if (item != null) {
-            // 处理 伤害
-            print("need do impack with: ${item.name}");
-            var isAlive = true;
-            if (isAlive) {
-              return pos;
-            }
+          var rightBlock = tempVos[key];
+          if (rightBlock != null) {
+            return pos;
           }
           return getPointPosition(newPos);
         }
       }
 
       // get new pos by pos;
-      var pos = getPointPosition(block.position);
-      print("${block.name} ${block.life} ${pos.x} - ${pos.y}");
+      var pos = getPointPosition(leftBlock.position);
 
-      var position = getBoardPositionAt(pos.x, pos.y);
+      // is dif pos; need to move;
+      if (!isEqualPosition(pos, leftBlock.position)) {
+        var position = getBoardPositionAt(pos.x, pos.y);
 
-      var body = vos[block.id];
-      if (body != null) {
-        body.position = position;
-        print("move to ${position}");
+        var body = vos[leftBlock.id];
+        if (body != null) {
+          leftBlock.position = pos;
+          body.position = position;
+        }
       }
-      // newBlock.moveTo(pos.x, pos.y, point);
+
       var key = getBlockKey(pos);
-      tempVos[key] = block;
+      tempVos[key] = leftBlock;
     }
 
     for (var block in blocklist) {
       checkBlockPoint(block, point);
     }
+  }
 
-    currentStep.vos.clear();
-    currentStep.vos.addAll(tempVos);
+  initPopup() {
+    popup = BlockComponent(
+      size: Vector2(200, 160),
+      color: Colors.black38,
+      position: Vector2(0, -40),
+    );
+    var text = TextComponent(
+      text: "GameOver",
+      position: Vector2(50, 20),
+    );
+    var button = Button(
+        text: "Restart",
+        position: Vector2(100, 80),
+        size: Vector2(120, 40),
+        onPressed: () {
+          gameRestart();
+        });
+    popup.add(text);
+    popup.add(button);
   }
 
   initControl() {
@@ -223,6 +328,9 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
       block.add(button);
     }
 
+    stepLabel = TextComponent(text: "step: 0", position: Vector2(200, 0));
+    block.add(stepLabel);
+
     add(block);
   }
 
@@ -245,6 +353,8 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     initBoard();
 
     initControl();
+
+    initPopup();
 
     // wait for a moment
     gameStart();
@@ -270,4 +380,8 @@ bool checkSizeEdge(BoardPosition pos, BoardSize size) {
 
 String getBlockKey(BoardPosition pos) {
   return "B_${pos.x}_${pos.y}";
+}
+
+bool isEqualPosition(BoardPosition left, BoardPosition right) {
+  return left.x == right.x && left.y == right.y;
 }

@@ -24,6 +24,17 @@
           "level": 1
         }
       ]
+    },
+    {
+      "index": 2,
+      "blocks": [
+        {
+          "type": "Enemy",
+          "position": [0, 0],
+          "life": 4,
+          "level": 1
+        }
+      ]
     }
   ]
 }

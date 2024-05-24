@@ -52,7 +52,7 @@ class GameLevelData {
   late String id; // uuid
   late String name;
   // size
-  late BoardSize size;
+  late BoardSize size = BoardSize(5, 5);
   GameLevelData({
     String? id,
     String? name,
@@ -86,14 +86,14 @@ class GameStepData {
   late String id; // uuid
 
   // 所有物件
-  late Map<String, BlockData> vos;
+  late Map<String, BoardItem> vos;
 
   late GamePoint point;
 
   // 所有行为
   late List<GameActionData> actions;
 
-  List<BlockData> get blocks => vos.values.toList();
+  List<BoardItem> get blocks => vos.values.toList();
 
   GameStepData({
     String? id,
@@ -106,9 +106,47 @@ class GameStepData {
     actions = [];
   }
 
-  addBlock(BlockData block) {
+  addBlock(BoardItem block) {
     vos[block.id] = block;
   }
 }
 
-class GameActionData {}
+// 游戏场景
+enum GameActionType {
+  // 转身
+  turn,
+  // 移动
+  move,
+
+  // 攻击
+  attack,
+
+  // 受伤
+  injure,
+
+  // 死亡
+  dead,
+
+  // 新建
+  create,
+}
+
+class GameActionData {
+  String target;
+  GameActionType type;
+
+  GamePoint? point;
+  BoardPosition? position;
+
+  int? life;
+
+  GameActionData({
+    required this.target,
+    required this.type,
+    this.point,
+    this.position,
+    this.life,
+  }) {
+    //
+  }
+}

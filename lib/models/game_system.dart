@@ -1,20 +1,26 @@
 // 游戏状态
 
+import 'dart:math';
+
 import 'system/game.dart';
+import 'system/block.dart';
+import 'system/board.dart';
 
 class GameSystem {
-  // 游戏状态
-  GameStatus status = GameStatus.start;
-
   late GameLevelData level;
 
-  // 记录 每一步的信息
-  List<GameStepData> steps = [];
-
   // 当前 步骤
-  int currentStepIndex = 0;
-  // 当前 步骤的数据
-  GameStepData get currentStep => steps[currentStepIndex];
+  int step = 0;
+  // 游戏状态
+  GameStatus status = GameStatus.start;
+  // 所有 block
+  final Map<String, BoardItem> _vos = {};
+  // list block
+  List<BoardItem> get blocks => _vos.values.toList();
+  // 记录行为
+  final List<GameActionData> actions = [];
+
+  late BoardSize size;
 
   // 初始化
   GameSystem() {
@@ -24,14 +30,64 @@ class GameSystem {
   // 更新 level
   setLevel(GameLevelData level) {
     this.level = level;
+    // update size
+    size = level.size;
+
+    jumpToStep(0);
   }
 
-  gameStart() {}
-  gamePause() {}
-  gameOver() {}
-  gameRestart() {}
+  jumpToStep(int step) {
+    var step = level.getStepData(0);
+    if (step != null) {
+      for (var block in step.blocks) {
+        addBlock(block);
+      }
+    }
+  }
 
-  actionSlide() {}
+  addBlock(BoardItem block) {
+    var item = block.copy();
+    _vos[block.id] = item;
+    return item;
+  }
+
+  BoardItem? getBlock(String id) {
+    return _vos[id];
+  }
+
+  removeBlock(BoardItem block) {
+    _vos.remove(block.id);
+  }
+
+  addAction(GameActionData action) {
+    actions.add(action);
+  }
+
+  gameStart() {
+    status = GameStatus.play;
+  }
+
+  gamePause() {
+    status = GameStatus.pause;
+  }
+
+  gameOver() {
+    status = GameStatus.end;
+  }
+
+  gameRestart() {
+    status = GameStatus.start;
+    step = 0;
+    actions.clear();
+    _vos.clear();
+
+    jumpToStep(0);
+  }
+
+  actionSlide(GamePoint point) {
+    checkMovePoint(point);
+  }
+
   actionAdd() {}
   actionUpdate() {}
   actionConfig() {}
@@ -39,4 +95,263 @@ class GameSystem {
 
   stepAdd() {}
   stepCheck() {}
+
+  //
+  Map<String, BoardItem> getBlockPosVos() {
+    // 获取 位置 map 地图
+    Map<String, BoardItem> posVos = {};
+    for (var element in blocks) {
+      var key = getBlockKey(element.position);
+      posVos[key] = element;
+    }
+    return posVos;
+  }
+
+  Map<String, BoardPosition> getExtraBlocks() {
+    Map<String, BoardPosition> allTargets = {};
+
+    // 创建 5x5 格子
+    for (int x = 1; x < 6; x++) {
+      for (int y = 1; y < 6; y++) {
+        var pos = BoardPosition(x, y);
+        var key = getBlockKey(pos);
+        allTargets[key] = pos;
+      }
+    }
+    // remove existe block
+    var posVos = getBlockPosVos();
+    posVos.forEach((key, value) {
+      allTargets.remove(key);
+    });
+    return allTargets;
+  }
+
+  checkStep() {
+    // go next step
+    step += 1;
+
+    var allTargets = getExtraBlocks();
+
+    getRandomPos() {
+      List<BoardPosition> list = allTargets.values.toList();
+      var random = Random();
+      int index = random.nextInt(list.length);
+      var pos = list[index];
+      allTargets.remove(getBlockKey(pos));
+      return pos;
+    }
+
+    List<GameActionData> createActions = [];
+    addCreateAction(BoardItem block) {
+      var createAction = GameActionData(
+        target: block.id,
+        type: GameActionType.create,
+        position: block.position,
+      );
+      createActions.add(createAction);
+    }
+
+    // get step data
+    var stepData = level.getStepData(step);
+
+    if (stepData != null) {
+      print("has new step data: $stepData");
+
+      print(stepData.blocks);
+
+      for (var item in stepData.blocks) {
+        var pos = getRandomPos();
+        print("create block at: ${pos.x}, ${pos.y}");
+        // remove new key from allTargets
+        item.position = pos;
+
+        // add action
+        var block = addBlock(item);
+        addCreateAction(block);
+      }
+    } else if (step % 5 == 3) {
+      var item = BoardItem(
+        name: "name",
+        type: BlockType.enemy,
+      );
+      var random = Random();
+      int index = random.nextInt(5);
+      item.life = index;
+      item.level = 1;
+      item.position = getRandomPos();
+      var block = addBlock(item);
+      addCreateAction(block);
+    }
+
+    actions.addAll(createActions);
+  }
+
+  checkDead() {
+    List<GameActionData> deadActions = [];
+    for (var leftBlock in blocks) {
+      if (leftBlock.life <= 0) {
+        // turnAction
+        var deadAction = GameActionData(
+          target: leftBlock.id,
+          type: GameActionType.dead,
+        );
+        deadActions.add(deadAction);
+      }
+    }
+
+    actions.addAll(deadActions);
+  }
+
+  // check if need attack
+  checkAttack() {
+    var vos = getBlockPosVos();
+
+    List<GameActionData> attackActions = [];
+    List<GameActionData> injureActions = [];
+
+    for (var leftBlock in blocks) {
+      var point = leftBlock.point;
+      // 获取 block 射程范围内 是否有 对象
+      var attackPoisiton = point.addPosition(leftBlock.position);
+
+      var key = getBlockKey(attackPoisiton);
+      var rightBlock = vos[key];
+      if (rightBlock != null) {
+        var canAttack = false;
+        print("has block on ${key}");
+
+        if (leftBlock.type != rightBlock.type) {
+          canAttack = true;
+        }
+
+        if (canAttack) {
+          // turnAction
+          var attackAction = GameActionData(
+            target: leftBlock.id,
+            type: GameActionType.attack,
+          );
+
+          attackActions.add(attackAction);
+
+          var injureAction = GameActionData(
+            target: rightBlock.id,
+            type: GameActionType.injure,
+            life: -1,
+          );
+
+          injureActions.add(injureAction);
+        }
+      }
+    }
+
+    actions.addAll(attackActions);
+    actions.addAll(injureActions);
+  }
+
+  checkMovePoint(GamePoint point) {
+    List<GameActionData> turnActions = [];
+    List<GameActionData> moveActions = [];
+
+    // 获取 排序
+    List<BoardItem> blocklist = [];
+    // 获取 位置 map 地图
+    for (var element in blocks) {
+      blocklist.add(element);
+    }
+    blocklist.sort((a, b) {
+      var posA = a.position;
+      var posB = b.position;
+      switch (point) {
+        case GamePoint.right:
+          return posB.x - posA.x;
+        case GamePoint.left:
+          return posA.x - posB.x;
+        case GamePoint.top:
+          return posA.y - posB.y;
+        case GamePoint.bottom:
+          return posB.y - posA.y;
+      }
+    });
+
+    Map<String, BoardItem> tempVos = {};
+
+    checkBlockPoint(BoardItem leftBlock, GamePoint point) {
+      // 获取 某一个方向上的位置。
+      BoardPosition getPointPosition(BoardPosition pos) {
+        // 获取 新位置
+        var newPos = point.addPosition(pos);
+        // 判断 新位置是否到边界
+        var isEdge = checkSizeEdge(newPos, size);
+        // 返回 当前 pos
+        if (isEdge) {
+          return pos;
+        } else {
+          // 判断 当前位置是否 有对象
+          var key = getBlockKey(newPos);
+          var rightBlock = tempVos[key];
+          if (rightBlock != null) {
+            return pos;
+          }
+          return getPointPosition(newPos);
+        }
+      }
+
+      // get new pos by pos;
+      var pos = getPointPosition(leftBlock.position);
+
+      if (point != leftBlock.point) {
+        // turnAction
+        var turnAction = GameActionData(
+          target: leftBlock.id,
+          type: GameActionType.turn,
+          point: point,
+        );
+        turnActions.add(turnAction);
+      }
+      // is dif pos; need to move;
+      if (!isEqualPosition(pos, leftBlock.position)) {
+        // moveActions
+        var moveAction = GameActionData(
+          target: leftBlock.id,
+          type: GameActionType.move,
+          point: point,
+          position: pos,
+        );
+        moveActions.add(moveAction);
+      }
+
+      var key = getBlockKey(pos);
+      tempVos[key] = leftBlock;
+    }
+
+    for (var block in blocklist) {
+      checkBlockPoint(block, point);
+    }
+    actions.addAll(turnActions);
+    actions.addAll(moveActions);
+  }
+}
+
+String getBlockKey(BoardPosition pos) {
+  return "B_${pos.x}_${pos.y}";
+}
+
+bool checkSizeEdge(BoardPosition pos, BoardSize size) {
+  if (pos.x <= 0) {
+    return true;
+  }
+  if (pos.x > size.width) {
+    return true;
+  }
+  if (pos.y <= 0) {
+    return true;
+  }
+  if (pos.y > size.height) {
+    return true;
+  }
+  return false;
+}
+
+bool isEqualPosition(BoardPosition left, BoardPosition right) {
+  return left.x == right.x && left.y == right.y;
 }

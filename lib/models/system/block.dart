@@ -1,3 +1,4 @@
+import 'package:flutter_game_2048_fight/models/system/game.dart';
 import 'package:uuid/uuid.dart';
 
 import 'board.dart';
@@ -6,7 +7,7 @@ enum BlockType {
   // 英雄
   hero,
   // 敌人
-  enmey,
+  enemy,
   // 石头
   rock,
   // 物件
@@ -23,7 +24,7 @@ extension BlockTypeExtension on BlockType {
       case "Hero":
         return BlockType.hero;
       case "Enemy":
-        return BlockType.enmey;
+        return BlockType.enemy;
     }
     return BlockType.rock;
   }
@@ -65,19 +66,18 @@ class BoardItem<T> extends BlockData with WithPosition, WithLevel {
   late T? body;
 
   late int life;
+  late GamePoint point;
 
   BoardItem({
     String? id,
     String? name,
     BlockType? type,
+    GamePoint? point,
   }) {
     this.id = id ?? const Uuid().v4().toString();
     this.name = name ?? "";
     this.type = type ?? BlockType.rock;
-  }
-
-  moveTo() {
-    // body.moveTo()
+    this.point = point ?? GamePoint.bottom;
   }
 
   BoardItem copy() {
