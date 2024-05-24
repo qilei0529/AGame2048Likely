@@ -208,11 +208,8 @@ class GameSystem {
         var canAttack = false;
         print("has block on ${key}");
 
-        if (rightBlock.type == BlockType.hero ||
-            rightBlock.type == BlockType.enemy) {
-          if (leftBlock.type != rightBlock.type) {
-            canAttack = true;
-          }
+        if (checkBlockCanAttack(leftBlock.type, rightBlock.type)) {
+          canAttack = true;
         }
 
         if (canAttack) {
@@ -366,6 +363,16 @@ bool checkBlockCanMove(BlockType type) {
   if (type == BlockType.hero || type == BlockType.enemy) {
     return true;
   }
+  return false;
+}
+
+bool checkBlockCanAttack(BlockType typeA, BlockType typeB) {
+  if (typeA == BlockType.hero || typeA == BlockType.enemy) {
+    if (typeA != typeB) {
+      return true;
+    }
+  }
+
   return false;
 }
 
