@@ -1,3 +1,4 @@
+import 'package:flame/components.dart';
 import 'package:flutter_game_2048_fight/models/system/game.dart';
 import 'package:uuid/uuid.dart';
 
@@ -8,14 +9,14 @@ enum BlockType {
   hero,
   // 敌人
   enemy,
-  // 石头
-  rock,
   // 物件
   element,
   // 云
   cloud,
   // 宝箱
-  chest
+  chest,
+  // 石头
+  block,
 }
 
 extension BlockTypeExtension on BlockType {
@@ -26,7 +27,7 @@ extension BlockTypeExtension on BlockType {
       case "Enemy":
         return BlockType.enemy;
     }
-    return BlockType.rock;
+    return BlockType.block;
   }
 }
 
@@ -42,7 +43,7 @@ class BlockData {
   }) {
     this.id = id ?? const Uuid().v4().toString();
     this.name = name ?? "";
-    this.type = type ?? BlockType.rock;
+    this.type = type ?? BlockType.block;
   }
 }
 
@@ -62,6 +63,13 @@ mixin WithLevel on BlockData {
   }
 }
 
+enum BlockMergeCode {
+  // 英雄
+  hero,
+  ememy,
+  none,
+}
+
 class BoardItem<T> extends BlockData with WithPosition, WithLevel {
   late T? body;
 
@@ -69,6 +77,10 @@ class BoardItem<T> extends BlockData with WithPosition, WithLevel {
   late GamePoint point;
 
   bool isDead = false;
+
+  BlockMergeCode code = BlockMergeCode.none;
+
+  int act = 0;
 
   BoardItem({
     String? id,
@@ -78,7 +90,7 @@ class BoardItem<T> extends BlockData with WithPosition, WithLevel {
   }) {
     this.id = id ?? const Uuid().v4().toString();
     this.name = name ?? "";
-    this.type = type ?? BlockType.rock;
+    this.type = type ?? BlockType.block;
     this.point = point ?? GamePoint.bottom;
   }
 
@@ -87,6 +99,8 @@ class BoardItem<T> extends BlockData with WithPosition, WithLevel {
     item.position = position;
     item.life = life;
     item.level = level;
+    item.code = code;
+    item.act = act;
     return item;
   }
 }

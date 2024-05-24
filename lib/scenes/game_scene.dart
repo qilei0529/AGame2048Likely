@@ -49,13 +49,22 @@ class TheGameScene extends FlameGame {
           for (var data in blocks) {
             var id = data["id"];
             var name = data["name"];
-            var type = data["type"];
+            var type = BlockType.block.toType(data["type"]);
 
             var block = BoardItem(
               id: id,
               name: name,
-              type: BlockType.rock.toType(type),
+              type: type,
             );
+
+            if (type == BlockType.hero) {
+              block.code = BlockMergeCode.hero;
+              block.act = 1;
+            } else if (type == BlockType.enemy) {
+              block.code = BlockMergeCode.none;
+              block.act = 1;
+            }
+
             List<dynamic>? pos = data["position"];
             if (pos != null) {
               var x = pos[0] as int;

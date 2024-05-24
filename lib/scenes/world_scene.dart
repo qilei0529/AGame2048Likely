@@ -40,9 +40,12 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     var pos = item.position;
     var position = getBoardPositionAt(pos.x, pos.y);
 
-    var color = Colors.blue.shade400;
+    var color = Colors.blueGrey.shade300;
     if (item.type == BlockType.enemy) {
       color = Colors.red.shade400;
+    }
+    if (item.type == BlockType.hero) {
+      color = Colors.blue.shade400;
     }
     var block = BlockComponent(
       // key: ComponentKey.named(item.id),
@@ -51,8 +54,10 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     );
     block.debugMode = true;
     block.debugColor = Colors.black26;
-    block.setLife(item.life);
     block.point = item.point;
+    if (item.life > 0) {
+      block.setLife(item.life);
+    }
     board.add(block);
 
     // link vos with block ref
@@ -245,7 +250,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
           return;
         }
         if (type == GameActionType.heal) {
-          print("${item.id} injour: <- ");
+          print("${item.id} heal: <- ");
           block.lifeTo(num: item.life, end: onEnd);
           return;
         }

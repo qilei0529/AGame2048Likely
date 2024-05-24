@@ -1,7 +1,6 @@
 // 游戏状态
 import 'dart:math';
 
-import 'system/task.dart';
 import 'system/game.dart';
 import 'system/block.dart';
 import 'system/board.dart';
@@ -180,10 +179,9 @@ class GameSystem {
       int index = random.nextInt(5) + 1;
       item.life = index;
       item.level = 1;
-      var pos = getRandomPos();
-      print(pos);
-      item.position = pos;
-      print(item.id);
+      item.code = BlockMergeCode.ememy;
+      item.act = 1;
+      item.position = getRandomPos();
       // add block to system
       addBlock(item);
       // create
@@ -210,13 +208,17 @@ class GameSystem {
         var canAttack = false;
         print("has block on ${key}");
 
-        if (leftBlock.type != rightBlock.type) {
-          canAttack = true;
+        if (rightBlock.type == BlockType.hero ||
+            rightBlock.type == BlockType.enemy) {
+          if (leftBlock.type != rightBlock.type) {
+            canAttack = true;
+          }
         }
 
         if (canAttack) {
           // act from leftBlock
-          var act = 1;
+          print("leftBlock act ---- ${leftBlock.act}");
+          var act = leftBlock.act;
 
           // turnAction
           var attackAction = GameActionData(
@@ -294,6 +296,10 @@ class GameSystem {
     checkBlockPoint(BoardItem leftBlock, GamePoint point) {
       // 获取 某一个方向上的位置。
       BoardPosition getPointPosition(BoardPosition pos) {
+        // 判断是否可以移动
+        if (!checkBlockCanMove(leftBlock.type)) {
+          return pos;
+        }
         // 获取 新位置
         var newPos = point.addPosition(pos);
         // 判断 新位置是否到边界
@@ -354,6 +360,13 @@ class GameSystem {
 
 String getBlockKey(BoardPosition pos) {
   return "B_${pos.x}_${pos.y}";
+}
+
+bool checkBlockCanMove(BlockType type) {
+  if (type == BlockType.hero || type == BlockType.enemy) {
+    return true;
+  }
+  return false;
 }
 
 bool checkSizeEdge(BoardPosition pos, BoardSize size) {

@@ -22,6 +22,12 @@
           "position": [4, 2],
           "life": 3,
           "level": 1
+        },
+        {
+          "type": "Block",
+          "position": [4, 3],
+          "life": 0,
+          "level": 1
         }
       ]
     },
