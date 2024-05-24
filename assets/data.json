@@ -24,15 +24,21 @@
           "level": 1
         },
         {
-          "type": "Element",
-          "position": [1, 1],
-          "life": 3,
+          "type": "Block",
+          "position": [3, 3],
+          "life": 1,
           "level": 1
         },
         {
-          "type": "Block",
-          "position": [3, 3],
-          "life": 2,
+          "type": "Element",
+          "position": [1, 1],
+          "life": 1,
+          "level": 1
+        },
+        {
+          "type": "Element",
+          "position": [1, 2],
+          "life": 1,
           "level": 1
         }
       ]

@@ -226,13 +226,8 @@ class GameSystem {
         var canMerge = false;
         print("has block on ${key}");
 
-        if (checkBlockCanMove(leftBlock.type) &&
-            checkBlockCanMove(rightBlock.type)) {
-          if (leftBlock.code == rightBlock.code) {
-            if (leftBlock.level == rightBlock.level) {
-              canMerge = true;
-            }
-          }
+        if (checkBlockCanMerge(leftBlock, rightBlock)) {
+          canMerge = true;
         }
 
         if (canMerge) {
@@ -471,6 +466,21 @@ bool checkBlockCanMove(BlockType type) {
       type == BlockType.element) {
     return true;
   }
+  return false;
+}
+
+bool checkBlockCanMerge(BoardItem leftBlock, BoardItem rightBlock) {
+  if (leftBlock.isDead || rightBlock.isDead) {
+    return false;
+  }
+  if (checkBlockCanMove(leftBlock.type) && checkBlockCanMove(rightBlock.type)) {
+    if (leftBlock.code == rightBlock.code) {
+      if (leftBlock.level == rightBlock.level) {
+        return true;
+      }
+    }
+  }
+
   return false;
 }
 
