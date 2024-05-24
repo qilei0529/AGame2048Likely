@@ -171,12 +171,14 @@ class GameSystem {
       }
     } else if (step % 3 == 0) {
       print("create --------------- ");
-      var item = BoardItem(
-        name: "name",
-        type: BlockType.enemy,
-      );
       var random = Random();
       int index = random.nextInt(5) + 1;
+
+      var type = index == 5 ? BlockType.block : BlockType.enemy;
+      var item = BoardItem(
+        name: "name",
+        type: type,
+      );
       item.life = index;
       item.level = 1;
       item.code = BlockMergeCode.ememy;
