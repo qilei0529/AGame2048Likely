@@ -68,6 +68,8 @@ class BoardItem<T> extends BlockData with WithPosition, WithLevel {
   late int life;
   late GamePoint point;
 
+  bool isDead = false;
+
   BoardItem({
     String? id,
     String? name,

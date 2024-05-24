@@ -10,6 +10,7 @@ import 'package:flutter_game_2048_fight/models/system/board.dart';
 import 'package:flutter_game_2048_fight/scenes/game_scene.dart';
 
 // elements
+import 'package:flutter_game_2048_fight/models/system/task.dart';
 import 'package:flutter_game_2048_fight/models/system/game.dart';
 import 'package:flutter_game_2048_fight/elements/button.dart';
 import 'package:flutter_game_2048_fight/elements/block.dart';
@@ -18,23 +19,16 @@ import 'package:flutter_game_2048_fight/elements/block.dart';
 class WorldScene extends World with HasGameReference<TheGameScene> {
   late GameLevelData level;
   late BlockComponent board;
+  late BlockComponent popup;
+  late TextComponent stepLabel;
 
-  // 当前 的 step
-  late int step = 0;
-  // 所有 的 step data
-  late List<GameStepData> steps = [];
-  // 当前 step
-  late GameStepData currentStep;
+  Map<String, BlockComponent> vos = {};
 
-  late Map<String, BlockComponent> vos = {};
-
-  late GameSystem system = GameSystem();
+  GameSystem system = GameSystem();
 
   WorldScene({required this.level});
 
-  late TextComponent stepLabel;
-
-  late BlockComponent popup;
+  bool isSliding = false;
 
   initBlocks() {
     for (var item in system.blocks) {
@@ -42,7 +36,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     }
   }
 
-  addBlock(BoardItem item) {
+  BlockComponent addBlock(BoardItem item) {
     var pos = item.position;
     var position = getBoardPositionAt(pos.x, pos.y);
 
@@ -51,7 +45,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
       color = Colors.red.shade400;
     }
     var block = BlockComponent(
-      key: ComponentKey.named(item.id),
+      // key: ComponentKey.named(item.id),
       position: position,
       color: color,
     );
@@ -63,6 +57,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
 
     // link vos with block ref
     vos[item.id] = block;
+    return block;
   }
 
   gameStart() {
@@ -133,148 +128,130 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     add(board);
   }
 
-  actionSlide(GamePoint point) {
+  actionSlide(GamePoint point) async {
+    print(system.status);
     if (system.status != GameStatus.play) {
       return;
     }
+    print(isSliding);
+    if (isSliding) {
+      return;
+    }
+    isSliding = true;
+    TaskSystem taskSystem = TaskSystem();
+    taskSystem.max = 1;
+    taskSystem.add((next) async {
+      print("check ---- slide");
+      system.actionSlide(point);
+      await runActions();
+      next();
+    });
 
-    system.actionSlide(point);
-    // run turn move
-    runActions();
-    system.checkAttack();
-    // run attack injour
-    runActions();
-    system.checkDead();
-    // run attack dead
-    runActions();
+    taskSystem.add((next) async {
+      print("check ---- attack");
+      system.checkAttack();
+      await runActions();
+      next();
+    });
 
-    // check next step
-    system.checkStep();
-    runActions();
+    taskSystem.add((next) async {
+      print("check ---- step");
+      system.checkStep();
+      await runActions();
+      updateStep();
+      next();
+    });
 
-    updateStep();
+    await taskSystem.run();
+    isSliding = false;
+    print("finish ---- step check");
   }
 
   updateStep() {
     stepLabel.text = "step: ${system.step}";
   }
 
-  runActions() {
+  runActions() async {
     var actions = system.actions;
+    var taskSystem = TaskSystem(maxQueue: 20);
     for (var action in actions) {
-      var type = action.type;
-      var item = system.getBlock(action.target);
-      // print("action: ${action.type} $block $body");
-      if (item != null) {
-        var block = vos[action.target];
-        if (block != null) {
-          // 处理 turn
-          if (type == GameActionType.turn) {
-            item.point = action.point!;
-            block.point = action.point!;
-          }
-          if (type == GameActionType.move) {
-            var pos = action.position!;
-            item.position = pos;
-            // block.position = getBoardPositionAt(pos.x, pos.y);
-            block.moveTo(pos.x, pos.y);
-          }
-          if (type == GameActionType.attack) {
-            print("${item.id} attck: -> ");
-            block.attack();
-          }
-          if (type == GameActionType.injure) {
-            print("${item.id} injour: <- ");
-            item.life += action.life!;
-            // block.setLife(item.life);
-            block.lifeTo(item.life);
-          }
-          if (type == GameActionType.dead) {
-            print("${item.id} injour: <- ");
-            system.removeBlock(item);
-            // block.removeFromParent();
-            block.dead();
-            if (item.type == BlockType.hero) {
-              gameOver();
-            }
-          }
-        }
-        if (type == GameActionType.create) {
-          print("${item.id} create");
-          addBlock(item);
-        }
-      }
+      // ignore: prefer_function_declarations_over_variables
+      var task = (Function next) => runAction(action, next);
+      taskSystem.add(task);
     }
+    await taskSystem.run();
     system.actions.clear();
   }
 
-  checkPoint(GamePoint point) {
-    // 获取 排序
-    List<BoardItem> blocklist = [];
-    for (var element in currentStep.blocks) {
-      blocklist.add(element);
-    }
+  runAction(GameActionData action, Function onEnd) {
+    var type = action.type;
 
-    blocklist.sort((a, b) {
-      var posA = a.position;
-      var posB = b.position;
-      switch (point) {
-        case GamePoint.right:
-          return posB.x - posA.x;
-        case GamePoint.left:
-          return posA.x - posB.x;
-        case GamePoint.top:
-          return posA.y - posB.y;
-        case GamePoint.bottom:
-          return posB.y - posA.y;
+    var item = system.getBlock(action.target);
+
+    if (type == GameActionType.dead) {
+      var block = vos[action.target];
+      if (item != null && block != null) {
+        block.dead(end: () {
+          block.removeFromParent();
+          onEnd();
+        });
+        system.removeBlock(item);
+        if (item.type == BlockType.hero) {
+          gameOver();
+        }
       }
-    });
-
-    Map<String, BoardItem> tempVos = {};
-    var size = currentStep.size;
-
-    checkBlockPoint(BoardItem leftBlock, GamePoint point) {
-      // 获取 某一个方向上的位置。
-      BoardPosition getPointPosition(BoardPosition pos) {
-        // 获取 新位置
-        var newPos = point.addPosition(pos);
-        // 判断 新位置是否到边界
-        var isEdge = checkSizeEdge(newPos, size);
-        // 返回 当前 pos
-        if (isEdge) {
-          return pos;
+      return;
+    }
+    // do create
+    if (type == GameActionType.create) {
+      if (item != null) {
+        print("create block ${item.id}");
+        addBlock(item);
+        var block = vos[item.id];
+        if (block != null) {
+          block.born(end: onEnd);
         } else {
-          // 判断 当前位置是否 有对象
-          var key = getBlockKey(newPos);
-          var rightBlock = tempVos[key];
-          if (rightBlock != null) {
-            return pos;
+          onEnd();
+        }
+      }
+      return;
+    }
+
+    if (item != null) {
+      var block = vos[action.target];
+      if (block != null) {
+        // 处理 turn
+        if (type == GameActionType.turn) {
+          if (action.point != null) {
+            block.point = action.point!;
           }
-          return getPointPosition(newPos);
+          onEnd();
+          return;
+        }
+        if (type == GameActionType.move) {
+          var pos = action.position!;
+          block.moveTo(x: pos.x, y: pos.y, end: onEnd);
+          return;
+        }
+        // attac
+        if (type == GameActionType.attack) {
+          print("${item.id} attck: -> ");
+          block.attack(end: onEnd);
+          return;
+        }
+        if (type == GameActionType.injure) {
+          print("${item.id} injour: <- ");
+          block.lifeTo(num: item.life, end: onEnd);
+          return;
+        }
+        if (type == GameActionType.heal) {
+          print("${item.id} injour: <- ");
+          block.lifeTo(num: item.life, end: onEnd);
+          return;
         }
       }
-
-      // get new pos by pos;
-      var pos = getPointPosition(leftBlock.position);
-
-      // is dif pos; need to move;
-      if (!isEqualPosition(pos, leftBlock.position)) {
-        var position = getBoardPositionAt(pos.x, pos.y);
-
-        var body = vos[leftBlock.id];
-        if (body != null) {
-          leftBlock.position = pos;
-          body.position = position;
-        }
-      }
-
-      var key = getBlockKey(pos);
-      tempVos[key] = leftBlock;
     }
-
-    for (var block in blocklist) {
-      checkBlockPoint(block, point);
-    }
+    onEnd();
   }
 
   initPopup() {
@@ -336,9 +313,6 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
 
   // get the position from int x y
   Vector2 getBoardPositionAt(int x, int y) {
-    var width = 300;
-    var height = 300;
-    print("$width, $height");
     var dx = 60.0 * x.toDouble() - 30;
     var dy = 60.0 * y.toDouble() - 30;
     return Vector2(dx, dy);

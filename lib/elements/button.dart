@@ -20,7 +20,6 @@ class Button extends AdvancedButtonComponent {
   @override
   Future<void> onLoad() async {
     super.onLoad();
-
     defaultLabel = TextComponent(
       text: text,
       textRenderer: TextPaint(

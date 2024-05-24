@@ -127,6 +127,9 @@ enum GameActionType {
   // 死亡
   dead,
 
+  // 恢复
+  heal,
+
   // 新建
   create,
 }
@@ -138,13 +141,18 @@ class GameActionData {
   GamePoint? point;
   BoardPosition? position;
 
+  int? value;
   int? life;
+
+  String? toTarget;
 
   GameActionData({
     required this.target,
     required this.type,
     this.point,
     this.position,
+    this.toTarget,
+    this.value,
     this.life,
   }) {
     //

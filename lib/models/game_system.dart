@@ -1,7 +1,7 @@
 // 游戏状态
-
 import 'dart:math';
 
+import 'system/task.dart';
 import 'system/game.dart';
 import 'system/block.dart';
 import 'system/board.dart';
@@ -40,15 +40,16 @@ class GameSystem {
     var step = level.getStepData(0);
     if (step != null) {
       for (var block in step.blocks) {
-        addBlock(block);
+        addBlock(block.copy());
       }
     }
   }
 
   addBlock(BoardItem block) {
-    var item = block.copy();
-    _vos[block.id] = item;
-    return item;
+    if (_vos[block.id] != null) {
+      print("has block exist ${block.id}");
+    }
+    _vos[block.id] = block;
   }
 
   BoardItem? getBlock(String id) {
@@ -166,48 +167,37 @@ class GameSystem {
         item.position = pos;
 
         // add action
-        var block = addBlock(item);
-        addCreateAction(block);
+        addBlock(item.copy());
+        addCreateAction(item);
       }
-    } else if (step % 5 == 3) {
+    } else if (step % 3 == 0) {
+      print("create --------------- ");
       var item = BoardItem(
         name: "name",
         type: BlockType.enemy,
       );
       var random = Random();
-      int index = random.nextInt(5);
+      int index = random.nextInt(5) + 1;
       item.life = index;
       item.level = 1;
-      item.position = getRandomPos();
-      var block = addBlock(item);
-      addCreateAction(block);
+      var pos = getRandomPos();
+      print(pos);
+      item.position = pos;
+      print(item.id);
+      // add block to system
+      addBlock(item);
+      // create
+      addCreateAction(item);
     }
 
     actions.addAll(createActions);
-  }
-
-  checkDead() {
-    List<GameActionData> deadActions = [];
-    for (var leftBlock in blocks) {
-      if (leftBlock.life <= 0) {
-        // turnAction
-        var deadAction = GameActionData(
-          target: leftBlock.id,
-          type: GameActionType.dead,
-        );
-        deadActions.add(deadAction);
-      }
-    }
-
-    actions.addAll(deadActions);
   }
 
   // check if need attack
   checkAttack() {
     var vos = getBlockPosVos();
 
-    List<GameActionData> attackActions = [];
-    List<GameActionData> injureActions = [];
+    List<GameActionData> tempActions = [];
 
     for (var leftBlock in blocks) {
       var point = leftBlock.point;
@@ -225,27 +215,53 @@ class GameSystem {
         }
 
         if (canAttack) {
+          // act from leftBlock
+          var act = 1;
+
           // turnAction
           var attackAction = GameActionData(
             target: leftBlock.id,
             type: GameActionType.attack,
+            toTarget: rightBlock.id,
+            value: act,
           );
 
-          attackActions.add(attackAction);
+          tempActions.add(attackAction);
+
+          var rightLife = max(0, rightBlock.life - act);
+          rightBlock.life = rightLife;
 
           var injureAction = GameActionData(
             target: rightBlock.id,
             type: GameActionType.injure,
-            life: -1,
+            value: act,
+            life: rightLife,
           );
+          tempActions.add(injureAction);
 
-          injureActions.add(injureAction);
+          if (rightLife == 0) {
+            rightBlock.isDead = true;
+            var deadAction = GameActionData(
+              target: rightBlock.id,
+              type: GameActionType.dead,
+            );
+            tempActions.add(deadAction);
+
+            var heal = 1;
+            leftBlock.life += heal;
+            var healAction = GameActionData(
+              target: leftBlock.id,
+              type: GameActionType.heal,
+              life: leftBlock.life,
+              value: heal,
+            );
+            tempActions.add(healAction);
+          }
         }
       }
     }
 
-    actions.addAll(attackActions);
-    actions.addAll(injureActions);
+    actions.addAll(tempActions);
   }
 
   checkMovePoint(GamePoint point) {
@@ -300,6 +316,8 @@ class GameSystem {
       var pos = getPointPosition(leftBlock.position);
 
       if (point != leftBlock.point) {
+        // change the data
+        leftBlock.point = point;
         // turnAction
         var turnAction = GameActionData(
           target: leftBlock.id,
@@ -310,6 +328,8 @@ class GameSystem {
       }
       // is dif pos; need to move;
       if (!isEqualPosition(pos, leftBlock.position)) {
+        // change the pos
+        leftBlock.position = pos;
         // moveActions
         var moveAction = GameActionData(
           target: leftBlock.id,

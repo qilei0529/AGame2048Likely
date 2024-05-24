@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flame/components.dart';
 import 'package:flutter_game_2048_fight/models/system/block.dart';
 import 'package:flutter_game_2048_fight/models/system/game.dart';
+import 'package:flutter_game_2048_fight/models/system/task.dart';
 
 // scene
 import 'package:flutter_game_2048_fight/scenes/game_scene.dart';
@@ -38,125 +39,122 @@ class BlockComponent extends RectangleComponent
     ),
   );
 
-  List<SequenceEffect> _tasks = [];
-  bool _onEffect = false;
+  TaskSystem taskSystem = TaskSystem(maxQueue: 1);
 
-  checkTask() {
-    if (_onEffect) {
-      return;
-    }
-    if (_tasks.isNotEmpty) {
-      var first = _tasks.first;
-      // start
-      _onEffect = true;
-      add(first);
-      _tasks.removeAt(0);
-    } else {
-      _onEffect = false;
-    }
+  lifeTo({required int num, Function? end}) {
+    taskSystem.add((next) {
+      // var pos = getGroundPositionAt(p.x, p.y);
+      EffectController duration(double x) => EffectController(duration: x);
+      add(
+        SequenceEffect(
+          [OpacityEffect.to(1, duration(0.1))],
+          onComplete: () {
+            // change life;
+            life.text = "$num";
+            if (end != null) {
+              end();
+            }
+            next();
+          },
+        ),
+      );
+    });
   }
 
-  lifeTo(int num) {
-    // var pos = getGroundPositionAt(p.x, p.y);
-    EffectController duration(double x) => EffectController(duration: x);
-
-    _tasks.add(
-      SequenceEffect(
-        [
-          OpacityEffect.to(1, duration(0)),
-        ],
-        onComplete: () {
-          // change life;
-          life.text = "$num";
-          _onEffect = false;
-          checkTask();
-        },
-      ),
-    );
-    checkTask();
+  born({Function? end}) {
+    taskSystem.add((next) {
+      // var pos = getGroundPositionAt(p.x, p.y);
+      EffectController duration(double x) => EffectController(duration: x);
+      add(
+        SequenceEffect(
+          [
+            OpacityEffect.to(0, duration(0)),
+            OpacityEffect.to(1, duration(0.1)),
+          ],
+          onComplete: () {
+            if (end != null) {
+              end();
+            }
+            next();
+          },
+        ),
+      );
+    });
   }
 
-  dead() {
-    // var pos = getGroundPositionAt(p.x, p.y);
-    EffectController duration(double x) => EffectController(duration: x);
-
-    _tasks.add(
-      SequenceEffect(
-        [
-          OpacityEffect.to(1, duration(0)),
-          RemoveEffect(delay: 0.5),
-        ],
-        onComplete: () {
-          // change life;
-          _onEffect = false;
-          checkTask();
-        },
-      ),
-    );
-    checkTask();
+  dead({Function? end}) {
+    taskSystem.add((next) {
+      EffectController duration(double x) => EffectController(duration: x);
+      // add run
+      add(
+        SequenceEffect(
+          [
+            OpacityEffect.to(0, duration(0)),
+            OpacityEffect.to(1, duration(0.1)),
+          ],
+          onComplete: () {
+            if (end != null) {
+              end();
+            }
+            next();
+          },
+        ),
+      );
+    });
   }
 
-  attack() {
-    EffectController duration(double x) => EffectController(duration: x);
-    // this.add()
-    var p = point.toPosition();
-    _tasks.add(
-      SequenceEffect(
-        [
-          MoveEffect.by(
-            Vector2(-8 * p.x.toDouble(), -8 * p.y.toDouble()),
-            EffectController(
-              duration: 0.16,
-              reverseDuration: 0.16,
-              // startDelay: 0.2,
-              atMinDuration: 0.2,
-              curve: Curves.ease,
-              infinite: false,
+  attack({Function? end}) {
+    taskSystem.add((next) {
+      EffectController duration(double x) => EffectController(duration: x);
+      // this.add()
+      var p = point.toPosition();
+      add(
+        SequenceEffect(
+          [
+            MoveEffect.by(
+              Vector2(-8 * p.x.toDouble(), -8 * p.y.toDouble()),
+              EffectController(
+                duration: 0.16,
+                reverseDuration: 0.16,
+                // startDelay: 0.2,
+                atMinDuration: 0.2,
+                curve: Curves.ease,
+                infinite: false,
+              ),
             ),
-          ),
-        ],
-        onComplete: () {
-          _onEffect = false;
-          checkTask();
-        },
-      ),
-    );
-
-    checkTask();
+          ],
+          onComplete: () {
+            if (end != null) {
+              end();
+            }
+            next();
+          },
+        ),
+      );
+    });
   }
 
-  moveTo(int x, int y) {
-    var pos = getGroundPositionAt(x, y);
-    EffectController duration(double x) => EffectController(duration: x);
-
-    var p = point.toPosition();
-    _tasks.add(
-      SequenceEffect(
-        [
-          MoveEffect.to(
-            pos,
-            duration(0.16),
-          ),
-          // MoveEffect.by(
-          //   Vector2(-8 * p.x.toDouble(), -8 * p.y.toDouble()),
-          //   EffectController(
-          //     duration: 0.16,
-          //     reverseDuration: 0.16,
-          //     // startDelay: 0.2,
-          //     atMinDuration: 0.2,
-          //     curve: Curves.ease,
-          //     infinite: false,
-          //   ),
-          // ),
-        ],
-        onComplete: () {
-          _onEffect = false;
-          checkTask();
-        },
-      ),
-    );
-
-    checkTask();
+  moveTo({required int x, required int y, Function? end}) {
+    taskSystem.add((next) {
+      var pos = getGroundPositionAt(x, y);
+      EffectController duration(double x) => EffectController(duration: x);
+      add(
+        SequenceEffect(
+          [
+            MoveEffect.to(
+              pos,
+              duration(0.16),
+            ),
+          ],
+          onComplete: () {
+            if (end != null) {
+              end();
+            }
+            next();
+          },
+        ),
+      );
+    });
   }
 
   // get the position from int x y
