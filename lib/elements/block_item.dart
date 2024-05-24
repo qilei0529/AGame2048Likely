@@ -37,6 +37,27 @@ class BoardItemComponent extends RectangleComponent
     ),
   );
 
+  late TextComponent level = TextComponent(
+    text: "",
+    textRenderer: TextPaint(
+      style: TextStyle(
+        fontSize: 24,
+        color: Colors.black45,
+      ),
+    ),
+    position: Vector2(40, 25),
+  );
+  late TextComponent code = TextComponent(
+    text: "code",
+    textRenderer: TextPaint(
+      style: TextStyle(
+        fontSize: 12,
+        color: Colors.black45,
+      ),
+    ),
+    position: Vector2(0, 40),
+  );
+
   TaskSystem taskSystem = TaskSystem(maxQueue: 1);
 
   lifeTo({required int num, Function? end}) {
@@ -169,10 +190,20 @@ class BoardItemComponent extends RectangleComponent
     this.life.text = "$life";
   }
 
+  setLevel(int level) {
+    this.level.text = "$level";
+  }
+
+  setCode(String code) {
+    this.code.text = code;
+  }
+
   @override
   void onMount() {
     setColor(color);
     add(life);
+    add(level);
+    add(code);
     super.onMount();
   }
 }

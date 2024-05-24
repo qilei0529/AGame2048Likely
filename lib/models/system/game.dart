@@ -132,6 +132,11 @@ enum GameActionType {
 
   // 新建
   create,
+
+  // 升级
+  upgrade,
+  // 吸收
+  absorbed,
 }
 
 class GameActionData {

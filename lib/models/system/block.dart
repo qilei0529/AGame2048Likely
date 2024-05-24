@@ -1,7 +1,6 @@
-import 'package:flame/components.dart';
-import 'package:flutter_game_2048_fight/models/system/game.dart';
 import 'package:uuid/uuid.dart';
 
+import 'game.dart';
 import 'board.dart';
 
 enum BlockType {
@@ -66,8 +65,21 @@ mixin WithLevel on BlockData {
 enum BlockMergeCode {
   // 英雄
   hero,
-  ememy,
+  enemy,
   none,
+}
+
+extension BlockMergeCodeExtension on BlockMergeCode {
+  String toCode() {
+    switch (this) {
+      case BlockMergeCode.enemy:
+        return "enemy";
+      case BlockMergeCode.hero:
+        return "hero";
+      case BlockMergeCode.none:
+        return "none";
+    }
+  }
 }
 
 class BoardItem<T> extends BlockData with WithPosition, WithLevel {

@@ -61,7 +61,7 @@ class TheGameScene extends FlameGame {
               block.code = BlockMergeCode.hero;
               block.act = 1;
             } else if (type == BlockType.enemy) {
-              block.code = BlockMergeCode.none;
+              block.code = BlockMergeCode.enemy;
               block.act = 1;
             }
 

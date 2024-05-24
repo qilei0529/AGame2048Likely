@@ -59,6 +59,8 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     if (item.life > 0) {
       block.setLife(item.life);
     }
+    block.setLevel(item.level);
+    block.setCode(item.code.toCode());
     board.add(block);
 
     // link vos with block ref
@@ -154,6 +156,13 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     });
 
     taskSystem.add((next) async {
+      print("check ---- merge");
+      system.checkMerge();
+      await runActions();
+      next();
+    });
+
+    taskSystem.add((next) async {
       print("check ---- attack");
       system.checkAttack();
       await runActions();
@@ -208,6 +217,17 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
       }
       return;
     }
+    if (type == GameActionType.absorbed) {
+      var block = vos[action.target];
+      if (item != null && block != null) {
+        block.dead(end: () {
+          block.removeFromParent();
+          onEnd();
+        });
+        system.removeBlock(item);
+      }
+      return;
+    }
     // do create
     if (type == GameActionType.create) {
       if (item != null) {
@@ -252,6 +272,12 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
         }
         if (type == GameActionType.heal) {
           print("${item.id} heal: <- ");
+          block.lifeTo(num: item.life, end: onEnd);
+          return;
+        }
+        if (type == GameActionType.upgrade) {
+          print("${item.id} upgrade: <- ");
+          block.setLevel(item.level);
           block.lifeTo(num: item.life, end: onEnd);
           return;
         }
