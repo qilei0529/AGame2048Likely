@@ -14,6 +14,7 @@ import 'package:flutter_game_2048_fight/models/system/task.dart';
 import 'package:flutter_game_2048_fight/models/system/game.dart';
 import 'package:flutter_game_2048_fight/elements/button.dart';
 import 'package:flutter_game_2048_fight/elements/block.dart';
+import 'package:flutter_game_2048_fight/elements/block_item.dart';
 
 // system
 class WorldScene extends World with HasGameReference<TheGameScene> {
@@ -22,7 +23,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
   late BlockComponent popup;
   late TextComponent stepLabel;
 
-  Map<String, BlockComponent> vos = {};
+  Map<String, BoardItemComponent> vos = {};
 
   GameSystem system = GameSystem();
 
@@ -36,7 +37,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     }
   }
 
-  BlockComponent addBlock(BoardItem item) {
+  BoardItemComponent addBlock(BoardItem item) {
     var pos = item.position;
     var position = getBoardPositionAt(pos.x, pos.y);
 
@@ -47,7 +48,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     if (item.type == BlockType.hero) {
       color = Colors.blue.shade400;
     }
-    var block = BlockComponent(
+    var block = BoardItemComponent(
       // key: ComponentKey.named(item.id),
       position: position,
       color: color,
