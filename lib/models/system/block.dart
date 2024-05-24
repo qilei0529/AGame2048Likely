@@ -25,6 +25,8 @@ extension BlockTypeExtension on BlockType {
         return BlockType.hero;
       case "Enemy":
         return BlockType.enemy;
+      case "Element":
+        return BlockType.element;
     }
     return BlockType.block;
   }
@@ -66,6 +68,7 @@ enum BlockMergeCode {
   // 英雄
   hero,
   enemy,
+  element,
   none,
 }
 
@@ -76,6 +79,8 @@ extension BlockMergeCodeExtension on BlockMergeCode {
         return "enemy";
       case BlockMergeCode.hero:
         return "hero";
+      case BlockMergeCode.element:
+        return "elem";
       case BlockMergeCode.none:
         return "none";
     }

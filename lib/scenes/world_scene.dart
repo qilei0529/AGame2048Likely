@@ -48,12 +48,15 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     if (item.type == BlockType.hero) {
       color = Colors.blue.shade400;
     }
+    if (item.type == BlockType.element) {
+      color = Colors.green.shade400;
+    }
     var block = BoardItemComponent(
       // key: ComponentKey.named(item.id),
       position: position,
       color: color,
     );
-    block.debugMode = true;
+    // block.debugMode = true;
     block.debugColor = Colors.black26;
     block.point = item.point;
     if (item.life > 0) {
@@ -165,6 +168,13 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     taskSystem.add((next) async {
       print("check ---- attack");
       system.checkAttack();
+      await runActions();
+      next();
+    });
+
+    taskSystem.add((next) async {
+      print("check ---- move");
+      system.actionSlide(point);
       await runActions();
       next();
     });

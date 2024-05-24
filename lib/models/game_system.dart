@@ -1,6 +1,8 @@
 // 游戏状态
 import 'dart:math';
 
+import 'package:flame/components.dart';
+
 import 'system/game.dart';
 import 'system/block.dart';
 import 'system/board.dart';
@@ -88,14 +90,6 @@ class GameSystem {
     checkMovePoint(point);
   }
 
-  actionAdd() {}
-  actionUpdate() {}
-  actionConfig() {}
-  actionNext() {}
-
-  stepAdd() {}
-  stepCheck() {}
-
   //
   Map<String, BoardItem> getBlockPosVos() {
     // 获取 位置 map 地图
@@ -141,6 +135,19 @@ class GameSystem {
       return pos;
     }
 
+    getRandomType() {
+      var random = Random();
+      int index = random.nextInt(10) + 1;
+      if (index > 8) {
+        return BlockType.block;
+      }
+      if (index > 4) {
+        return BlockType.element;
+      }
+
+      return BlockType.enemy;
+    }
+
     List<GameActionData> createActions = [];
     addCreateAction(BoardItem block) {
       var createAction = GameActionData(
@@ -169,19 +176,28 @@ class GameSystem {
         addBlock(item.copy());
         addCreateAction(item);
       }
-    } else if (step % 3 == 0) {
+    } else if (step % 2 == 0) {
       print("create --------------- ");
-      var random = Random();
-      int index = random.nextInt(5) + 1;
 
-      var type = index == 5 ? BlockType.block : BlockType.enemy;
+      var type = getRandomType();
+      var code = BlockMergeCode.none;
+      if (type == BlockType.hero) {
+        code = BlockMergeCode.hero;
+      }
+      if (type == BlockType.enemy) {
+        code = BlockMergeCode.enemy;
+      }
+
       var item = BoardItem(
         name: "name",
         type: type,
       );
+      var random = Random();
+      int index = random.nextInt(6) + 1;
       item.life = index;
       item.level = 1;
-      item.code = BlockMergeCode.enemy;
+      item.code = code;
+
       item.act = 1;
       item.position = getRandomPos();
       // add block to system
@@ -210,7 +226,8 @@ class GameSystem {
         var canMerge = false;
         print("has block on ${key}");
 
-        if (checkBlockCanMove(leftBlock.type)) {
+        if (checkBlockCanMove(leftBlock.type) &&
+            checkBlockCanMove(rightBlock.type)) {
           if (leftBlock.code == rightBlock.code) {
             if (leftBlock.level == rightBlock.level) {
               canMerge = true;
@@ -227,7 +244,7 @@ class GameSystem {
           );
           tempActions.add(eatAction);
 
-          rightBlock.level += leftBlock.level;
+          rightBlock.level += 1;
           rightBlock.life += leftBlock.life;
           var upgradeAction = GameActionData(
             target: rightBlock.id,
@@ -257,14 +274,51 @@ class GameSystem {
       var key = getBlockKey(attackPoisiton);
       var rightBlock = vos[key];
       if (rightBlock != null) {
+        var canElement = false;
         var canAttack = false;
         print("has block on ${key}");
 
-        if (checkBlockCanAttack(leftBlock.type, rightBlock.type)) {
+        if (checkBlockCanElement(leftBlock.type, rightBlock.type)) {
+          canElement = true;
+        } else if (checkBlockCanAttack(leftBlock.type, rightBlock.type)) {
           canAttack = true;
         }
 
-        if (canAttack) {
+        if (canElement) {
+          // do element
+          // only hero can get element
+          if (leftBlock.type == BlockType.hero) {
+            rightBlock.isDead = true;
+            var deadAction = GameActionData(
+              target: rightBlock.id,
+              type: GameActionType.dead,
+            );
+            tempActions.add(deadAction);
+
+            // upgrade
+            if (rightBlock.level >= leftBlock.level) {
+              leftBlock.level = rightBlock.level;
+              leftBlock.act = rightBlock.level;
+              var upgradeAction = GameActionData(
+                target: leftBlock.id,
+                type: GameActionType.upgrade,
+                life: rightBlock.life,
+                value: rightBlock.level,
+              );
+              tempActions.add(upgradeAction);
+            }
+
+            var heal = rightBlock.life;
+            leftBlock.life += heal;
+            var healAction = GameActionData(
+              target: leftBlock.id,
+              type: GameActionType.heal,
+              life: leftBlock.life,
+              value: heal,
+            );
+            tempActions.add(healAction);
+          }
+        } else if (canAttack) {
           // act from leftBlock
           print("leftBlock act ---- ${leftBlock.act}");
           var act = leftBlock.act;
@@ -412,23 +466,23 @@ String getBlockKey(BoardPosition pos) {
 }
 
 bool checkBlockCanMove(BlockType type) {
-  if (type == BlockType.hero || type == BlockType.enemy) {
+  if (type == BlockType.hero ||
+      type == BlockType.enemy ||
+      type == BlockType.element) {
     return true;
   }
   return false;
 }
 
-bool checkBlockCanAttack(BlockType typeA, BlockType typeB) {
-  if (typeA == BlockType.hero || typeA == BlockType.enemy) {
-    if (typeA != typeB) {
-      return true;
-    }
+bool checkBlockCanElement(BlockType typeA, BlockType typeB) {
+  if (typeB == BlockType.element) {
+    return true;
   }
 
   return false;
 }
 
-bool checkBlockCanMerge(BlockType typeA, BlockType typeB) {
+bool checkBlockCanAttack(BlockType typeA, BlockType typeB) {
   if (typeA == BlockType.hero || typeA == BlockType.enemy) {
     if (typeA != typeB) {
       return true;

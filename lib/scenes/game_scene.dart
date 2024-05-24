@@ -63,6 +63,8 @@ class TheGameScene extends FlameGame {
             } else if (type == BlockType.enemy) {
               block.code = BlockMergeCode.enemy;
               block.act = 1;
+            } else if (type == BlockType.element) {
+              block.code = BlockMergeCode.element;
             }
 
             List<dynamic>? pos = data["position"];
@@ -97,10 +99,8 @@ class TheGameScene extends FlameGame {
   }
 
   gameStart() async {
-    print('start');
     // get level data
     var level = await loadLevel();
-    print(level);
     // show black ground
     // showMask();
     // wait for the data ready

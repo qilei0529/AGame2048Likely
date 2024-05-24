@@ -7,7 +7,7 @@
       "blocks": [
         {
           "type": "Hero",
-          "position": [2, 3],
+          "position": [2, 2],
           "life": 4,
           "level": 1
         },
@@ -24,8 +24,14 @@
           "level": 1
         },
         {
+          "type": "Element",
+          "position": [1, 1],
+          "life": 3,
+          "level": 1
+        },
+        {
           "type": "Block",
-          "position": [4, 3],
+          "position": [3, 3],
           "life": 2,
           "level": 1
         }

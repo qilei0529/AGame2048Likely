@@ -1,8 +1,7 @@
-import 'package:flutter_game_2048_fight/models/system/block.dart';
-import 'package:flutter_game_2048_fight/scenes/game_scene.dart';
 import 'package:uuid/uuid.dart';
 
 import 'board.dart';
+import 'block.dart';
 
 enum GameStatus {
   start,

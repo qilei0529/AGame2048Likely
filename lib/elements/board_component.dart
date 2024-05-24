@@ -39,7 +39,7 @@ class BoardComponent extends ShapeComponent with HasGameReference<MainScene> {
   void onMount() {
     super.onMount();
     size = Vector2(60, 60);
-    debugMode = true;
+    // debugMode = true;
     add(life);
     add(level);
   }
