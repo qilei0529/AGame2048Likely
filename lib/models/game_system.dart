@@ -1,6 +1,7 @@
 // 游戏状态
 
 // step
+
 import 'step/check_attack.dart';
 import 'step/check_create.dart';
 import 'step/check_door.dart';
@@ -24,7 +25,10 @@ class GameSystem {
   int floor = 1;
 
   // 体力值
-  int stamina = 0;
+  int sta = 10;
+
+  // 武力值
+  int act = 10;
 
   // 游戏状态
   GameStatus status = GameStatus.start;
@@ -36,6 +40,9 @@ class GameSystem {
   final List<GameActionData> actions = [];
 
   late BoardSize size = BoardSize(5, 5);
+
+  BoardItem? get hero =>
+      _vos.values.firstWhere((block) => block.type == BlockType.hero);
 
   // 初始化
   GameSystem() {
@@ -131,19 +138,20 @@ class GameSystem {
   }
 
   actionSlide(GamePoint point) {
-    checkMovePoint(point);
-
-    checkBlockStep();
+    checkMovePoint(point: point);
+    for (var block in blocks) {
+      checkBlockStep(block);
+    }
     checkStepForNext();
   }
 
-  checkBlockStep() {
+  checkBlockStep(BoardItem block) {
     List<GameActionData> tempActions;
-
     // 融合
     tempActions = checkMergeStep(
       blocks: blocks,
       size: size,
+      leftBlock: block,
     );
     if (tempActions.isNotEmpty) {
       print("has merge step $tempActions");
@@ -155,6 +163,7 @@ class GameSystem {
     tempActions = checkElementStep(
       blocks: blocks,
       size: size,
+      leftBlock: block,
     );
     if (tempActions.isNotEmpty) {
       print("has element step $tempActions");
@@ -166,6 +175,7 @@ class GameSystem {
     tempActions = checkDoorStep(
       blocks: blocks,
       size: size,
+      leftBlock: block,
     );
     if (tempActions.isNotEmpty) {
       print("has door step $tempActions");
@@ -177,6 +187,7 @@ class GameSystem {
     tempActions = checkAttackStep(
       blocks: blocks,
       size: size,
+      leftBlock: block,
     );
     if (tempActions.isNotEmpty) {
       print("has attack step $tempActions");
@@ -205,11 +216,12 @@ class GameSystem {
     }
   }
 
-  checkMovePoint(GamePoint point) {
+  checkMovePoint({required GamePoint point, int? actionLevel}) {
     var tempActions = checkMoveStep(
       point: point,
       blocks: blocks,
       size: size,
+      actionLevel: actionLevel,
     );
     if (tempActions.isNotEmpty) {
       actions.addAll(tempActions);

@@ -59,6 +59,7 @@ checkCreateStep({
       type: GameActionType.create,
       position: block.position,
     );
+    createAction.level = 3;
     createActions.add(createAction);
   }
 

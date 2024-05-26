@@ -164,6 +164,8 @@ class GameActionData {
   String target;
   GameActionType type;
 
+  late int level;
+
   GamePoint? point;
   BoardPosition? position;
 
@@ -182,5 +184,6 @@ class GameActionData {
     this.life,
   }) {
     //
+    level = 2;
   }
 }

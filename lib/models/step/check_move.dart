@@ -7,6 +7,7 @@ List<GameActionData> checkMoveStep({
   required GamePoint point,
   required List<BoardItem> blocks,
   required BoardSize size,
+  int? actionLevel,
 }) {
   List<GameActionData> moveActions = [];
 
@@ -70,6 +71,7 @@ List<GameActionData> checkMoveStep({
         type: GameActionType.turn,
         point: point,
       );
+      turnAction.level = 1;
       moveActions.add(turnAction);
     }
     // is dif pos; need to move;
@@ -83,6 +85,7 @@ List<GameActionData> checkMoveStep({
         point: point,
         position: pos,
       );
+      moveAction.level = actionLevel ?? 1;
       moveActions.add(moveAction);
     }
 

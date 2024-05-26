@@ -124,11 +124,14 @@ class BoardItem<T> extends BlockData with WithPosition, WithLevel {
   late int life;
   late GamePoint point;
 
+  // 攻击力
+  int act = 0;
+  // 耐力值
+  int sta = 0;
+
   bool isDead = false;
 
   BlockMergeCode code = BlockMergeCode.none;
-
-  int act = 0;
 
   BoardItem({
     String? id,

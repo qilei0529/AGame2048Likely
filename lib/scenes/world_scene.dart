@@ -21,6 +21,8 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
   late BlockComponent popup;
   late TextComponent floorLabel;
   late TextComponent stepLabel;
+  late TextComponent actLabel;
+  late TextComponent staLabel;
 
   Map<String, BoardItemComponent> vos = {};
 
@@ -95,6 +97,8 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     initBlocks();
     updateStep();
     updateFloor();
+    updateAct();
+    updateSta();
   }
 
   gameNextFloor() {
@@ -109,6 +113,8 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     initBlocks();
     updateStep();
     updateFloor();
+    updateAct();
+    updateSta();
   }
 
   gameOver() {
@@ -169,6 +175,8 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
 
     // update step display
     updateStep();
+    updateAct();
+    updateSta();
     await runActions();
     isSliding = false;
   }
@@ -181,13 +189,38 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     floorLabel.text = "floor: ${system.floor}";
   }
 
+  updateAct() {
+    var hero = system.hero;
+    if (hero != null) {
+      actLabel.text = "武力: ${hero.act}";
+    }
+  }
+
+  updateSta() {
+    staLabel.text = "体力: ${system.sta}";
+  }
+
   runActions() async {
     var actions = system.actions;
-    var taskSystem = TaskSystem(maxQueue: 20);
-    for (var action in actions) {
-      // ignore: prefer_function_declarations_over_variables
-      var task = (Function next) => runAction(action, next);
-      taskSystem.add(task);
+    runAcitonList(List<GameActionData> list) async {
+      var innerTaskSystem = TaskSystem(maxQueue: 20);
+      for (var action in list) {
+        // ignore: prefer_function_declarations_over_variables
+        var task = (Function next) => runAction(action, next);
+        innerTaskSystem.add(task);
+      }
+      await innerTaskSystem.run();
+    }
+
+    var taskSystem = TaskSystem(maxQueue: 1);
+    for (var index in [1, 2, 3]) {
+      var list = actions.where((action) => action.level == index).toList();
+      if (list.isNotEmpty) {
+        taskSystem.add((next) async {
+          await runAcitonList(list);
+          next();
+        });
+      }
     }
     system.actions.clear();
     await taskSystem.run();
@@ -360,8 +393,12 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
 
     stepLabel = TextComponent(text: "step: 0", position: Vector2(200, 0));
     floorLabel = TextComponent(text: "floor: 0", position: Vector2(200, 30));
+    staLabel = TextComponent(text: "体力: 0", position: Vector2(200, 60));
+    actLabel = TextComponent(text: "武器: 0", position: Vector2(200, 90));
     block.add(stepLabel);
     block.add(floorLabel);
+    block.add(staLabel);
+    block.add(actLabel);
 
     add(block);
   }
