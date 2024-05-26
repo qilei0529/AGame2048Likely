@@ -11,6 +11,7 @@ checkCreateStep({
   required BoardSize size,
   required GameLevelData level,
   required int step,
+  required int floor,
 }) {
   var allTargets = getExtraBlocks(blocks: blocks);
 
@@ -48,7 +49,7 @@ checkCreateStep({
   }
 
   // get step data
-  var stepData = level.getStepData(step);
+  var stepData = level.getStepData("${floor}_$step");
 
   if (stepData != null) {
     print("has new step data: $stepData");

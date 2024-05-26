@@ -52,6 +52,10 @@ class GameLevelData {
   late String name;
   // size
   late BoardSize size = BoardSize(5, 5);
+
+  // floor
+  // late int floor = 1;
+
   GameLevelData({
     String? id,
     String? name,
@@ -61,12 +65,12 @@ class GameLevelData {
   }
 
   // step data for level
-  Map<int, GameStepData> levelStepData = {};
+  Map<String, GameStepData> levelStepData = {};
 
   // get step data
-  GameStepData? getStepData(int step) {
+  GameStepData? getStepData(String path) {
     // get static step data from map
-    var data = levelStepData[step];
+    var data = levelStepData[path];
     if (data != null) {
       return data;
     }
@@ -116,6 +120,8 @@ enum GameActionType {
   turn,
   // 移动
   move,
+  // 进入
+  enter,
 
   // 攻击
   attack,

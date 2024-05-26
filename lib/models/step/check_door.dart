@@ -29,22 +29,56 @@ List<GameActionData> checkDoorStep({
 
       if (canElement) {
         // do element
-        rightBlock.isDead = true;
-        var deadAction = GameActionData(
-          target: rightBlock.id,
-          type: GameActionType.dead,
-        );
-        tempActions.add(deadAction);
+        if (rightBlock.life > 0) {
+          rightBlock.life -= 1;
+          var lifeAction = GameActionData(
+            target: rightBlock.id,
+            type: GameActionType.injure,
+          );
+          tempActions.add(lifeAction);
 
-        var heal = rightBlock.life;
-        leftBlock.life += heal;
-        var healAction = GameActionData(
-          target: leftBlock.id,
-          type: GameActionType.heal,
-          life: leftBlock.life,
-          value: heal,
-        );
-        tempActions.add(healAction);
+          // turnAction
+          var attackAction = GameActionData(
+            target: leftBlock.id,
+            type: GameActionType.attack,
+            toTarget: rightBlock.id,
+            value: 1,
+          );
+
+          tempActions.add(attackAction);
+        }
+
+        if (rightBlock.life == 1) {
+          rightBlock.level = 2;
+          var itemAction = GameActionData(
+            target: rightBlock.id,
+            type: GameActionType.upgrade,
+            value: rightBlock.level,
+          );
+          tempActions.add(itemAction);
+        } else if (rightBlock.life == 0) {
+          rightBlock.isDead = true;
+          var deadAction = GameActionData(
+            target: rightBlock.id,
+            type: GameActionType.dead,
+          );
+          tempActions.add(deadAction);
+
+          // move forword
+          var moveAction = GameActionData(
+            target: leftBlock.id,
+            type: GameActionType.move,
+            point: point,
+            position: rightBlock.position,
+          );
+          tempActions.add(moveAction);
+          // move forword
+          var enterAction = GameActionData(
+            target: leftBlock.id,
+            type: GameActionType.enter,
+          );
+          tempActions.add(enterAction);
+        }
       }
     }
   }

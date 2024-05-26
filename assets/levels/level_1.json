@@ -1,15 +1,58 @@
 {
   "name": "level 1",
-
-  "steps": [
+  "sections": [
     {
-      "index": 0,
-      "blocks": [
+      "title": "the level 1 floor 1",
+      "steps": [
         {
-          "type": "Hero",
-          "position": [1, 4],
-          "life": 4,
-          "level": 1
+          "index": 1,
+          "blocks": [
+            {
+              "type": "Hero",
+              "code": "hero",
+              "position": [2, 3],
+              "life": 4,
+              "level": 1
+            },
+            {
+              "type": "Enemy",
+              "code": "enemy",
+              "position": [4, 1],
+              "life": 1,
+              "level": 1
+            },
+            {
+              "type": "Enemy",
+              "code": "enemy",
+              "position": [4, 2],
+              "life": 3,
+              "level": 1
+            },
+            {
+              "type": "Block",
+              "code": "rock",
+              "life": 5,
+              "level": 1
+            },
+            {
+              "type": "Element",
+              "code": "element",
+              "life": 1,
+              "level": 1
+            },
+            {
+              "type": "Door",
+              "code": "door",
+              "life": 5,
+              "level": 1
+            },
+            {
+              "type": "Element",
+              "code": "weapon",
+              "life": 1,
+              "level": 1
+            }
+          ]
         }
       ]
     }

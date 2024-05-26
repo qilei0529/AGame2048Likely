@@ -1,21 +1,27 @@
 // 游戏状态
 
-import 'package:flutter_game_2048_fight/models/step/check_attack.dart';
-import 'package:flutter_game_2048_fight/models/step/check_create.dart';
-import 'package:flutter_game_2048_fight/models/step/check_door.dart';
-import 'package:flutter_game_2048_fight/models/step/check_element.dart';
-import 'package:flutter_game_2048_fight/models/step/check_merge.dart';
-import 'package:flutter_game_2048_fight/models/step/check_move.dart';
+// step
+import 'step/check_attack.dart';
+import 'step/check_create.dart';
+import 'step/check_door.dart';
+import 'step/check_element.dart';
+import 'step/check_merge.dart';
+import 'step/check_move.dart';
+
+// system
+import 'system/level.dart';
 
 import 'system/game.dart';
 import 'system/block.dart';
 import 'system/board.dart';
 
 class GameSystem {
-  late GameLevelData level;
+  GameLevelData level = GameLevelData();
 
   // 当前 步骤
-  int step = 0;
+  int step = 1;
+
+  int floor = 1;
 
   // 体力值
   int stamina = 0;
@@ -29,7 +35,7 @@ class GameSystem {
   // 记录行为
   final List<GameActionData> actions = [];
 
-  late BoardSize size;
+  late BoardSize size = BoardSize(5, 5);
 
   // 初始化
   GameSystem() {
@@ -37,18 +43,25 @@ class GameSystem {
   }
 
   // 更新 level
-  setLevel(GameLevelData level) {
-    this.level = level;
+  loadLevel(String path) async {
+    // this.level = level;
     // update size
-    size = level.size;
-
-    jumpToStep(0);
+    // size = level.size;
+    var levelData = await loadLevelData(path: path);
+    level = levelData;
+    print("load level $level");
   }
 
-  jumpToStep(int step) {
-    var step = level.getStepData(0);
-    if (step != null) {
-      for (var block in step.blocks) {
+  toFloor(int floor) {
+    print("to floor $floor");
+    this.floor = floor;
+  }
+
+  toStep(int step) {
+    print("to step $step");
+    var stepData = level.getStepData("${floor}_$step");
+    if (stepData != null) {
+      for (var block in stepData.blocks) {
         addBlock(block.copy());
       }
     }
@@ -74,6 +87,8 @@ class GameSystem {
   }
 
   gameStart() {
+    toFloor(1);
+    toStep(1);
     status = GameStatus.play;
   }
 
@@ -91,7 +106,8 @@ class GameSystem {
     actions.clear();
     _vos.clear();
 
-    jumpToStep(0);
+    toFloor(1);
+    toStep(1);
   }
 
   actionSlide(GamePoint point) {
@@ -104,10 +120,18 @@ class GameSystem {
     var [
       createActions,
       createBlocks,
-    ] = checkCreateStep(blocks: blocks, size: size, level: level, step: step);
+    ] = checkCreateStep(
+      blocks: blocks,
+      size: size,
+      level: level,
+      step: step,
+      floor: floor,
+    );
 
     createBlocks.forEach((item) => addBlock(item));
-    actions.addAll(createActions);
+    if (createActions.isNotEmpty) {
+      actions.addAll(createActions);
+    }
   }
 
   // 融合

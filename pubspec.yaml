@@ -25,7 +25,6 @@ dev_dependencies:
 flutter:
   assets:
     - assets/levels/ # To here.
-    - assets/data.json
   # uses-material-design: true
   # assets: # Add from here
   #   - assets/

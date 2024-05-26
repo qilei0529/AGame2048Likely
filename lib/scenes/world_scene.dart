@@ -4,7 +4,6 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_game_2048_fight/models/game_system.dart';
 import 'package:flutter_game_2048_fight/models/system/block.dart';
-import 'package:flutter_game_2048_fight/models/system/board.dart';
 
 // scene
 import 'package:flutter_game_2048_fight/scenes/game_scene.dart';
@@ -18,20 +17,22 @@ import 'package:flutter_game_2048_fight/elements/block_item.dart';
 
 // system
 class WorldScene extends World with HasGameReference<TheGameScene> {
-  late GameLevelData level;
   late BlockComponent board;
   late BlockComponent popup;
   late TextComponent stepLabel;
 
   Map<String, BoardItemComponent> vos = {};
 
-  GameSystem system = GameSystem();
+  GameSystem system;
 
-  WorldScene({required this.level});
+  WorldScene({
+    required this.system,
+  });
 
   bool isSliding = false;
 
   initBlocks() {
+    print("init blocks ${system.blocks}");
     for (var item in system.blocks) {
       addBlock(item);
     }
@@ -74,11 +75,11 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     return block;
   }
 
-  gameStart() {
+  gameStart() async {
     // 初始化 英雄
-    system.setLevel(level);
-    initBlocks();
     system.gameStart();
+    print("game start");
+    initBlocks();
   }
 
   gamePlay() {}
@@ -87,14 +88,15 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
 
   gameRestart() {
     system.gameRestart();
+
     popup.removeFromParent();
 
     vos.forEach((key, value) {
       value.removeFromParent();
     });
 
-    system.jumpToStep(0);
     initBlocks();
+
     system.gameStart();
   }
 
@@ -104,6 +106,8 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     initPopup();
     add(popup);
   }
+
+  initFloor() {}
 
   initHeader() {
     var size = game.camera.viewport.size;
@@ -176,13 +180,6 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     });
 
     taskSystem.add((next) async {
-      print("check ---- door");
-      system.checkDoor();
-      await runActions();
-      next();
-    });
-
-    taskSystem.add((next) async {
       print("check ---- attack");
       system.checkAttack();
       await runActions();
@@ -192,6 +189,13 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     taskSystem.add((next) async {
       print("check ---- move");
       system.actionSlide(point);
+      await runActions();
+      next();
+    });
+
+    taskSystem.add((next) async {
+      print("check ---- door");
+      system.checkDoor();
       await runActions();
       next();
     });
