@@ -26,7 +26,7 @@
         {
           "type": "Block",
           "position": [3, 3],
-          "life": 1,
+          "life": 5,
           "level": 1
         },
         {

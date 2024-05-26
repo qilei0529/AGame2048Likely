@@ -1,8 +1,6 @@
 // 游戏状态
 import 'dart:math';
 
-import 'package:flame/components.dart';
-
 import 'system/game.dart';
 import 'system/block.dart';
 import 'system/board.dart';
@@ -12,6 +10,10 @@ class GameSystem {
 
   // 当前 步骤
   int step = 0;
+
+  // 体力值
+  int stamina = 0;
+
   // 游戏状态
   GameStatus status = GameStatus.start;
   // 所有 block
@@ -194,6 +196,9 @@ class GameSystem {
       );
       var random = Random();
       int index = random.nextInt(6) + 1;
+      if (type == BlockType.block) {
+        index = 5;
+      }
       item.life = index;
       item.level = 1;
       item.code = code;
@@ -241,6 +246,7 @@ class GameSystem {
 
           rightBlock.level += 1;
           rightBlock.life += leftBlock.life;
+          rightBlock.act = rightBlock.level;
           var upgradeAction = GameActionData(
             target: rightBlock.id,
             type: GameActionType.upgrade,
