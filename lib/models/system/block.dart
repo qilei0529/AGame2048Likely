@@ -16,6 +16,8 @@ enum BlockType {
   chest,
   // 石头
   block,
+  // door
+  door,
 }
 
 extension BlockTypeExtension on BlockType {
@@ -27,6 +29,8 @@ extension BlockTypeExtension on BlockType {
         return BlockType.enemy;
       case "Element":
         return BlockType.element;
+      case "Door":
+        return BlockType.door;
     }
     return BlockType.block;
   }
@@ -69,11 +73,32 @@ enum BlockMergeCode {
   hero,
   enemy,
   element,
+  weapon,
+  door,
+  rock,
   none,
 }
 
 extension BlockMergeCodeExtension on BlockMergeCode {
-  String toCode() {
+  BlockMergeCode toCode(String code) {
+    switch (code) {
+      case "enemy":
+        return BlockMergeCode.enemy;
+      case "hero":
+        return BlockMergeCode.hero;
+      case "element":
+        return BlockMergeCode.element;
+      case "weapon":
+        return BlockMergeCode.weapon;
+      case "door":
+        return BlockMergeCode.door;
+      case "rock":
+        return BlockMergeCode.rock;
+    }
+    return BlockMergeCode.none;
+  }
+
+  String toCodeString() {
     switch (this) {
       case BlockMergeCode.enemy:
         return "enemy";
@@ -81,6 +106,12 @@ extension BlockMergeCodeExtension on BlockMergeCode {
         return "hero";
       case BlockMergeCode.element:
         return "elem";
+      case BlockMergeCode.weapon:
+        return "weapon";
+      case BlockMergeCode.door:
+        return "door";
+      case BlockMergeCode.rock:
+        return "rock";
       case BlockMergeCode.none:
         return "none";
     }

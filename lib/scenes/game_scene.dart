@@ -50,6 +50,7 @@ class TheGameScene extends FlameGame {
             var id = data["id"];
             var name = data["name"];
             var type = BlockType.block.toType(data["type"]);
+            var code = BlockMergeCode.none.toCode(data["code"] ?? "");
 
             var block = BoardItem(
               id: id,
@@ -57,14 +58,12 @@ class TheGameScene extends FlameGame {
               type: type,
             );
 
+            block.code = code;
+
             if (type == BlockType.hero) {
-              block.code = BlockMergeCode.hero;
               block.act = 1;
             } else if (type == BlockType.enemy) {
-              block.code = BlockMergeCode.enemy;
               block.act = 1;
-            } else if (type == BlockType.element) {
-              block.code = BlockMergeCode.element;
             }
 
             List<dynamic>? pos = data["position"];

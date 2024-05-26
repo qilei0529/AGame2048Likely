@@ -7,37 +7,57 @@
       "blocks": [
         {
           "type": "Hero",
-          "position": [2, 2],
+          "code": "hero",
+          "position": [2, 4],
           "life": 4,
           "level": 1
         },
         {
           "type": "Enemy",
+          "code": "enemy",
           "position": [4, 1],
           "life": 1,
           "level": 1
         },
         {
           "type": "Enemy",
+          "code": "enemy",
           "position": [4, 2],
           "life": 3,
           "level": 1
         },
         {
           "type": "Block",
+          "code": "rock",
           "position": [3, 3],
           "life": 5,
           "level": 1
         },
         {
           "type": "Element",
+          "code": "element",
           "position": [1, 1],
           "life": 1,
           "level": 1
         },
         {
           "type": "Element",
+          "code": "element",
           "position": [1, 2],
+          "life": 1,
+          "level": 1
+        },
+        {
+          "type": "Door",
+          "code": "door",
+          "position": [1, 3],
+          "life": 5,
+          "level": 1
+        },
+        {
+          "type": "Element",
+          "code": "weapon",
+          "position": [1, 5],
           "life": 1,
           "level": 1
         }

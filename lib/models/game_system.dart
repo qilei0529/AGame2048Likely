@@ -1,5 +1,11 @@
 // 游戏状态
-import 'dart:math';
+
+import 'package:flutter_game_2048_fight/models/step/check_attack.dart';
+import 'package:flutter_game_2048_fight/models/step/check_create.dart';
+import 'package:flutter_game_2048_fight/models/step/check_door.dart';
+import 'package:flutter_game_2048_fight/models/step/check_element.dart';
+import 'package:flutter_game_2048_fight/models/step/check_merge.dart';
+import 'package:flutter_game_2048_fight/models/step/check_move.dart';
 
 import 'system/game.dart';
 import 'system/block.dart';
@@ -92,438 +98,66 @@ class GameSystem {
     checkMovePoint(point);
   }
 
-  //
-  Map<String, BoardItem> getBlockPosVos() {
-    // 获取 位置 map 地图
-    Map<String, BoardItem> posVos = {};
-    for (var element in blocks) {
-      var key = getBlockKey(element.position);
-      posVos[key] = element;
-    }
-    return posVos;
-  }
-
-  Map<String, BoardPosition> getExtraBlocks() {
-    Map<String, BoardPosition> allTargets = {};
-
-    // 创建 5x5 格子
-    for (int x = 1; x < 6; x++) {
-      for (int y = 1; y < 6; y++) {
-        var pos = BoardPosition(x, y);
-        var key = getBlockKey(pos);
-        allTargets[key] = pos;
-      }
-    }
-    // remove existe block
-    var posVos = getBlockPosVos();
-    posVos.forEach((key, value) {
-      allTargets.remove(key);
-    });
-    return allTargets;
-  }
-
   checkStep() {
     // go next step
     step += 1;
+    var [
+      createActions,
+      createBlocks,
+    ] = checkCreateStep(blocks: blocks, size: size, level: level, step: step);
 
-    var allTargets = getExtraBlocks();
-
-    getRandomPos() {
-      List<BoardPosition> list = allTargets.values.toList();
-      var random = Random();
-      int index = random.nextInt(list.length);
-      var pos = list[index];
-      allTargets.remove(getBlockKey(pos));
-      return pos;
-    }
-
-    getRandomType() {
-      var random = Random();
-      int index = random.nextInt(10) + 1;
-      if (index > 8) {
-        return BlockType.block;
-      }
-      if (index > 4) {
-        return BlockType.element;
-      }
-
-      return BlockType.enemy;
-    }
-
-    List<GameActionData> createActions = [];
-    addCreateAction(BoardItem block) {
-      var createAction = GameActionData(
-        target: block.id,
-        type: GameActionType.create,
-        position: block.position,
-      );
-      createActions.add(createAction);
-    }
-
-    // get step data
-    var stepData = level.getStepData(step);
-
-    if (stepData != null) {
-      print("has new step data: $stepData");
-
-      print(stepData.blocks);
-
-      for (var item in stepData.blocks) {
-        var pos = getRandomPos();
-        print("create block at: ${pos.x}, ${pos.y}");
-        // remove new key from allTargets
-        item.position = pos;
-
-        // add action
-        addBlock(item.copy());
-        addCreateAction(item);
-      }
-    } else if (step % 2 == 0) {
-      print("create --------------- ");
-
-      var type = getRandomType();
-      var code = BlockMergeCode.none;
-      if (type == BlockType.hero) {
-        code = BlockMergeCode.hero;
-      }
-      if (type == BlockType.enemy) {
-        code = BlockMergeCode.enemy;
-      }
-
-      var item = BoardItem(
-        name: "name",
-        type: type,
-      );
-      var random = Random();
-      int index = random.nextInt(6) + 1;
-      if (type == BlockType.block) {
-        index = 5;
-      }
-      item.life = index;
-      item.level = 1;
-      item.code = code;
-
-      item.act = 1;
-      item.position = getRandomPos();
-      // add block to system
-      addBlock(item);
-      // create
-      addCreateAction(item);
-    }
-
+    createBlocks.forEach((item) => addBlock(item));
     actions.addAll(createActions);
   }
 
   // 融合
   checkMerge() {
-    var vos = getBlockPosVos();
-
-    List<GameActionData> tempActions = [];
-
-    for (var leftBlock in blocks) {
-      var point = leftBlock.point;
-      // 获取 block 射程范围内 是否有 对象
-      var attackPoisiton = point.addPosition(leftBlock.position);
-
-      var key = getBlockKey(attackPoisiton);
-      var rightBlock = vos[key];
-      if (rightBlock != null) {
-        var canMerge = false;
-        print("has block on ${key}");
-
-        if (checkBlockCanMerge(leftBlock, rightBlock)) {
-          canMerge = true;
-        }
-
-        if (canMerge) {
-          // turnAction
-          leftBlock.isDead = true;
-          var eatAction = GameActionData(
-            target: leftBlock.id,
-            type: GameActionType.absorbed,
-          );
-          tempActions.add(eatAction);
-
-          rightBlock.level += 1;
-          rightBlock.life += leftBlock.life;
-          rightBlock.act = rightBlock.level;
-          var upgradeAction = GameActionData(
-            target: rightBlock.id,
-            type: GameActionType.upgrade,
-            value: rightBlock.level,
-            life: rightBlock.life,
-          );
-          tempActions.add(upgradeAction);
-        }
-      }
+    var tempActions = checkMergeStep(blocks: blocks, size: size);
+    if (tempActions.isNotEmpty) {
+      actions.addAll(tempActions);
     }
+  }
 
-    actions.addAll(tempActions);
+  // check if need attack
+  checkElement() {
+    var tempActions = checkElementStep(
+      blocks: blocks,
+      size: size,
+    );
+    if (tempActions.isNotEmpty) {
+      actions.addAll(tempActions);
+    }
+  }
+
+  checkDoor() {
+    var tempActions = checkDoorStep(
+      blocks: blocks,
+      size: size,
+    );
+    if (tempActions.isNotEmpty) {
+      actions.addAll(tempActions);
+    }
   }
 
   // check if need attack
   checkAttack() {
-    var vos = getBlockPosVos();
-
-    List<GameActionData> tempActions = [];
-
-    for (var leftBlock in blocks) {
-      var point = leftBlock.point;
-      // 获取 block 射程范围内 是否有 对象
-      var attackPoisiton = point.addPosition(leftBlock.position);
-
-      var key = getBlockKey(attackPoisiton);
-      var rightBlock = vos[key];
-      if (rightBlock != null) {
-        var canElement = false;
-        var canAttack = false;
-        print("has block on ${key}");
-
-        if (checkBlockCanElement(leftBlock.type, rightBlock.type)) {
-          canElement = true;
-        } else if (checkBlockCanAttack(leftBlock.type, rightBlock.type)) {
-          canAttack = true;
-        }
-
-        if (canElement) {
-          // do element
-          // only hero can get element
-          if (leftBlock.type == BlockType.hero) {
-            rightBlock.isDead = true;
-            var deadAction = GameActionData(
-              target: rightBlock.id,
-              type: GameActionType.dead,
-            );
-            tempActions.add(deadAction);
-
-            // upgrade
-            if (rightBlock.level >= leftBlock.level) {
-              leftBlock.level = rightBlock.level;
-              leftBlock.act = rightBlock.level;
-              var upgradeAction = GameActionData(
-                target: leftBlock.id,
-                type: GameActionType.upgrade,
-                life: rightBlock.life,
-                value: rightBlock.level,
-              );
-              tempActions.add(upgradeAction);
-            }
-
-            var heal = rightBlock.life;
-            leftBlock.life += heal;
-            var healAction = GameActionData(
-              target: leftBlock.id,
-              type: GameActionType.heal,
-              life: leftBlock.life,
-              value: heal,
-            );
-            tempActions.add(healAction);
-          }
-        } else if (canAttack) {
-          // act from leftBlock
-          print("leftBlock act ---- ${leftBlock.act}");
-          var act = leftBlock.act;
-
-          // turnAction
-          var attackAction = GameActionData(
-            target: leftBlock.id,
-            type: GameActionType.attack,
-            toTarget: rightBlock.id,
-            value: act,
-          );
-
-          tempActions.add(attackAction);
-
-          var rightLife = max(0, rightBlock.life - act);
-          rightBlock.life = rightLife;
-
-          var injureAction = GameActionData(
-            target: rightBlock.id,
-            type: GameActionType.injure,
-            value: act,
-            life: rightLife,
-          );
-          tempActions.add(injureAction);
-
-          if (rightLife == 0) {
-            rightBlock.isDead = true;
-            var deadAction = GameActionData(
-              target: rightBlock.id,
-              type: GameActionType.dead,
-            );
-            tempActions.add(deadAction);
-
-            var heal = 1;
-            leftBlock.life += heal;
-            var healAction = GameActionData(
-              target: leftBlock.id,
-              type: GameActionType.heal,
-              life: leftBlock.life,
-              value: heal,
-            );
-            tempActions.add(healAction);
-          }
-        }
-      }
+    var tempActions = checkAttackStep(
+      blocks: blocks,
+      size: size,
+    );
+    if (tempActions.isNotEmpty) {
+      actions.addAll(tempActions);
     }
-
-    actions.addAll(tempActions);
   }
 
   checkMovePoint(GamePoint point) {
-    List<GameActionData> turnActions = [];
-    List<GameActionData> moveActions = [];
-
-    // 获取 排序
-    List<BoardItem> blocklist = [];
-    // 获取 位置 map 地图
-    for (var element in blocks) {
-      blocklist.add(element);
-    }
-    blocklist.sort((a, b) {
-      var posA = a.position;
-      var posB = b.position;
-      switch (point) {
-        case GamePoint.right:
-          return posB.x - posA.x;
-        case GamePoint.left:
-          return posA.x - posB.x;
-        case GamePoint.top:
-          return posA.y - posB.y;
-        case GamePoint.bottom:
-          return posB.y - posA.y;
-      }
-    });
-
-    Map<String, BoardItem> tempVos = {};
-
-    checkBlockPoint(BoardItem leftBlock, GamePoint point) {
-      // 获取 某一个方向上的位置。
-      BoardPosition getPointPosition(BoardPosition pos) {
-        // 判断是否可以移动
-        if (!checkBlockCanMove(leftBlock.type)) {
-          return pos;
-        }
-        // 获取 新位置
-        var newPos = point.addPosition(pos);
-        // 判断 新位置是否到边界
-        var isEdge = checkSizeEdge(newPos, size);
-        // 返回 当前 pos
-        if (isEdge) {
-          return pos;
-        } else {
-          // 判断 当前位置是否 有对象
-          var key = getBlockKey(newPos);
-          var rightBlock = tempVos[key];
-          if (rightBlock != null) {
-            return pos;
-          }
-          return getPointPosition(newPos);
-        }
-      }
-
-      // get new pos by pos;
-      var pos = getPointPosition(leftBlock.position);
-
-      if (point != leftBlock.point) {
-        // change the data
-        leftBlock.point = point;
-        // turnAction
-        var turnAction = GameActionData(
-          target: leftBlock.id,
-          type: GameActionType.turn,
-          point: point,
-        );
-        turnActions.add(turnAction);
-      }
-      // is dif pos; need to move;
-      if (!isEqualPosition(pos, leftBlock.position)) {
-        // change the pos
-        leftBlock.position = pos;
-        // moveActions
-        var moveAction = GameActionData(
-          target: leftBlock.id,
-          type: GameActionType.move,
-          point: point,
-          position: pos,
-        );
-        moveActions.add(moveAction);
-      }
-
-      var key = getBlockKey(pos);
-      tempVos[key] = leftBlock;
-    }
-
-    for (var block in blocklist) {
-      checkBlockPoint(block, point);
-    }
-    actions.addAll(turnActions);
-    actions.addAll(moveActions);
-  }
-}
-
-String getBlockKey(BoardPosition pos) {
-  return "B_${pos.x}_${pos.y}";
-}
-
-bool checkBlockCanMove(BlockType type) {
-  if (type == BlockType.hero ||
-      type == BlockType.enemy ||
-      type == BlockType.element) {
-    return true;
-  }
-  return false;
-}
-
-bool checkBlockCanMerge(BoardItem leftBlock, BoardItem rightBlock) {
-  if (leftBlock.isDead || rightBlock.isDead) {
-    return false;
-  }
-  if (checkBlockCanMove(leftBlock.type) && checkBlockCanMove(rightBlock.type)) {
-    if (leftBlock.code == rightBlock.code) {
-      if (leftBlock.level == rightBlock.level) {
-        return true;
-      }
+    var tempActions = checkMoveStep(
+      point: point,
+      blocks: blocks,
+      size: size,
+    );
+    if (tempActions.isNotEmpty) {
+      actions.addAll(tempActions);
     }
   }
-
-  return false;
-}
-
-bool checkBlockCanElement(BlockType typeA, BlockType typeB) {
-  if (typeB == BlockType.element) {
-    return true;
-  }
-
-  return false;
-}
-
-bool checkBlockCanAttack(BlockType typeA, BlockType typeB) {
-  if (typeA == BlockType.hero || typeA == BlockType.enemy) {
-    if (typeA != typeB) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-bool checkSizeEdge(BoardPosition pos, BoardSize size) {
-  if (pos.x <= 0) {
-    return true;
-  }
-  if (pos.x > size.width) {
-    return true;
-  }
-  if (pos.y <= 0) {
-    return true;
-  }
-  if (pos.y > size.height) {
-    return true;
-  }
-  return false;
-}
-
-bool isEqualPosition(BoardPosition left, BoardPosition right) {
-  return left.x == right.x && left.y == right.y;
 }

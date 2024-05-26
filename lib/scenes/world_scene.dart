@@ -51,6 +51,9 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     if (item.type == BlockType.element) {
       color = Colors.green.shade400;
     }
+    if (item.type == BlockType.door) {
+      color = Colors.orange.shade400;
+    }
     var block = BoardItemComponent(
       // key: ComponentKey.named(item.id),
       position: position,
@@ -63,7 +66,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
       block.setLife(item.life);
     }
     block.setLevel(item.level);
-    block.setCode(item.code.toCode());
+    block.setCode(item.code.toCodeString());
     board.add(block);
 
     // link vos with block ref
@@ -144,13 +147,13 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     if (system.status != GameStatus.play) {
       return;
     }
-    print(isSliding);
     if (isSliding) {
       return;
     }
     isSliding = true;
     TaskSystem taskSystem = TaskSystem();
     taskSystem.max = 1;
+
     taskSystem.add((next) async {
       print("check ---- slide");
       system.actionSlide(point);
@@ -161,6 +164,20 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     taskSystem.add((next) async {
       print("check ---- merge");
       system.checkMerge();
+      await runActions();
+      next();
+    });
+
+    taskSystem.add((next) async {
+      print("check ---- element");
+      system.checkElement();
+      await runActions();
+      next();
+    });
+
+    taskSystem.add((next) async {
+      print("check ---- door");
+      system.checkDoor();
       await runActions();
       next();
     });
@@ -376,28 +393,4 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     gameStart();
     return super.onLoad();
   }
-}
-
-bool checkSizeEdge(BoardPosition pos, BoardSize size) {
-  if (pos.x <= 0) {
-    return true;
-  }
-  if (pos.x > size.width) {
-    return true;
-  }
-  if (pos.y <= 0) {
-    return true;
-  }
-  if (pos.y > size.height) {
-    return true;
-  }
-  return false;
-}
-
-String getBlockKey(BoardPosition pos) {
-  return "B_${pos.x}_${pos.y}";
-}
-
-bool isEqualPosition(BoardPosition left, BoardPosition right) {
-  return left.x == right.x && left.y == right.y;
 }
