@@ -29,11 +29,15 @@ Future<GameLevelData> loadLevelData({required String path}) async {
       if (steps != null) {
         // add floor
         floor += 1;
+        var title = section["title"];
+        var floorData = GameFloorData(title: title);
+        level.levelFloorData["F_$floor"] = floorData;
+
         for (var item in steps) {
           var index = item["index"] as int;
           // create a step for level
           var step = GameStepData();
-          level.levelStepData["${floor}_$index"] = step;
+          floorData.steps["${floor}_$index"] = step;
 
           // reduce blocks
           List<dynamic>? blocks = item["blocks"];
@@ -57,6 +61,7 @@ Future<GameLevelData> loadLevelData({required String path}) async {
                   list.add(pos);
                 }
               });
+              print("the edge list $list");
               var random = Random();
               int index = random.nextInt(list.length);
               var pos = list[index];

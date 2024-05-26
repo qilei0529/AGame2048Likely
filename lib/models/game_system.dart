@@ -49,6 +49,7 @@ class GameSystem {
     // size = level.size;
     var levelData = await loadLevelData(path: path);
     level = levelData;
+
     print("load level $level");
   }
 
@@ -59,7 +60,8 @@ class GameSystem {
 
   toStep(int step) {
     print("to step $step");
-    var stepData = level.getStepData("${floor}_$step");
+    this.step = step;
+    var stepData = level.getStepData(step: step, floor: floor);
     if (stepData != null) {
       for (var block in stepData.blocks) {
         addBlock(block.copy());
@@ -87,9 +89,9 @@ class GameSystem {
   }
 
   gameStart() {
+    status = GameStatus.play;
     toFloor(1);
     toStep(1);
-    status = GameStatus.play;
   }
 
   gamePause() {
@@ -102,9 +104,10 @@ class GameSystem {
 
   gameRestart() {
     status = GameStatus.start;
-    step = 0;
-    actions.clear();
+    // clean blocks
     _vos.clear();
+    // clean actions
+    actions.clear();
 
     toFloor(1);
     toStep(1);
@@ -112,9 +115,60 @@ class GameSystem {
 
   actionSlide(GamePoint point) {
     checkMovePoint(point);
+
+    checkBlockStep();
+    checkStepForNext();
   }
 
-  checkStep() {
+  checkBlockStep() {
+    List<GameActionData> tempActions;
+
+    // 融合
+    tempActions = checkMergeStep(
+      blocks: blocks,
+      size: size,
+    );
+    if (tempActions.isNotEmpty) {
+      print("has merge step $tempActions");
+      actions.addAll(tempActions);
+      return;
+    }
+
+    // 道具
+    tempActions = checkElementStep(
+      blocks: blocks,
+      size: size,
+    );
+    if (tempActions.isNotEmpty) {
+      print("has element step $tempActions");
+      actions.addAll(tempActions);
+      return;
+    }
+
+    // 门
+    tempActions = checkDoorStep(
+      blocks: blocks,
+      size: size,
+    );
+    if (tempActions.isNotEmpty) {
+      print("has door step $tempActions");
+      actions.addAll(tempActions);
+      return;
+    }
+
+    // 攻击
+    tempActions = checkAttackStep(
+      blocks: blocks,
+      size: size,
+    );
+    if (tempActions.isNotEmpty) {
+      print("has attack step $tempActions");
+      actions.addAll(tempActions);
+      return;
+    }
+  }
+
+  checkStepForNext() {
     // go next step
     step += 1;
     var [
@@ -131,46 +185,6 @@ class GameSystem {
     createBlocks.forEach((item) => addBlock(item));
     if (createActions.isNotEmpty) {
       actions.addAll(createActions);
-    }
-  }
-
-  // 融合
-  checkMerge() {
-    var tempActions = checkMergeStep(blocks: blocks, size: size);
-    if (tempActions.isNotEmpty) {
-      actions.addAll(tempActions);
-    }
-  }
-
-  // check if need attack
-  checkElement() {
-    var tempActions = checkElementStep(
-      blocks: blocks,
-      size: size,
-    );
-    if (tempActions.isNotEmpty) {
-      actions.addAll(tempActions);
-    }
-  }
-
-  checkDoor() {
-    var tempActions = checkDoorStep(
-      blocks: blocks,
-      size: size,
-    );
-    if (tempActions.isNotEmpty) {
-      actions.addAll(tempActions);
-    }
-  }
-
-  // check if need attack
-  checkAttack() {
-    var tempActions = checkAttackStep(
-      blocks: blocks,
-      size: size,
-    );
-    if (tempActions.isNotEmpty) {
-      actions.addAll(tempActions);
     }
   }
 

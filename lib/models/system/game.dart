@@ -65,20 +65,34 @@ class GameLevelData {
   }
 
   // step data for level
-  Map<String, GameStepData> levelStepData = {};
+  // Map<String, GameStepData> levelStepData = {};
+
+  Map<String, GameFloorData> levelFloorData = {};
+
+  GameFloorData? getFloorData(int floor) {
+    print("get floor data $floor");
+    return levelFloorData["F_$floor"];
+  }
 
   // get step data
-  GameStepData? getStepData(String path) {
+  GameStepData? getStepData({required int step, required int floor}) {
     // get static step data from map
-    var data = levelStepData[path];
-    if (data != null) {
-      return data;
+
+    var floorData = getFloorData(floor);
+    if (floorData != null) {
+      return floorData.steps["${floor}_$step"];
     }
     return null;
-    // create a empty step
-    // var uuid = const Uuid().v4();
-    // return GameStepData(uuid.toString(), size);
   }
+}
+
+class GameFloorData {
+  late String title;
+  Map<String, GameStepData> steps = {};
+
+  GameFloorData({
+    required this.title,
+  });
 }
 
 // 每一步的数据
@@ -93,9 +107,6 @@ class GameStepData {
 
   late GamePoint point;
 
-  // 所有行为
-  late List<GameActionData> actions;
-
   List<BoardItem> get blocks => vos.values.toList();
 
   GameStepData({
@@ -106,7 +117,6 @@ class GameStepData {
     this.size = size ?? BoardSize(5, 5);
 
     vos = {};
-    actions = [];
   }
 
   addBlock(BoardItem block) {

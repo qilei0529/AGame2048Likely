@@ -58,6 +58,16 @@ List<GameActionData> checkElementStep({
           value: heal,
         );
         tempActions.add(healAction);
+
+        // move to target
+        leftBlock.position = rightBlock.position;
+        var moveAction = GameActionData(
+          target: leftBlock.id,
+          type: GameActionType.move,
+          position: rightBlock.position,
+          point: point,
+        );
+        tempActions.add(moveAction);
       }
     }
   }

@@ -63,7 +63,7 @@ checkCreateStep({
   }
 
   // get step data
-  var stepData = level.getStepData("${floor}_$step");
+  var stepData = level.getStepData(step: step, floor: floor);
 
   if (stepData != null) {
     print("has new step data: $stepData");
@@ -71,7 +71,12 @@ checkCreateStep({
     print(stepData.blocks);
 
     for (var item in stepData.blocks) {
-      var pos = getRandomPos();
+      BoardPosition pos;
+      if (item.type == BlockType.door) {
+        pos = getRandomEdge();
+      } else {
+        pos = getRandomPos();
+      }
       print("create block at: ${pos.x}, ${pos.y}");
       // remove new key from allTargets
       item.position = pos;
@@ -105,6 +110,13 @@ checkCreateStep({
     }
     if (type == BlockType.door) {
       life = 5;
+    }
+    if (type == BlockType.element) {
+      if (life == 1) {
+        code = BlockMergeCode.weapon;
+      } else {
+        code = BlockMergeCode.element;
+      }
     }
     item.life = life;
     item.level = 1;

@@ -78,9 +78,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
   gameStart() async {
     print("game start");
     // 初始化 英雄
-    system.gameStart();
-    initBlocks();
-    updateStep();
+    gameRestart();
   }
 
   gamePlay() {}
@@ -95,8 +93,9 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
       value.removeFromParent();
     });
 
-    initBlocks();
     system.gameStart();
+    initBlocks();
+    updateStep();
   }
 
   gameOver() {
@@ -154,60 +153,9 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
       return;
     }
     isSliding = true;
-    TaskSystem taskSystem = TaskSystem();
-    taskSystem.max = 1;
 
-    taskSystem.add((next) async {
-      print("check ---- slide");
-      system.actionSlide(point);
-      await runActions();
-      next();
-    });
-
-    taskSystem.add((next) async {
-      print("check ---- merge");
-      system.checkMerge();
-      await runActions();
-      next();
-    });
-
-    taskSystem.add((next) async {
-      print("check ---- element");
-      system.checkElement();
-      await runActions();
-      next();
-    });
-
-    taskSystem.add((next) async {
-      print("check ---- attack");
-      system.checkAttack();
-      await runActions();
-      next();
-    });
-
-    taskSystem.add((next) async {
-      print("check ---- move");
-      system.actionSlide(point);
-      await runActions();
-      next();
-    });
-
-    taskSystem.add((next) async {
-      print("check ---- door");
-      system.checkDoor();
-      await runActions();
-      next();
-    });
-
-    taskSystem.add((next) async {
-      print("check ---- step");
-      system.checkStep();
-      await runActions();
-      updateStep();
-      next();
-    });
-
-    await taskSystem.run();
+    system.actionSlide(point);
+    await runActions();
     isSliding = false;
     print("finish ---- step check");
   }
@@ -262,13 +210,15 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     if (type == GameActionType.create) {
       if (item != null) {
         print("create block ${item.id}");
-        addBlock(item);
-        var block = vos[item.id];
-        if (block != null) {
-          block.born(end: onEnd);
-        } else {
-          onEnd();
-        }
+        Future.delayed(const Duration(milliseconds: 800), () {
+          addBlock(item);
+          var block = vos[item.id];
+          if (block != null) {
+            block.born(end: onEnd);
+          } else {
+            onEnd();
+          }
+        });
       }
       return;
     }

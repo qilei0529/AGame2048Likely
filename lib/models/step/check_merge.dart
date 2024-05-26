@@ -23,7 +23,6 @@ checkMergeStep({
       var canMerge = false;
       print("has block on ${key}");
       if (rightBlock.isDead) {
-        // oh it is dead
       } else if (checkBlockCanMerge(leftBlock, rightBlock)) {
         canMerge = true;
       }
