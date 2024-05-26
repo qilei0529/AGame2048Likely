@@ -41,15 +41,20 @@
               "level": 1
             },
             {
-              "type": "Door",
-              "code": "door",
-              "life": 5,
-              "level": 1
-            },
-            {
               "type": "Element",
               "code": "weapon",
               "life": 1,
+              "level": 1
+            }
+          ]
+        },
+        {
+          "index": 20,
+          "blocks": [
+            {
+              "type": "Door",
+              "code": "door",
+              "life": 5,
               "level": 1
             }
           ]

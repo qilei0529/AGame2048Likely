@@ -24,6 +24,20 @@ checkCreateStep({
     return pos;
   }
 
+  getRandomEdge() {
+    List<BoardPosition> list = [];
+    allTargets.values.forEach((pos) {
+      if (pos.x == 1 || pos.y == 1) {
+        list.add(pos);
+      }
+    });
+    var random = Random();
+    int index = random.nextInt(list.length);
+    var pos = list[index];
+    allTargets.remove(getBlockKey(pos));
+    return pos;
+  }
+
   getRandomType() {
     var random = Random();
     int index = random.nextInt(10) + 1;
@@ -78,22 +92,26 @@ checkCreateStep({
     if (type == BlockType.enemy) {
       code = BlockMergeCode.enemy;
     }
+    var pos = getRandomPos();
 
     var item = BoardItem(
       name: "name",
       type: type,
     );
     var random = Random();
-    int index = random.nextInt(6) + 1;
+    int life = random.nextInt(6) + 1;
     if (type == BlockType.block) {
-      index = 5;
+      life = 5;
     }
-    item.life = index;
+    if (type == BlockType.door) {
+      life = 5;
+    }
+    item.life = life;
     item.level = 1;
     item.code = code;
 
     item.act = 1;
-    item.position = getRandomPos();
+    item.position = pos;
     // add block to system
     // addBlock(item);
     createBlocks.add(item);

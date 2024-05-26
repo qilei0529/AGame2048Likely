@@ -50,6 +50,20 @@ Future<GameLevelData> loadLevelData({required String path}) async {
               return pos;
             }
 
+            getRandomEdge() {
+              List<BoardPosition> list = [];
+              allTargets.values.forEach((pos) {
+                if (pos.x == 1 || pos.y == 1) {
+                  list.add(pos);
+                }
+              });
+              var random = Random();
+              int index = random.nextInt(list.length);
+              var pos = list[index];
+              allTargets.remove(getBlockKey(pos));
+              return pos;
+            }
+
             for (var data in blocks) {
               var id = data["id"];
               var name = data["name"];
@@ -78,7 +92,12 @@ Future<GameLevelData> loadLevelData({required String path}) async {
                 var key = getBlockKey(block.position);
                 allTargets.remove(key);
               } else {
-                var pos = getRandomPos();
+                BoardPosition pos;
+                if (block.type == BlockType.door) {
+                  pos = getRandomEdge();
+                } else {
+                  pos = getRandomPos();
+                }
                 block.position = pos;
                 var key = getBlockKey(block.position);
                 allTargets.remove(key);

@@ -76,10 +76,11 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
   }
 
   gameStart() async {
+    print("game start");
     // 初始化 英雄
     system.gameStart();
-    print("game start");
     initBlocks();
+    updateStep();
   }
 
   gamePlay() {}
@@ -88,7 +89,6 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
 
   gameRestart() {
     system.gameRestart();
-
     popup.removeFromParent();
 
     vos.forEach((key, value) {
@@ -96,7 +96,6 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     });
 
     initBlocks();
-
     system.gameStart();
   }
 
