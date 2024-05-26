@@ -81,8 +81,6 @@ checkCreateStep({
       // remove new key from allTargets
       item.position = pos;
 
-      // add action
-      // addBlock(item.copy());
       createBlocks.add(item.copy());
       addCreateAction(item);
     }

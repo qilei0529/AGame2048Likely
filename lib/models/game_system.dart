@@ -53,15 +53,19 @@ class GameSystem {
     print("load level $level");
   }
 
-  toFloor(int floor) {
-    print("to floor $floor");
-    this.floor = floor;
+  toFloor(int nextFloor) {
+    print("to floor $nextFloor");
+    floor = nextFloor;
   }
 
   toStep(int step) {
     print("to step $step");
     this.step = step;
-    var stepData = level.getStepData(step: step, floor: floor);
+    var stepData = level.getStepData(
+      step: step,
+      floor: floor,
+      blocks: blocks,
+    );
     if (stepData != null) {
       for (var block in stepData.blocks) {
         addBlock(block.copy());
@@ -89,9 +93,7 @@ class GameSystem {
   }
 
   gameStart() {
-    status = GameStatus.play;
-    toFloor(1);
-    toStep(1);
+    status = GameStatus.start;
   }
 
   gamePause() {
@@ -110,6 +112,21 @@ class GameSystem {
     actions.clear();
 
     toFloor(1);
+    toStep(1);
+  }
+
+  actionNextFloor() {
+    status = GameStatus.start;
+
+    // 过滤出 hero
+    var hero = _vos.values.firstWhere((block) => block.type == BlockType.hero);
+    _vos.clear();
+    // add the hero to next level
+    if (hero != null) {
+      addBlock(hero);
+    }
+
+    toFloor(floor + 1);
     toStep(1);
   }
 

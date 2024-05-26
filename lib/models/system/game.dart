@@ -1,3 +1,4 @@
+import 'package:flutter_game_2048_fight/models/system/level.dart';
 import 'package:uuid/uuid.dart';
 
 import 'board.dart';
@@ -75,12 +76,17 @@ class GameLevelData {
   }
 
   // get step data
-  GameStepData? getStepData({required int step, required int floor}) {
+  GameStepData? getStepData(
+      {required int step, required int floor, List<BoardItem>? blocks}) {
     // get static step data from map
 
     var floorData = getFloorData(floor);
     if (floorData != null) {
-      return floorData.steps["${floor}_$step"];
+      var data = floorData.steps["${floor}_$step"];
+      if (data != null) {
+        return getGameStepData(
+            item: floorData.steps["${floor}_$step"], leftBlocks: blocks);
+      }
     }
     return null;
   }
@@ -88,7 +94,7 @@ class GameLevelData {
 
 class GameFloorData {
   late String title;
-  Map<String, GameStepData> steps = {};
+  Map<String, dynamic> steps = {};
 
   GameFloorData({
     required this.title,

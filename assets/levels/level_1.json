@@ -60,6 +60,41 @@
           ]
         }
       ]
+    },
+
+    {
+      "title": "the level 1 floor 2",
+      "steps": [
+        {
+          "index": 1,
+          "blocks": [
+            {
+              "type": "Enemy",
+              "code": "enemy",
+              "life": 1,
+              "level": 1
+            },
+            {
+              "type": "Enemy",
+              "code": "enemy",
+              "life": 3,
+              "level": 1
+            },
+            {
+              "type": "Block",
+              "code": "rock",
+              "life": 5,
+              "level": 1
+            },
+            {
+              "type": "Element",
+              "code": "element",
+              "life": 1,
+              "level": 1
+            }
+          ]
+        }
+      ]
     }
   ]
 }

@@ -88,7 +88,7 @@ class BoardItemComponent extends RectangleComponent
         SequenceEffect(
           [
             OpacityEffect.to(0, duration(0)),
-            OpacityEffect.to(1, duration(0.1)),
+            OpacityEffect.to(1, duration(0.2)),
           ],
           onComplete: () {
             if (end != null) {

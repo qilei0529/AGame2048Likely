@@ -19,6 +19,7 @@ import 'package:flutter_game_2048_fight/elements/block_item.dart';
 class WorldScene extends World with HasGameReference<TheGameScene> {
   late BlockComponent board;
   late BlockComponent popup;
+  late TextComponent floorLabel;
   late TextComponent stepLabel;
 
   Map<String, BoardItemComponent> vos = {};
@@ -81,10 +82,6 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     gameRestart();
   }
 
-  gamePlay() {}
-
-  gamePause() {}
-
   gameRestart() {
     system.gameRestart();
     popup.removeFromParent();
@@ -92,20 +89,33 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     vos.forEach((key, value) {
       value.removeFromParent();
     });
+    vos.clear();
 
     system.gameStart();
     initBlocks();
     updateStep();
+    updateFloor();
+  }
+
+  gameNextFloor() {
+    system.actionNextFloor();
+
+    // clean blocks
+    vos.forEach((key, value) {
+      value.removeFromParent();
+    });
+    vos.clear();
+
+    initBlocks();
+    updateStep();
+    updateFloor();
   }
 
   gameOver() {
     system.gameOver();
-
     initPopup();
     add(popup);
   }
-
-  initFloor() {}
 
   initHeader() {
     var size = game.camera.viewport.size;
@@ -145,7 +155,9 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
   }
 
   actionSlide(GamePoint point) async {
-    print(system.status);
+    if (system.status == GameStatus.start) {
+      system.status = GameStatus.play;
+    }
     if (system.status != GameStatus.play) {
       return;
     }
@@ -153,15 +165,20 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
       return;
     }
     isSliding = true;
-
     system.actionSlide(point);
+
+    // update step display
+    updateStep();
     await runActions();
     isSliding = false;
-    print("finish ---- step check");
   }
 
   updateStep() {
     stepLabel.text = "step: ${system.step}";
+  }
+
+  updateFloor() {
+    floorLabel.text = "floor: ${system.floor}";
   }
 
   runActions() async {
@@ -172,15 +189,34 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
       var task = (Function next) => runAction(action, next);
       taskSystem.add(task);
     }
-    await taskSystem.run();
     system.actions.clear();
+    await taskSystem.run();
   }
 
   runAction(GameActionData action, Function onEnd) {
-    var type = action.type;
+    // no actions
+    if (system.status != GameStatus.play) {
+      onEnd();
+      return;
+    }
 
+    var type = action.type;
     var item = system.getBlock(action.target);
 
+    if (type == GameActionType.enter) {
+      var block = vos[action.target];
+      if (item != null && block != null) {
+        // to play enter
+        block.dead(end: () {
+          block.removeFromParent();
+          onEnd();
+          if (item.type == BlockType.hero) {
+            gameNextFloor();
+          }
+        });
+      }
+      return;
+    }
     if (type == GameActionType.dead) {
       var block = vos[action.target];
       if (item != null && block != null) {
@@ -192,6 +228,8 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
         if (item.type == BlockType.hero) {
           gameOver();
         }
+      } else {
+        onEnd();
       }
       return;
     }
@@ -203,14 +241,15 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
           onEnd();
         });
         system.removeBlock(item);
+      } else {
+        onEnd();
       }
       return;
     }
     // do create
     if (type == GameActionType.create) {
       if (item != null) {
-        print("create block ${item.id}");
-        Future.delayed(const Duration(milliseconds: 800), () {
+        Future.delayed(const Duration(milliseconds: 300), () {
           addBlock(item);
           var block = vos[item.id];
           if (block != null) {
@@ -219,6 +258,8 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
             onEnd();
           }
         });
+      } else {
+        onEnd();
       }
       return;
     }
@@ -241,22 +282,22 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
         }
         // attac
         if (type == GameActionType.attack) {
-          print("${item.id} attck: -> ");
+          // print("${item.id} attck: -> ");
           block.attack(end: onEnd);
           return;
         }
         if (type == GameActionType.injure) {
-          print("${item.id} injour: <- ");
+          // print("${item.id} injour: <- ");
           block.lifeTo(num: item.life, end: onEnd);
           return;
         }
         if (type == GameActionType.heal) {
-          print("${item.id} heal: <- ");
+          // print("${item.id} heal: <- ");
           block.lifeTo(num: item.life, end: onEnd);
           return;
         }
         if (type == GameActionType.upgrade) {
-          print("${item.id} upgrade: <- ");
+          // print("${item.id} upgrade: <- ");
           block.setLevel(item.level);
           block.lifeTo(num: item.life, end: onEnd);
           return;
@@ -318,7 +359,9 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     }
 
     stepLabel = TextComponent(text: "step: 0", position: Vector2(200, 0));
+    floorLabel = TextComponent(text: "floor: 0", position: Vector2(200, 30));
     block.add(stepLabel);
+    block.add(floorLabel);
 
     add(block);
   }

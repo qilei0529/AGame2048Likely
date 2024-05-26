@@ -65,6 +65,7 @@ List<GameActionData> checkDoorStep({
           tempActions.add(deadAction);
 
           // move forword
+          leftBlock.position = rightBlock.position;
           var moveAction = GameActionData(
             target: leftBlock.id,
             type: GameActionType.move,
@@ -72,6 +73,7 @@ List<GameActionData> checkDoorStep({
             position: rightBlock.position,
           );
           tempActions.add(moveAction);
+
           // move forword
           var enterAction = GameActionData(
             target: leftBlock.id,
