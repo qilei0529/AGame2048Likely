@@ -8,6 +8,7 @@ List<GameActionData> checkMoveStep({
   required List<BoardItem> blocks,
   required BoardSize size,
   int? actionLevel,
+  Function? onStep,
 }) {
   List<GameActionData> moveActions = [];
 
@@ -91,6 +92,10 @@ List<GameActionData> checkMoveStep({
 
     var key = getBlockKey(pos);
     tempVos[key] = leftBlock;
+
+    if (onStep != null) {
+      onStep(leftBlock);
+    }
   }
 
   for (var block in blocklist) {

@@ -69,6 +69,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
       // key: ComponentKey.named(item.id),
       position: position,
       color: color,
+      size: Vector2(58, 58),
     );
     // block.debugMode = true;
     block.debugColor = Colors.black26;

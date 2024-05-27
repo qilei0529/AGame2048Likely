@@ -153,10 +153,12 @@ class GameSystem {
   }
 
   actionSlide(GamePoint point) {
-    checkMovePoint(point: point);
-    for (var block in blocks) {
-      checkBlockStep(block);
-    }
+    checkMovePoint(
+      point: point,
+      onStep: (block) {
+        checkBlockStep(block);
+      },
+    );
   }
 
   checkBlockStep(BoardItem block) {
@@ -240,12 +242,17 @@ class GameSystem {
     }
   }
 
-  checkMovePoint({required GamePoint point, int? actionLevel}) {
+  checkMovePoint({
+    required GamePoint point,
+    int? actionLevel,
+    Function? onStep,
+  }) {
     var tempActions = checkMoveStep(
       point: point,
       blocks: blocks,
       size: size,
       actionLevel: actionLevel,
+      onStep: onStep,
     );
     if (tempActions.isNotEmpty) {
       actions.addAll(tempActions);

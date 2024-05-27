@@ -63,16 +63,6 @@ List<GameActionData> checkAttackStep({
         );
         tempActions.add(deadAction);
 
-        var heal = 1;
-        leftBlock.life += heal;
-        var healAction = GameActionData(
-          target: leftBlock.id,
-          type: GameActionType.heal,
-          life: leftBlock.life,
-          value: heal,
-        );
-        tempActions.add(healAction);
-
         // move to target
         // leftBlock.position = rightBlock.position;
         var moveAction = GameActionData(
