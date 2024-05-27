@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flame/components.dart';
 import 'package:flutter_game_2048_fight/models/system/game.dart';
 import 'package:flutter_game_2048_fight/models/system/task.dart';
+import 'package:flutter_game_2048_fight/models/util.dart';
 
 // scene
 import 'package:flutter_game_2048_fight/scenes/game_scene.dart';
@@ -23,7 +24,7 @@ class BoardItemComponent extends RectangleComponent
     GamePoint? point,
   }) {
     this.color = color ?? Colors.white60;
-    super.size = size ?? Vector2(48, 48);
+    super.size = size ?? globalBlockSize;
     super.anchor = Anchor.center;
   }
 
@@ -178,8 +179,10 @@ class BoardItemComponent extends RectangleComponent
 
   // get the position from int x y
   getGroundPositionAt(int x, int y) {
-    var dx = 50.0 * x.toDouble() - 25;
-    var dy = 50.0 * y.toDouble() - 25;
+    var width = globalBlockSize.x;
+    var height = globalBlockSize.y;
+    var dx = width * x.toDouble() - width / 2;
+    var dy = height * y.toDouble() - height / 2;
     return Vector2(dx, dy);
   }
 

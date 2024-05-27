@@ -1,4 +1,5 @@
 import 'package:flutter_game_2048_fight/models/system/level.dart';
+import 'package:flutter_game_2048_fight/models/util.dart';
 import 'package:uuid/uuid.dart';
 
 import 'board.dart';
@@ -52,7 +53,7 @@ class GameLevelData {
   late String id; // uuid
   late String name;
   // size
-  late BoardSize size = BoardSize(6, 6);
+  late BoardSize size = globalGameSize;
 
   GameLevelData({
     String? id,
@@ -120,7 +121,7 @@ class GameStepData {
     BoardSize? size,
   }) {
     this.id = id ?? const Uuid().v4().toString();
-    this.size = size ?? BoardSize(5, 5);
+    this.size = size ?? globalGameSize;
 
     vos = {};
   }

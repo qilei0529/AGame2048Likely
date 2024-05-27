@@ -1,5 +1,11 @@
+import 'package:flame/extensions.dart';
+
 import 'system/block.dart';
 import 'system/board.dart';
+
+final globalGameSize = BoardSize(6, 6);
+final globalBlockSize = Vector2(60, 60);
+final globalBoardSize = Vector2(360, 360);
 
 String getBlockKey(BoardPosition pos) {
   return "B_${pos.x}_${pos.y}";

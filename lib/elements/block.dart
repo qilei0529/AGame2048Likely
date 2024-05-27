@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 // frame
 import 'package:flame/components.dart';
 import 'package:flutter_game_2048_fight/models/system/game.dart';
+import 'package:flutter_game_2048_fight/models/util.dart';
 
 // scene
 import 'package:flutter_game_2048_fight/scenes/game_scene.dart';
@@ -37,6 +38,6 @@ mixin HasBoardReference on BlockComponent {
   RectangleComponent get board => parent! as RectangleComponent;
 
   Vector2 getBoardSize() {
-    return Vector2(300, 300);
+    return globalBoardSize;
   }
 }

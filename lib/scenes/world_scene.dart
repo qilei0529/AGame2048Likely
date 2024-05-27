@@ -4,6 +4,7 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_game_2048_fight/models/game_system.dart';
 import 'package:flutter_game_2048_fight/models/system/block.dart';
+import 'package:flutter_game_2048_fight/models/util.dart';
 
 // scene
 import 'package:flutter_game_2048_fight/scenes/game_scene.dart';
@@ -146,9 +147,9 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
 
   initBoard() {
     board = BlockComponent(
-      size: Vector2(300, 300),
+      size: globalBoardSize,
       color: Colors.white60,
-      position: Vector2(0, -80),
+      position: Vector2(0, -60),
     );
 
     var size = system.size;
@@ -156,7 +157,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
       for (var y = 1; y < size.height + 1; y++) {
         var pos = getBoardPositionAt(x, y);
         var block = BlockComponent(
-          size: Vector2(46, 46),
+          size: Vector2(58, 58),
           color: Colors.green.shade100,
           position: pos,
         );
@@ -385,7 +386,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     var block = BlockComponent(
       size: Vector2(320, 160),
       color: Colors.yellow.shade700,
-      position: Vector2(0, 180),
+      position: Vector2(0, 240),
     );
 
     var list = [
@@ -425,8 +426,10 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
 
   // get the position from int x y
   Vector2 getBoardPositionAt(int x, int y) {
-    var dx = 50.0 * x.toDouble() - 25;
-    var dy = 50.0 * y.toDouble() - 25;
+    var width = globalBlockSize.x;
+    var height = globalBlockSize.y;
+    var dx = width * x.toDouble() - width / 2;
+    var dy = height * y.toDouble() - height / 2;
     return Vector2(dx, dy);
   }
 
