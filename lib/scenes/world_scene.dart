@@ -151,18 +151,19 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
       position: Vector2(0, -80),
     );
 
-    for (var x = 1; x < 6; x += 1) {
-      for (var y = 1; y < 6; y += 1) {
+    var size = system.size;
+    for (var x = 1; x < size.width + 1; x++) {
+      for (var y = 1; y < size.height + 1; y++) {
         var pos = getBoardPositionAt(x, y);
         var block = BlockComponent(
-          size: Vector2(60, 60),
+          size: Vector2(50, 50),
           color: Colors.green.shade100,
           position: pos,
         );
         board.add(block);
       }
     }
-
+    // board.debugMode = true;
     add(board);
   }
 

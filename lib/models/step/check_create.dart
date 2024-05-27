@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:math';
 
 import 'package:flutter_game_2048_fight/models/system/block.dart';
@@ -180,8 +179,8 @@ List<BlockType> getBlockTypes(List<BoardItem> blocks) {
     vos[block.type] = item + 1;
   }
 
-  var total = 30;
-  var maxSize = 30;
+  var total = 36;
+  var maxSize = 36;
   List<BlockType> res = [];
   defaultMap.forEach((key, value) {
     if (key != BlockType.enemy) {

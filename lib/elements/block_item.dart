@@ -23,7 +23,7 @@ class BoardItemComponent extends RectangleComponent
     GamePoint? point,
   }) {
     this.color = color ?? Colors.white60;
-    super.size = size ?? Vector2(60, 60);
+    super.size = size ?? Vector2(56, 56);
     super.anchor = Anchor.center;
   }
 
@@ -45,7 +45,7 @@ class BoardItemComponent extends RectangleComponent
         color: Colors.black45,
       ),
     ),
-    position: Vector2(40, 25),
+    position: Vector2(35, 25),
   );
   late TextComponent code = TextComponent(
     text: "code",
@@ -55,7 +55,7 @@ class BoardItemComponent extends RectangleComponent
         color: Colors.black45,
       ),
     ),
-    position: Vector2(0, 40),
+    position: Vector2(0, 35),
   );
 
   TaskSystem taskSystem = TaskSystem(maxQueue: 1);
