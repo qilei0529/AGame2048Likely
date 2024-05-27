@@ -179,12 +179,16 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     }
     isSliding = true;
     system.actionSlide(point);
-
     // update step display
     updateStep();
     updateAct();
     updateSta();
     await runActions();
+    system.checkMovePoint(point: point);
+    await runActions();
+    system.checkStepForNext();
+    await runActions();
+
     isSliding = false;
   }
 
@@ -315,6 +319,18 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
         if (type == GameActionType.move) {
           var pos = action.position!;
           block.moveTo(x: pos.x, y: pos.y, end: onEnd);
+          return;
+        }
+        if (type == GameActionType.moveIn) {
+          var pos = action.position!;
+          block.moveTo(
+              x: pos.x,
+              y: pos.y,
+              end: () {
+                //  moveIn
+                item.position = pos;
+                onEnd();
+              });
           return;
         }
         // attac

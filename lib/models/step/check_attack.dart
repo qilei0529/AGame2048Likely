@@ -74,10 +74,10 @@ List<GameActionData> checkAttackStep({
         tempActions.add(healAction);
 
         // move to target
-        leftBlock.position = rightBlock.position;
+        // leftBlock.position = rightBlock.position;
         var moveAction = GameActionData(
           target: leftBlock.id,
-          type: GameActionType.move,
+          type: GameActionType.moveIn,
           position: rightBlock.position,
           point: point,
         );

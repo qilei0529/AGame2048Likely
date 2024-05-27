@@ -136,6 +136,8 @@ enum GameActionType {
   turn,
   // 移动
   move,
+  // 移动
+  moveIn,
   // 进入
   enter,
 

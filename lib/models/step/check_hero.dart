@@ -141,10 +141,10 @@ List<GameActionData> checkHeroStep({
       // move level 3 forword
       if (rightLife == 0) {
         // move to target
-        leftBlock.position = rightBlock.position;
+        // leftBlock.position = rightBlock.position;
         var moveAction = GameActionData(
           target: leftBlock.id,
-          type: GameActionType.move,
+          type: GameActionType.moveIn,
           position: rightBlock.position,
           point: point,
         );

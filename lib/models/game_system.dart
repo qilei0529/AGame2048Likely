@@ -148,7 +148,6 @@ class GameSystem {
     for (var block in blocks) {
       checkBlockStep(block);
     }
-    checkStepForNext();
   }
 
   checkBlockStep(BoardItem block) {
