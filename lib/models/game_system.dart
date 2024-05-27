@@ -110,6 +110,10 @@ class GameSystem {
     _vos[block.id] = block;
   }
 
+  addAction(GameActionData action) {
+    actions.add(action);
+  }
+
   removeBlock(BoardItem block) {
     _vos.remove(block.id);
   }
@@ -153,12 +157,11 @@ class GameSystem {
   }
 
   actionSlide(GamePoint point) {
-    checkMovePoint(
-      point: point,
-      onStep: (block) {
-        checkBlockStep(block);
-      },
-    );
+    checkMovePoint(point: point);
+    var blocklist = getRangeBlocks(blocks, point);
+    for (var block in blocklist) {
+      checkBlockStep(block);
+    }
   }
 
   checkBlockStep(BoardItem block) {
@@ -168,7 +171,7 @@ class GameSystem {
       leftBlock: block,
       system: this,
     );
-    if (tempActions.isNotEmpty) {
+    if (status == GameStatus.play && tempActions.isNotEmpty) {
       print("has merge step $tempActions");
       actions.addAll(tempActions);
       return;
@@ -179,7 +182,7 @@ class GameSystem {
       leftBlock: block,
       system: this,
     );
-    if (tempActions.isNotEmpty) {
+    if (status == GameStatus.play && tempActions.isNotEmpty) {
       print("has element step $tempActions");
       actions.addAll(tempActions);
       return;
@@ -190,7 +193,7 @@ class GameSystem {
       leftBlock: block,
       system: this,
     );
-    if (tempActions.isNotEmpty) {
+    if (status == GameStatus.play && tempActions.isNotEmpty) {
       print("has door step $tempActions");
       actions.addAll(tempActions);
       return;
@@ -201,7 +204,7 @@ class GameSystem {
       leftBlock: block,
       system: this,
     );
-    if (tempActions.isNotEmpty) {
+    if (status == GameStatus.play && tempActions.isNotEmpty) {
       print("has attack step $tempActions");
       actions.addAll(tempActions);
       return;
@@ -212,7 +215,7 @@ class GameSystem {
       leftBlock: block,
       system: this,
     );
-    if (tempActions.isNotEmpty) {
+    if (status == GameStatus.play && tempActions.isNotEmpty) {
       print("has attack step $tempActions");
       actions.addAll(tempActions);
       return;
@@ -222,7 +225,7 @@ class GameSystem {
   checkStepForNext() {
     // go next step
     var tempActions = checkGameStep(system: this);
-    if (tempActions.isNotEmpty) {
+    if (status == GameStatus.play && tempActions.isNotEmpty) {
       print("has game step $tempActions");
       actions.addAll(tempActions);
     }
@@ -237,7 +240,7 @@ class GameSystem {
 
     // create Block
     createBlocks.forEach((item) => addBlock(item));
-    if (createActions.isNotEmpty) {
+    if (status == GameStatus.play && createActions.isNotEmpty) {
       actions.addAll(createActions);
     }
   }
@@ -254,7 +257,7 @@ class GameSystem {
       actionLevel: actionLevel,
       onStep: onStep,
     );
-    if (tempActions.isNotEmpty) {
+    if (status == GameStatus.play && tempActions.isNotEmpty) {
       actions.addAll(tempActions);
     }
   }

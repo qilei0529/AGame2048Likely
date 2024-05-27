@@ -74,7 +74,7 @@ checkCreateStep({
       createBlocks.add(item.copy());
       addCreateAction(item);
     }
-  } else if (step % 3 == 0) {
+  } else if (step % 2 == 0) {
     print("create a random block --------------- ");
 
     // 每次 生成 随机 3个
@@ -165,9 +165,9 @@ BlockType getRandomTypeSuper({
 }
 
 Map<BlockType, int> defaultMap = {
-  // BlockType.element: 20,
-  // BlockType.weapon: 25,
-  // BlockType.heal: 25,
+  BlockType.element: 20,
+  BlockType.weapon: 25,
+  BlockType.heal: 25,
   BlockType.block: 10,
   BlockType.enemy: 20,
 };

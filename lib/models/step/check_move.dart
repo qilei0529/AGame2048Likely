@@ -3,15 +3,7 @@ import 'package:flutter_game_2048_fight/models/system/board.dart';
 import 'package:flutter_game_2048_fight/models/system/game.dart';
 import 'package:flutter_game_2048_fight/models/util.dart';
 
-List<GameActionData> checkMoveStep({
-  required GamePoint point,
-  required List<BoardItem> blocks,
-  required BoardSize size,
-  int? actionLevel,
-  Function? onStep,
-}) {
-  List<GameActionData> moveActions = [];
-
+List<BoardItem> getRangeBlocks(List<BoardItem> blocks, GamePoint point) {
   // 获取 排序
   List<BoardItem> blocklist = [];
   // 获取 位置 map 地图
@@ -32,6 +24,17 @@ List<GameActionData> checkMoveStep({
         return posB.y - posA.y;
     }
   });
+  return blocklist;
+}
+
+List<GameActionData> checkMoveStep({
+  required GamePoint point,
+  required List<BoardItem> blocks,
+  required BoardSize size,
+  int? actionLevel,
+  Function? onStep,
+}) {
+  List<GameActionData> moveActions = [];
 
   Map<String, BoardItem> tempVos = {};
 
@@ -98,6 +101,7 @@ List<GameActionData> checkMoveStep({
     }
   }
 
+  var blocklist = getRangeBlocks(blocks, point);
   for (var block in blocklist) {
     checkBlockPoint(block, point);
   }

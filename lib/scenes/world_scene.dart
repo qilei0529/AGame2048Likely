@@ -169,6 +169,94 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     add(board);
   }
 
+  updateStep() {
+    stepLabel.text = "step: ${system.step}";
+  }
+
+  updateFloor() {
+    floorLabel.text = "floor: ${system.floor}";
+  }
+
+  updateAct() {
+    actLabel.text = "act: ${system.act}";
+  }
+
+  updateSta() {
+    staLabel.text = "sp: ${system.sta}";
+  }
+
+  initPopup() {
+    popup = BlockComponent(
+      size: Vector2(200, 160),
+      color: Colors.black38,
+      position: Vector2(0, -40),
+    );
+    var text = TextComponent(
+      text: "GameOver",
+      position: Vector2(50, 20),
+    );
+    var button = Button(
+        text: "Restart",
+        position: Vector2(100, 80),
+        size: Vector2(120, 40),
+        onPressed: () {
+          gameRestart();
+        });
+    popup.add(text);
+    popup.add(button);
+  }
+
+  initControl() {
+    var block = BlockComponent(
+      size: Vector2(320, 160),
+      color: Colors.yellow.shade700,
+      position: Vector2(0, 240),
+    );
+
+    var list = [
+      {"text": "L", "top": -160, "left": 0, "point": GamePoint.left},
+      {"text": "R", "top": -40, "left": 0, "point": GamePoint.right},
+      {"text": "T", "top": -100, "left": -60, "point": GamePoint.top},
+      {"text": "B", "top": -100, "left": 60, "point": GamePoint.bottom},
+    ];
+
+    for (var item in list) {
+      var text = item["text"];
+      var point = item["point"] as GamePoint;
+      var top = item["top"] as int;
+      var left = item["left"] as int;
+      var button = Button(
+          text: text as String,
+          position: Vector2(200 + top.toDouble(), 80 + left.toDouble()),
+          size: Vector2(60, 60),
+          onPressed: () {
+            print('on pressed $text $point');
+            actionSlide(point);
+          });
+      block.add(button);
+    }
+
+    stepLabel = TextComponent(text: "step: 0", position: Vector2(200, 0));
+    floorLabel = TextComponent(text: "floor: 0", position: Vector2(200, 30));
+    staLabel = TextComponent(text: "体力: 0", position: Vector2(200, 60));
+    actLabel = TextComponent(text: "武器: 0", position: Vector2(200, 90));
+    block.add(stepLabel);
+    block.add(floorLabel);
+    block.add(staLabel);
+    block.add(actLabel);
+
+    add(block);
+  }
+
+  // get the position from int x y
+  Vector2 getBoardPositionAt(int x, int y) {
+    var width = globalBlockSize.x;
+    var height = globalBlockSize.y;
+    var dx = width * x.toDouble() - width / 2;
+    var dy = height * y.toDouble() - height / 2;
+    return Vector2(dx, dy);
+  }
+
   actionSlide(GamePoint point) async {
     if (system.status == GameStatus.start) {
       system.status = GameStatus.play;
@@ -186,34 +274,18 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     updateAct();
     updateSta();
     await runActions();
-    system.checkMovePoint(point: point);
-    await runActions();
-    system.checkStepForNext();
-    await runActions();
-
+    if (system.status == GameStatus.play) {
+      system.checkMovePoint(point: point);
+      system.checkStepForNext();
+      await runActions();
+    }
     isSliding = false;
-  }
-
-  updateStep() {
-    stepLabel.text = "step: ${system.step}";
-  }
-
-  updateFloor() {
-    floorLabel.text = "floor: ${system.floor}";
-  }
-
-  updateAct() {
-    actLabel.text = "act: ${system.act}";
-  }
-
-  updateSta() {
-    staLabel.text = "sp: ${system.sta}";
   }
 
   runActions() async {
     var actions = system.actions;
     runAcitonList(List<GameActionData> list) async {
-      var innerTaskSystem = TaskSystem(maxQueue: 20);
+      var innerTaskSystem = TaskSystem(maxQueue: 36);
       for (var action in list) {
         // ignore: prefer_function_declarations_over_variables
         var task = (Function next) => runAction(action, next);
@@ -360,78 +432,6 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
       }
     }
     onEnd();
-  }
-
-  initPopup() {
-    popup = BlockComponent(
-      size: Vector2(200, 160),
-      color: Colors.black38,
-      position: Vector2(0, -40),
-    );
-    var text = TextComponent(
-      text: "GameOver",
-      position: Vector2(50, 20),
-    );
-    var button = Button(
-        text: "Restart",
-        position: Vector2(100, 80),
-        size: Vector2(120, 40),
-        onPressed: () {
-          gameRestart();
-        });
-    popup.add(text);
-    popup.add(button);
-  }
-
-  initControl() {
-    var block = BlockComponent(
-      size: Vector2(320, 160),
-      color: Colors.yellow.shade700,
-      position: Vector2(0, 240),
-    );
-
-    var list = [
-      {"text": "L", "top": -160, "left": 0, "point": GamePoint.left},
-      {"text": "R", "top": -40, "left": 0, "point": GamePoint.right},
-      {"text": "T", "top": -100, "left": -60, "point": GamePoint.top},
-      {"text": "B", "top": -100, "left": 60, "point": GamePoint.bottom},
-    ];
-
-    for (var item in list) {
-      var text = item["text"];
-      var point = item["point"] as GamePoint;
-      var top = item["top"] as int;
-      var left = item["left"] as int;
-      var button = Button(
-          text: text as String,
-          position: Vector2(200 + top.toDouble(), 80 + left.toDouble()),
-          size: Vector2(60, 60),
-          onPressed: () {
-            print('on pressed $text $point');
-            actionSlide(point);
-          });
-      block.add(button);
-    }
-
-    stepLabel = TextComponent(text: "step: 0", position: Vector2(200, 0));
-    floorLabel = TextComponent(text: "floor: 0", position: Vector2(200, 30));
-    staLabel = TextComponent(text: "体力: 0", position: Vector2(200, 60));
-    actLabel = TextComponent(text: "武器: 0", position: Vector2(200, 90));
-    block.add(stepLabel);
-    block.add(floorLabel);
-    block.add(staLabel);
-    block.add(actLabel);
-
-    add(block);
-  }
-
-  // get the position from int x y
-  Vector2 getBoardPositionAt(int x, int y) {
-    var width = globalBlockSize.x;
-    var height = globalBlockSize.y;
-    var dx = width * x.toDouble() - width / 2;
-    var dy = height * y.toDouble() - height / 2;
-    return Vector2(dx, dy);
   }
 
   @override
