@@ -1,15 +1,14 @@
+import 'package:flutter_game_2048_fight/models/game_system.dart';
 import 'package:flutter_game_2048_fight/models/system/block.dart';
-import 'package:flutter_game_2048_fight/models/system/board.dart';
 import 'package:flutter_game_2048_fight/models/system/game.dart';
 import 'package:flutter_game_2048_fight/models/util.dart';
 
 checkMergeStep({
   // required GamePoint point,
-  required List<BoardItem> blocks,
-  required BoardSize size,
   required BoardItem leftBlock,
+  required GameSystem system,
 }) {
-  var vos = getBlockPosVos(blocks: blocks);
+  var vos = getBlockPosVos(blocks: system.blocks);
 
   List<GameActionData> tempActions = [];
 

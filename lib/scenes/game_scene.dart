@@ -1,20 +1,15 @@
 import 'dart:async';
-import 'dart:convert';
-import 'package:flutter/services.dart' show rootBundle;
 
 // frame
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_game_2048_fight/models/game_system.dart';
-import 'package:flutter_game_2048_fight/models/system/block.dart';
-import 'package:flutter_game_2048_fight/models/system/board.dart';
 
 // scene
 import 'start_scene.dart';
 import 'world_scene.dart';
 
 // elements
-import 'package:flutter_game_2048_fight/models/system/game.dart';
 import 'package:flutter_game_2048_fight/elements/background.dart';
 
 // system

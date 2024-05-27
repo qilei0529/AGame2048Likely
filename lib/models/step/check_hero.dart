@@ -5,7 +5,7 @@ import 'package:flutter_game_2048_fight/models/system/block.dart';
 import 'package:flutter_game_2048_fight/models/system/game.dart';
 import 'package:flutter_game_2048_fight/models/util.dart';
 
-List<GameActionData> checkAttackStep({
+List<GameActionData> checkHeroStep({
   required BoardItem leftBlock,
   required GameSystem system,
 }) {
@@ -25,7 +25,9 @@ List<GameActionData> checkAttackStep({
     print("has block on ${key}");
     if (rightBlock.isDead) {
       // oh it is dead
-    } else if (checkBlockCanAttack(leftBlock.type, rightBlock.type)) {
+      // only reduce hero check
+    } else if (leftBlock.type == BlockType.hero &&
+        checkBlockCanAttack(leftBlock.type, rightBlock.type)) {
       canAttack = true;
     }
 

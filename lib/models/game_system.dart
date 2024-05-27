@@ -2,6 +2,8 @@
 
 // step
 
+import 'package:flutter_game_2048_fight/models/step/check_hero.dart';
+
 import 'step/check_attack.dart';
 import 'step/check_create.dart';
 import 'step/check_door.dart';
@@ -24,12 +26,6 @@ class GameSystem {
 
   int floor = 1;
 
-  // 体力值
-  int sta = 10;
-
-  // 武力值
-  int act = 10;
-
   // 游戏状态
   GameStatus status = GameStatus.start;
   // 所有 block
@@ -43,6 +39,12 @@ class GameSystem {
 
   BoardItem? get hero =>
       _vos.values.firstWhere((block) => block.type == BlockType.hero);
+
+  // 武力值
+  int get act => hero?.act ?? 0;
+
+  // 体力值
+  int sta = 10;
 
   // 初始化
   GameSystem() {
@@ -149,9 +151,8 @@ class GameSystem {
     List<GameActionData> tempActions;
     // 融合
     tempActions = checkMergeStep(
-      blocks: blocks,
-      size: size,
       leftBlock: block,
+      system: this,
     );
     if (tempActions.isNotEmpty) {
       print("has merge step $tempActions");
@@ -161,9 +162,8 @@ class GameSystem {
 
     // 道具
     tempActions = checkElementStep(
-      blocks: blocks,
-      size: size,
       leftBlock: block,
+      system: this,
     );
     if (tempActions.isNotEmpty) {
       print("has element step $tempActions");
@@ -173,9 +173,8 @@ class GameSystem {
 
     // 门
     tempActions = checkDoorStep(
-      blocks: blocks,
-      size: size,
       leftBlock: block,
+      system: this,
     );
     if (tempActions.isNotEmpty) {
       print("has door step $tempActions");
@@ -183,11 +182,21 @@ class GameSystem {
       return;
     }
 
+    // 主角 攻击
+    tempActions = checkHeroStep(
+      leftBlock: block,
+      system: this,
+    );
+    if (tempActions.isNotEmpty) {
+      print("has attack step $tempActions");
+      actions.addAll(tempActions);
+      return;
+    }
+
     // 攻击
     tempActions = checkAttackStep(
-      blocks: blocks,
-      size: size,
       leftBlock: block,
+      system: this,
     );
     if (tempActions.isNotEmpty) {
       print("has attack step $tempActions");
