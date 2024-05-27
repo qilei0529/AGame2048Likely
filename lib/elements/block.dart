@@ -22,7 +22,7 @@ class BlockComponent extends RectangleComponent
     GamePoint? point,
   }) {
     this.color = color ?? Colors.white60;
-    super.size = size ?? Vector2(60, 60);
+    super.size = size ?? Vector2(50, 50);
     super.anchor = Anchor.center;
   }
 

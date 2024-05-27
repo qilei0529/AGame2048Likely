@@ -23,7 +23,7 @@ class BoardItemComponent extends RectangleComponent
     GamePoint? point,
   }) {
     this.color = color ?? Colors.white60;
-    super.size = size ?? Vector2(56, 56);
+    super.size = size ?? Vector2(48, 48);
     super.anchor = Anchor.center;
   }
 
@@ -178,11 +178,8 @@ class BoardItemComponent extends RectangleComponent
 
   // get the position from int x y
   getGroundPositionAt(int x, int y) {
-    var width = 300;
-    var height = 300;
-    print("$width, $height");
-    var dx = 60.0 * x.toDouble() - 30;
-    var dy = 60.0 * y.toDouble() - 30;
+    var dx = 50.0 * x.toDouble() - 25;
+    var dy = 50.0 * y.toDouble() - 25;
     return Vector2(dx, dy);
   }
 

@@ -156,7 +156,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
       for (var y = 1; y < size.height + 1; y++) {
         var pos = getBoardPositionAt(x, y);
         var block = BlockComponent(
-          size: Vector2(50, 50),
+          size: Vector2(46, 46),
           color: Colors.green.shade100,
           position: pos,
         );
@@ -425,8 +425,8 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
 
   // get the position from int x y
   Vector2 getBoardPositionAt(int x, int y) {
-    var dx = 60.0 * x.toDouble() - 30;
-    var dy = 60.0 * y.toDouble() - 30;
+    var dx = 50.0 * x.toDouble() - 25;
+    var dy = 50.0 * y.toDouble() - 25;
     return Vector2(dx, dy);
   }
 

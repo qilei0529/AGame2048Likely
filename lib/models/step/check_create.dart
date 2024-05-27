@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flame/extensions.dart';
 import 'package:flutter_game_2048_fight/models/system/block.dart';
 import 'package:flutter_game_2048_fight/models/system/board.dart';
 import 'package:flutter_game_2048_fight/models/system/game.dart';
@@ -13,6 +14,7 @@ checkCreateStep({
   required int step,
   required int floor,
 }) {
+  print("555 ${size.width}");
   var allTargets = getExtraBlocks(blocks: blocks, size: size);
 
   BoardPosition getRandomPos() {
@@ -87,7 +89,7 @@ checkCreateStep({
         list.addAll(blocks);
         list.addAll(createBlocks);
         print("create list length: ${list.length}");
-        var item = getRandomBlock(list);
+        var item = getRandomBlock(list, size);
 
         item.position = pos;
         // allTargets.remove(key)
@@ -103,8 +105,11 @@ checkCreateStep({
 
 // var
 
-getRandomBlock(List<BoardItem> blocks) {
-  var type = getRandomTypeSuper(blocks: blocks);
+getRandomBlock(
+  List<BoardItem> blocks,
+  BoardSize size,
+) {
+  var type = getRandomTypeSuper(blocks: blocks, size: size);
   var code = BlockMergeCode.none;
   if (type == BlockType.hero) {
     code = BlockMergeCode.hero;
@@ -146,8 +151,9 @@ getRandomBlock(List<BoardItem> blocks) {
 
 BlockType getRandomTypeSuper({
   required List<BoardItem> blocks,
+  required BoardSize size,
 }) {
-  var list = getBlockTypes(blocks);
+  var list = getBlockTypes(blocks, size);
 
   if (list.isNotEmpty) {
     var random = Random();
@@ -166,7 +172,7 @@ Map<BlockType, int> defaultMap = {
   BlockType.enemy: 20,
 };
 
-List<BlockType> getBlockTypes(List<BoardItem> blocks) {
+List<BlockType> getBlockTypes(List<BoardItem> blocks, BoardSize size) {
   // 获取 每个 type
   Map<BlockType, int> vos = {};
 
@@ -179,8 +185,8 @@ List<BlockType> getBlockTypes(List<BoardItem> blocks) {
     vos[block.type] = item + 1;
   }
 
-  var total = 36;
-  var maxSize = 36;
+  var maxSize = size.width * size.height;
+  var total = maxSize;
   List<BlockType> res = [];
   defaultMap.forEach((key, value) {
     if (key != BlockType.enemy) {

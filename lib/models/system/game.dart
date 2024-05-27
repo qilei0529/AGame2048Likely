@@ -52,7 +52,7 @@ class GameLevelData {
   late String id; // uuid
   late String name;
   // size
-  late BoardSize size = BoardSize(5, 5);
+  late BoardSize size = BoardSize(6, 6);
 
   GameLevelData({
     String? id,
