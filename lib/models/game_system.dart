@@ -34,8 +34,7 @@ class GameSystem {
   // 记录行为
   final List<GameActionData> actions = [];
 
-  BoardItem? get hero =>
-      _vos.values.firstWhere((block) => block.type == BlockType.hero);
+  BoardItem? get hero => findBlockByType(BlockType.hero);
 
   // the step
   int step = 1;
@@ -51,6 +50,16 @@ class GameSystem {
   // 初始化
   GameSystem() {
     print("world init");
+  }
+
+  BoardItem? findBlockByType(BlockType targetType) {
+    BoardItem? result;
+    _vos.forEach((key, value) {
+      if (value.type == targetType) {
+        result = value;
+      }
+    });
+    return result;
   }
 
   // 更新 level

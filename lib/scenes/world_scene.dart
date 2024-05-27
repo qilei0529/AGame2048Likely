@@ -264,11 +264,11 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
         block.dead(end: () {
           block.removeFromParent();
           onEnd();
+          system.removeBlock(item);
+          if (item.type == BlockType.hero) {
+            gameOver();
+          }
         });
-        system.removeBlock(item);
-        if (item.type == BlockType.hero) {
-          gameOver();
-        }
       } else {
         onEnd();
       }
