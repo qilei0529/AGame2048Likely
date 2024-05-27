@@ -45,8 +45,11 @@ Future<GameLevelData> loadLevelData({required String path}) async {
   return level;
 }
 
-GameStepData getGameStepData(
-    {required dynamic item, List<BoardItem>? leftBlocks}) {
+GameStepData getGameStepData({
+  required dynamic item,
+  required BoardSize size,
+  List<BoardItem>? leftBlocks,
+}) {
   // create a step for level
   var step = GameStepData();
   // reduce blocks
@@ -54,7 +57,10 @@ GameStepData getGameStepData(
 
   if (blocks != null) {
     // all target
-    var allTargets = getExtraBlocks(blocks: leftBlocks ?? []);
+    var allTargets = getExtraBlocks(
+      blocks: leftBlocks ?? [],
+      size: size,
+    );
     getRandomPos() {
       List<BoardPosition> list = allTargets.values.toList();
       var random = Random();

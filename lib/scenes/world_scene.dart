@@ -190,10 +190,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
   }
 
   updateAct() {
-    var hero = system.hero;
-    if (hero != null) {
-      actLabel.text = "武力: ${hero.act}";
-    }
+    actLabel.text = "武力: ${system.act}";
   }
 
   updateSta() {

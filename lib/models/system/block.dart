@@ -10,6 +10,8 @@ enum BlockType {
   enemy,
   // 物件
   element,
+  // 物件
+  weapon,
   // 云
   cloud,
   // 宝箱
@@ -29,6 +31,8 @@ extension BlockTypeExtension on BlockType {
         return BlockType.enemy;
       case "Element":
         return BlockType.element;
+      case "Weapon":
+        return BlockType.weapon;
       case "Door":
         return BlockType.door;
     }

@@ -54,9 +54,6 @@ class GameLevelData {
   // size
   late BoardSize size = BoardSize(5, 5);
 
-  // floor
-  // late int floor = 1;
-
   GameLevelData({
     String? id,
     String? name,
@@ -85,7 +82,10 @@ class GameLevelData {
       var data = floorData.steps["${floor}_$step"];
       if (data != null) {
         return getGameStepData(
-            item: floorData.steps["${floor}_$step"], leftBlocks: blocks);
+          item: floorData.steps["${floor}_$step"],
+          leftBlocks: blocks,
+          size: size,
+        );
       }
     }
     return null;

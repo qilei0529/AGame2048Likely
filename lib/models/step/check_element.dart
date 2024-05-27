@@ -36,28 +36,30 @@ List<GameActionData> checkElementStep({
       );
       tempActions.add(deadAction);
 
-      // upgrade
-      if (rightBlock.level >= leftBlock.level) {
-        leftBlock.level = rightBlock.level;
-        leftBlock.act = rightBlock.level;
-        var upgradeAction = GameActionData(
+      var code = rightBlock.code;
+      if (code == BlockMergeCode.element) {
+        // heal
+        var heal = rightBlock.life;
+        leftBlock.life += heal;
+        var healAction = GameActionData(
           target: leftBlock.id,
-          type: GameActionType.upgrade,
-          life: rightBlock.life,
-          value: rightBlock.level,
+          type: GameActionType.heal,
+          life: leftBlock.life,
+          value: heal,
         );
-        tempActions.add(upgradeAction);
+        tempActions.add(healAction);
+      } else if (code == BlockMergeCode.weapon) {
+        // heal
+        // TODO: for get weapon
+        system.act += rightBlock.life;
+        var healAction = GameActionData(
+          target: leftBlock.id,
+          type: GameActionType.heal,
+          life: leftBlock.life,
+          value: 0,
+        );
+        tempActions.add(healAction);
       }
-
-      var heal = rightBlock.life;
-      leftBlock.life += heal;
-      var healAction = GameActionData(
-        target: leftBlock.id,
-        type: GameActionType.heal,
-        life: leftBlock.life,
-        value: heal,
-      );
-      tempActions.add(healAction);
 
       // move to target
       leftBlock.position = rightBlock.position;

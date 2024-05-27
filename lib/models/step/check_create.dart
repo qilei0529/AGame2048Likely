@@ -13,7 +13,7 @@ checkCreateStep({
   required int step,
   required int floor,
 }) {
-  var allTargets = getExtraBlocks(blocks: blocks);
+  var allTargets = getExtraBlocks(blocks: blocks, size: size);
 
   getRandomPos() {
     List<BoardPosition> list = allTargets.values.toList();
@@ -86,8 +86,7 @@ checkCreateStep({
       addCreateAction(item);
     }
   } else if (step % 2 == 0) {
-    print("create --------------- ");
-
+    print("create a random block --------------- ");
     var type = getRandomType();
     var code = BlockMergeCode.none;
     if (type == BlockType.hero) {

@@ -93,12 +93,13 @@ Map<String, BoardItem> getBlockPosVos({
 
 Map<String, BoardPosition> getExtraBlocks({
   required List<BoardItem> blocks,
+  required BoardSize size,
 }) {
   Map<String, BoardPosition> allTargets = {};
 
   // 创建 5x5 格子
-  for (int x = 1; x < 6; x++) {
-    for (int y = 1; y < 6; y++) {
+  for (int x = 1; x < size.width + 1; x++) {
+    for (int y = 1; y < size.height + 1; y++) {
       var pos = BoardPosition(x, y);
       var key = getBlockKey(pos);
       allTargets[key] = pos;

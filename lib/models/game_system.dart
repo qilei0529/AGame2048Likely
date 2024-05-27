@@ -2,8 +2,9 @@
 
 // step
 
-import 'package:flutter_game_2048_fight/models/step/check_hero.dart';
+import 'package:flutter_game_2048_fight/models/step/check_game.dart';
 
+import 'step/check_hero.dart';
 import 'step/check_attack.dart';
 import 'step/check_create.dart';
 import 'step/check_door.dart';
@@ -21,10 +22,8 @@ import 'system/board.dart';
 class GameSystem {
   GameLevelData level = GameLevelData();
 
-  // 当前 步骤
-  int step = 1;
-
-  int floor = 1;
+  // the size will sync by level;
+  late BoardSize size;
 
   // 游戏状态
   GameStatus status = GameStatus.start;
@@ -35,13 +34,16 @@ class GameSystem {
   // 记录行为
   final List<GameActionData> actions = [];
 
-  late BoardSize size = BoardSize(5, 5);
-
   BoardItem? get hero =>
       _vos.values.firstWhere((block) => block.type == BlockType.hero);
 
+  // the step
+  int step = 1;
+  // the floor
+  int floor = 1;
+
   // 武力值
-  int get act => hero?.act ?? 0;
+  int act = 10;
 
   // 体力值
   int sta = 10;
@@ -58,6 +60,9 @@ class GameSystem {
     // size = level.size;
     var levelData = await loadLevelData(path: path);
     level = levelData;
+
+    // sync the size
+    size = level.size;
 
     print("load level $level");
   }
@@ -82,6 +87,10 @@ class GameSystem {
     }
   }
 
+  BoardItem? getBlock(String id) {
+    return _vos[id];
+  }
+
   addBlock(BoardItem block) {
     if (_vos[block.id] != null) {
       print("has block exist ${block.id}");
@@ -89,16 +98,8 @@ class GameSystem {
     _vos[block.id] = block;
   }
 
-  BoardItem? getBlock(String id) {
-    return _vos[id];
-  }
-
   removeBlock(BoardItem block) {
     _vos.remove(block.id);
-  }
-
-  addAction(GameActionData action) {
-    actions.add(action);
   }
 
   gameStart() {
@@ -207,11 +208,13 @@ class GameSystem {
 
   checkStepForNext() {
     // go next step
-    step += 1;
-    var [
-      createActions,
-      createBlocks,
-    ] = checkCreateStep(
+    var tempActions = checkGameStep(system: this);
+    if (tempActions.isNotEmpty) {
+      print("has game step $tempActions");
+      actions.addAll(tempActions);
+    }
+
+    var [createActions, createBlocks] = checkCreateStep(
       blocks: blocks,
       size: size,
       level: level,
@@ -219,6 +222,7 @@ class GameSystem {
       floor: floor,
     );
 
+    // create Block
     createBlocks.forEach((item) => addBlock(item));
     if (createActions.isNotEmpty) {
       actions.addAll(createActions);
