@@ -11,7 +11,7 @@
               "type": "Hero",
               "code": "hero",
               "position": [2, 3],
-              "life": 4,
+              "life": 5,
               "level": 1
             },
             {
@@ -37,19 +37,25 @@
             {
               "type": "Element",
               "code": "element",
-              "life": 1,
+              "life": 4,
               "level": 1
             },
             {
-              "type": "Element",
+              "type": "Weapon",
               "code": "weapon",
-              "life": 1,
+              "life": 3,
+              "level": 1
+            },
+            {
+              "type": "Heal",
+              "code": "heal",
+              "life": 3,
               "level": 1
             }
           ]
         },
         {
-          "index": 4,
+          "index": 20,
           "blocks": [
             {
               "type": "Door",

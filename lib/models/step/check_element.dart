@@ -38,6 +38,17 @@ List<GameActionData> checkElementStep({
 
       var code = rightBlock.code;
       if (code == BlockMergeCode.element) {
+        // heal ad sp
+        var heal = rightBlock.life;
+        system.sta += heal;
+        var healAction = GameActionData(
+          target: leftBlock.id,
+          type: GameActionType.heal,
+          life: leftBlock.life,
+          value: heal,
+        );
+        tempActions.add(healAction);
+      } else if (code == BlockMergeCode.heal) {
         // heal
         var heal = rightBlock.life;
         leftBlock.life += heal;

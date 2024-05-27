@@ -53,7 +53,13 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
       color = Colors.blue.shade400;
     }
     if (item.type == BlockType.element) {
+      color = Colors.orange.shade200;
+    }
+    if (item.type == BlockType.heal) {
       color = Colors.green.shade400;
+    }
+    if (item.type == BlockType.weapon) {
+      color = Colors.blueGrey.shade500;
     }
     if (item.type == BlockType.door) {
       color = Colors.orange.shade400;
@@ -190,11 +196,11 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
   }
 
   updateAct() {
-    actLabel.text = "武力: ${system.act}";
+    actLabel.text = "act: ${system.act}";
   }
 
   updateSta() {
-    staLabel.text = "体力: ${system.sta}";
+    staLabel.text = "sp: ${system.sta}";
   }
 
   runActions() async {

@@ -8,9 +8,11 @@ enum BlockType {
   hero,
   // 敌人
   enemy,
-  // 物件
+  // sta
   element,
-  // 物件
+  // 生命
+  heal,
+  // 武器
   weapon,
   // 云
   cloud,
@@ -33,6 +35,8 @@ extension BlockTypeExtension on BlockType {
         return BlockType.element;
       case "Weapon":
         return BlockType.weapon;
+      case "Heal":
+        return BlockType.heal;
       case "Door":
         return BlockType.door;
     }
@@ -77,6 +81,7 @@ enum BlockMergeCode {
   hero,
   enemy,
   element,
+  heal,
   weapon,
   door,
   rock,
@@ -94,6 +99,8 @@ extension BlockMergeCodeExtension on BlockMergeCode {
         return BlockMergeCode.element;
       case "weapon":
         return BlockMergeCode.weapon;
+      case "heal":
+        return BlockMergeCode.heal;
       case "door":
         return BlockMergeCode.door;
       case "rock":
@@ -109,9 +116,11 @@ extension BlockMergeCodeExtension on BlockMergeCode {
       case BlockMergeCode.hero:
         return "hero";
       case BlockMergeCode.element:
-        return "elem";
+        return "sp";
+      case BlockMergeCode.heal:
+        return "hp";
       case BlockMergeCode.weapon:
-        return "weapon";
+        return "act";
       case BlockMergeCode.door:
         return "door";
       case BlockMergeCode.rock:

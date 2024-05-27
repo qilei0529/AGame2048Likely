@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:math';
 
 import 'package:flutter_game_2048_fight/models/system/block.dart';
@@ -15,7 +16,7 @@ checkCreateStep({
 }) {
   var allTargets = getExtraBlocks(blocks: blocks, size: size);
 
-  getRandomPos() {
+  BoardPosition getRandomPos() {
     List<BoardPosition> list = allTargets.values.toList();
     var random = Random();
     int index = random.nextInt(list.length);
@@ -36,19 +37,6 @@ checkCreateStep({
     var pos = list[index];
     allTargets.remove(getBlockKey(pos));
     return pos;
-  }
-
-  getRandomType() {
-    var random = Random();
-    int index = random.nextInt(10) + 1;
-    if (index > 8) {
-      return BlockType.block;
-    }
-    if (index > 4) {
-      return BlockType.element;
-    }
-
-    return BlockType.enemy;
   }
 
   List<GameActionData> createActions = [];
@@ -85,49 +73,136 @@ checkCreateStep({
       createBlocks.add(item.copy());
       addCreateAction(item);
     }
-  } else if (step % 2 == 0) {
+  } else if (step % 1 == 0) {
     print("create a random block --------------- ");
-    var type = getRandomType();
-    var code = BlockMergeCode.none;
-    if (type == BlockType.hero) {
-      code = BlockMergeCode.hero;
-    }
-    if (type == BlockType.enemy) {
-      code = BlockMergeCode.enemy;
-    }
-    var pos = getRandomPos();
 
-    var item = BoardItem(
-      name: "name",
-      type: type,
-    );
+    // 每次 生成 随机 3个
     var random = Random();
-    int life = random.nextInt(6) + 1;
-    if (type == BlockType.block) {
-      life = 5;
-    }
-    if (type == BlockType.door) {
-      life = 5;
-    }
-    if (type == BlockType.element) {
-      if (life == 1) {
-        code = BlockMergeCode.weapon;
-      } else {
-        code = BlockMergeCode.element;
+    int num = random.nextInt(2) + 1;
+
+    for (var i = 0; i < num; i++) {
+      if (allTargets.isNotEmpty) {
+        var pos = getRandomPos();
+
+        List<BoardItem> list = [];
+        list.addAll(blocks);
+        list.addAll(createBlocks);
+        print("create list length: ${list.length}");
+        var item = getRandomBlock(list);
+
+        item.position = pos;
+        // allTargets.remove(key)
+        createBlocks.add(item);
+        // create
+        addCreateAction(item);
       }
     }
-    item.life = life;
-    item.level = 1;
-    item.code = code;
-
-    item.act = 1;
-    item.position = pos;
-    // add block to system
-    // addBlock(item);
-    createBlocks.add(item);
-    // create
-    addCreateAction(item);
   }
 
   return [createActions, createBlocks];
+}
+
+// var
+
+getRandomBlock(List<BoardItem> blocks) {
+  var type = getRandomTypeSuper(blocks: blocks);
+  var code = BlockMergeCode.none;
+  if (type == BlockType.hero) {
+    code = BlockMergeCode.hero;
+  }
+  if (type == BlockType.enemy) {
+    code = BlockMergeCode.enemy;
+  }
+
+  var item = BoardItem(
+    name: "name",
+    type: type,
+  );
+  var random = Random();
+  int life = random.nextInt(5) + 1;
+  if (type == BlockType.block) {
+    code = BlockMergeCode.rock;
+    life = 6;
+  }
+  if (type == BlockType.element) {
+    code = BlockMergeCode.element;
+    life = 4;
+  }
+  if (type == BlockType.heal) {
+    code = BlockMergeCode.heal;
+    life = 3;
+  }
+  if (type == BlockType.weapon) {
+    code = BlockMergeCode.weapon;
+    life = 3;
+  }
+  item.life = life;
+  item.level = 1;
+  item.code = code;
+
+  item.act = 1;
+  // item.position = pos;
+  return item;
+}
+
+BlockType getRandomTypeSuper({
+  required List<BoardItem> blocks,
+}) {
+  var list = getBlockTypes(blocks);
+
+  if (list.isNotEmpty) {
+    var random = Random();
+    int index = random.nextInt(list.length);
+
+    return list[index];
+  }
+  return BlockType.enemy;
+}
+
+Map<BlockType, int> defaultMap = {
+  BlockType.element: 20,
+  BlockType.weapon: 25,
+  BlockType.heal: 25,
+  BlockType.block: 10,
+  BlockType.enemy: 20,
+};
+
+List<BlockType> getBlockTypes(List<BoardItem> blocks) {
+  // 获取 每个 type
+  Map<BlockType, int> vos = {};
+
+  for (var block in blocks) {
+    var item = vos[block.type];
+    if (item == null) {
+      vos[block.type] = 0;
+      item = 0;
+    }
+    vos[block.type] = item + 1;
+  }
+
+  var total = 30;
+  var maxSize = 30;
+  List<BlockType> res = [];
+  defaultMap.forEach((key, value) {
+    if (key != BlockType.enemy) {
+      var num = (value / 100 * maxSize).toInt();
+      var has = vos[key] ?? 0;
+      print("num $key $num $has");
+      num = max(0, num - has);
+      total -= num;
+      for (var i = 0; i < num; i++) {
+        res.add(key);
+      }
+    }
+  });
+  var enemy = vos[BlockType.enemy] ?? 0;
+  total -= enemy;
+  print("enemy $total");
+  for (var i = 0; i < total; i++) {
+    res.add(BlockType.enemy);
+  }
+
+  print("lay list $res");
+
+  return res;
 }

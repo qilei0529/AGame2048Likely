@@ -8,7 +8,9 @@ String getBlockKey(BoardPosition pos) {
 bool checkBlockCanMove(BlockType type) {
   if (type == BlockType.hero ||
       type == BlockType.enemy ||
-      type == BlockType.element) {
+      type == BlockType.element ||
+      type == BlockType.weapon ||
+      type == BlockType.heal) {
     return true;
   }
   return false;
@@ -31,7 +33,9 @@ bool checkBlockCanMerge(BoardItem leftBlock, BoardItem rightBlock) {
 
 bool checkBlockCanElement(BlockType typeA, BlockType typeB) {
   if (typeA == BlockType.hero) {
-    if (typeB == BlockType.element) {
+    if (typeB == BlockType.element ||
+        typeB == BlockType.weapon ||
+        typeB == BlockType.heal) {
       return true;
     }
   }

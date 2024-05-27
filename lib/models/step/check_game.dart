@@ -1,17 +1,15 @@
 import 'package:flutter_game_2048_fight/models/game_system.dart';
-import 'package:flutter_game_2048_fight/models/system/block.dart';
 import 'package:flutter_game_2048_fight/models/system/game.dart';
 
 checkGameStep({
   required GameSystem system,
 }) {
   system.step += 1;
+  List<GameActionData> tempActions = [];
 
   var sta = system.sta;
 
   var leftBlock = system.hero;
-
-  List<GameActionData> tempActions = [];
 
   if (leftBlock != null && !leftBlock.isDead) {
     var leftLife = leftBlock.life;
@@ -49,8 +47,7 @@ checkGameStep({
 
     // update sta;
     system.sta = sta;
-
-    return tempActions;
   }
-  //
+
+  return tempActions;
 }

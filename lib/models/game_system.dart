@@ -70,6 +70,9 @@ class GameSystem {
   toFloor(int nextFloor) {
     print("to floor $nextFloor");
     floor = nextFloor;
+
+    this.act = 10;
+    this.sta = 10;
   }
 
   toStep(int step) {
