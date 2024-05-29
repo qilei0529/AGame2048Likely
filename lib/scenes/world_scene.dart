@@ -35,6 +35,8 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
 
   bool isSliding = false;
 
+  bool isPending = false;
+
   initBlocks() {
     print("init blocks ${system.blocks}");
     for (var item in system.blocks) {
@@ -110,6 +112,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
   }
 
   gameNextFloor() {
+    isPending = true;
     system.actionNextFloor();
 
     // clean blocks
@@ -123,6 +126,10 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     updateFloor();
     updateAct();
     updateSta();
+
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      isPending = false;
+    });
   }
 
   gameOver() {
