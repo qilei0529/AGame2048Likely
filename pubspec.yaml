@@ -24,7 +24,10 @@ dev_dependencies:
 
 flutter:
   assets:
+    - assets/ # To here.
     - assets/levels/ # To here.
+    - assets/images/ # To here.
+    - assets/sheets/ # To here.
   # uses-material-design: true
   # assets: # Add from here
   #   - assets/

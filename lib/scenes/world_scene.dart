@@ -49,29 +49,52 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     var position = getBoardPositionAt(pos.x, pos.y);
 
     var color = Colors.blueGrey.shade300;
+
+    var cover = "cover_element";
+    var body = "element_hp";
+    var act;
+
     if (item.type == BlockType.enemy) {
       color = Colors.red.shade400;
+      cover = "cover_enemy";
+      body = "element_enemy_1";
     }
     if (item.type == BlockType.hero) {
       color = Colors.blue.shade400;
+      cover = "cover_hero";
+      body = "element_hero";
+      act = "4";
     }
     if (item.type == BlockType.element) {
       color = Colors.orange.shade200;
+      body = "element_sp";
     }
     if (item.type == BlockType.heal) {
       color = Colors.green.shade400;
+      body = "element_hp";
     }
     if (item.type == BlockType.weapon) {
       color = Colors.blueGrey.shade500;
+      body = "element_weapon";
     }
     if (item.type == BlockType.door) {
       color = Colors.orange.shade400;
+      body = "element_door";
+    }
+    if (item.type == BlockType.block) {
+      color = Colors.red.shade400;
+      cover = "cover_rock";
+      body = "element_rock";
     }
     var block = BoardItemComponent(
       // key: ComponentKey.named(item.id),
       position: position,
       color: color,
-      size: Vector2(58, 58),
+      size: Vector2(60, 60),
+      cover: cover,
+      body: body,
+      act: act,
+      type: item.type,
     );
     // block.debugMode = true;
     block.debugColor = Colors.black26;
@@ -80,7 +103,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
       block.setLife(item.life);
     }
     block.setLevel(item.level);
-    block.setCode(item.code.toCodeString());
+    // block.setCode(item.code.toCodeString());
     board.add(block);
 
     // link vos with block ref
@@ -156,21 +179,26 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
   initBoard() {
     board = BlockComponent(
       size: globalBoardSize,
-      color: Colors.white60,
+      color: Colors.black87,
       position: Vector2(0, -60),
     );
 
     var size = system.size;
+    var count = 0;
     for (var x = 1; x < size.width + 1; x++) {
       for (var y = 1; y < size.height + 1; y++) {
+        count++;
+        var hasColor = count % 2 == 0;
         var pos = getBoardPositionAt(x, y);
         var block = BlockComponent(
-          size: Vector2(58, 58),
-          color: Colors.green.shade100,
+          size: Vector2(60, 60),
+          color:
+              hasColor ? Color.fromARGB(10, 255, 255, 255) : Colors.transparent,
           position: pos,
         );
         board.add(block);
       }
+      count++;
     }
     // board.debugMode = true;
     add(board);
@@ -186,6 +214,12 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
 
   updateAct() {
     actLabel.text = "act: ${system.act}";
+    try {
+      var hero = vos[system.hero!.id];
+      if (hero != null) {
+        hero.setAct(system.act);
+      }
+    } catch (e) {}
   }
 
   updateSta() {

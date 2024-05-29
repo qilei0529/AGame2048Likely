@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 // frame
 import 'package:flame/components.dart';
+import 'package:flutter_game_2048_fight/models/system/block.dart';
 import 'package:flutter_game_2048_fight/models/system/game.dart';
 import 'package:flutter_game_2048_fight/models/system/task.dart';
 import 'package:flutter_game_2048_fight/models/util.dart';
@@ -10,10 +11,29 @@ import 'package:flutter_game_2048_fight/models/util.dart';
 // scene
 import 'package:flutter_game_2048_fight/scenes/game_scene.dart';
 
-class BoardItemComponent extends RectangleComponent
+class BoardItemComponent extends PositionComponent
     with HasGameReference<TheGameScene> {
   late Color color;
   late GamePoint point;
+
+  late BlockType type;
+
+  late final PositionComponent _block = PositionComponent(
+    size: size,
+  );
+
+  late String cover;
+  late final SpriteComponent _cover = SpriteComponent(
+    sprite: game.blocks.getSprite(cover),
+    size: size,
+  );
+  late String body;
+  late final SpriteComponent _body = SpriteComponent(
+    sprite: game.elements.getSprite(body),
+    size: size,
+  );
+  late String? act = "";
+  late int? level = 0;
 
   BoardItemComponent({
     super.key,
@@ -22,8 +42,15 @@ class BoardItemComponent extends RectangleComponent
     Color? color,
     int? life,
     GamePoint? point,
+    String? cover,
+    String? body,
+    String? act,
+    required this.type,
   }) {
     this.color = color ?? Colors.white60;
+    this.cover = cover ?? "cover_element";
+    this.body = body ?? "element_hp";
+    this.act = act ?? "";
     super.size = size ?? globalBlockSize;
     super.anchor = Anchor.center;
   }
@@ -32,31 +59,35 @@ class BoardItemComponent extends RectangleComponent
     text: "",
     textRenderer: TextPaint(
       style: const TextStyle(
-        fontSize: 24,
-        color: Colors.black54,
+        fontSize: 12,
+        color: Colors.white,
+        fontWeight: FontWeight.w500,
       ),
     ),
+    anchor: Anchor.center,
+    position: Vector2(11, 10),
   );
 
-  late TextComponent level = TextComponent(
-    text: "",
-    textRenderer: TextPaint(
-      style: TextStyle(
-        fontSize: 24,
-        color: Colors.black45,
-      ),
-    ),
-    position: Vector2(35, 25),
+  late final SpriteComponent _lifeBg = SpriteComponent(
+    sprite: game.blocks.getSprite("bg_life"),
+    size: Vector2(22, 22),
+    position: Vector2(4, 34),
+    // anchor: Anchor.center,
   );
-  late TextComponent code = TextComponent(
-    text: "code",
+
+  late final SpriteComponent _actBg;
+
+  late SpriteComponent _level;
+  late final TextComponent _act = TextComponent(
+    text: "4",
     textRenderer: TextPaint(
-      style: TextStyle(
+      style: const TextStyle(
         fontSize: 12,
-        color: Colors.black45,
+        color: Colors.white,
+        fontWeight: FontWeight.w500,
       ),
     ),
-    position: Vector2(0, 35),
+    position: Vector2(7, 2),
   );
 
   TaskSystem taskSystem = TaskSystem(maxQueue: 1);
@@ -65,9 +96,11 @@ class BoardItemComponent extends RectangleComponent
     taskSystem.add((next) {
       // var pos = getGroundPositionAt(p.x, p.y);
       EffectController duration(double x) => EffectController(duration: x);
-      add(
+      _block.add(
         SequenceEffect(
-          [OpacityEffect.to(1, duration(0.1))],
+          [
+            MoveToEffect(Vector2(0, 0), duration(0.2)),
+          ],
           onComplete: () {
             // change life;
             life.text = "$num";
@@ -83,13 +116,24 @@ class BoardItemComponent extends RectangleComponent
 
   born({Function? end}) {
     taskSystem.add((next) {
-      // var pos = getGroundPositionAt(p.x, p.y);
       EffectController duration(double x) => EffectController(duration: x);
-      add(
+
+      _cover.add(SequenceEffect(
+        [
+          OpacityEffect.fadeIn(duration(0.3)),
+        ],
+      ));
+      _block.add(
         SequenceEffect(
           [
-            OpacityEffect.to(0, duration(0)),
-            OpacityEffect.to(1, duration(0.2)),
+            SequenceEffect([
+              MoveToEffect(Vector2(0, -80), duration(0)),
+            ]),
+            SequenceEffect([
+              MoveToEffect(Vector2(0, 0), duration(0.1)),
+            ]),
+            MoveToEffect(Vector2(0, -8), duration(0.08)),
+            MoveToEffect(Vector2(0, 0), duration(0.08)),
           ],
           onComplete: () {
             if (end != null) {
@@ -106,11 +150,10 @@ class BoardItemComponent extends RectangleComponent
     taskSystem.add((next) {
       EffectController duration(double x) => EffectController(duration: x);
       // add run
-      add(
+      _block.add(
         SequenceEffect(
           [
-            OpacityEffect.to(0, duration(0)),
-            OpacityEffect.to(1, duration(0.1)),
+            MoveToEffect(Vector2(0, 0), duration(0.2)),
           ],
           onComplete: () {
             if (end != null) {
@@ -190,20 +233,74 @@ class BoardItemComponent extends RectangleComponent
     this.life.text = "$life";
   }
 
-  setLevel(int level) {
-    this.level.text = "$level";
+  setAct(int act) {
+    _act.text = "$act";
   }
 
-  setCode(String code) {
-    this.code.text = code;
+  initAct() {
+    if (act != null && act!.isNotEmpty) {
+      _actBg = SpriteComponent(
+        sprite: game.blocks.getSprite("bg_act"),
+        size: Vector2(22, 22),
+        position: Vector2(38, 34),
+        // anchor: Anchor.center,
+      );
+      _act.text = "4";
+      _actBg.add(_act);
+      _block.add(_actBg);
+    } else if (type == BlockType.element ||
+        type == BlockType.heal ||
+        type == BlockType.weapon ||
+        type == BlockType.block) {
+      _actBg = SpriteComponent(
+        sprite: game.blocks.getSprite("bg_element_2"),
+        size: Vector2(20, 20),
+        position: Vector2(34, 34),
+        // anchor: Anchor.center,
+      );
+      _actBg.add(_act);
+      _block.add(_actBg);
+    }
+  }
+
+  setLevel(int level) {
+    if (level > 1) {
+      _level.removeFromParent();
+      _level = SpriteComponent(
+        sprite: game.blocks.getSprite("bg_level_$level"),
+        size: Vector2(20, 20),
+        position: Vector2(20, 0),
+        // anchor: Anchor.center,
+      );
+      _block.add(_level);
+    }
+  }
+
+  initLevel() {
+    _level = SpriteComponent(
+      sprite: game.blocks.getSprite("bg_level_2"),
+      size: Vector2(20, 20),
+      position: Vector2(20, 0),
+      // anchor: Anchor.center,
+    );
+    _level.opacity = 0;
+    // bg.opacity = 0;
+    _block.add(_level);
+    // _block.add(level);
   }
 
   @override
   void onMount() {
-    setColor(color);
-    add(life);
-    add(level);
-    add(code);
+    _cover.add(_body);
+    _block.add(_cover);
+    if (type == BlockType.hero || type == BlockType.enemy) {
+      _lifeBg.add(life);
+      _block.add(_lifeBg);
+    }
+
+    initAct();
+    initLevel();
+    add(_block);
     super.onMount();
   }
 }

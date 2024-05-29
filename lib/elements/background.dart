@@ -23,7 +23,7 @@ class Background extends RectangleComponent
     var bg = RectangleComponent();
     bg.setColor(color);
     var size = game.camera.visibleWorldRect;
-    bg.size = Vector2(size.width, size.height);
+    bg.size = Vector2.all(1000); // Vector2(size.width, size.height);
     add(bg);
     super.onMount();
   }
