@@ -320,14 +320,16 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
       system.checkStepForNext();
       await runActions();
     }
+
     isSliding = false;
   }
 
   runActions() async {
     var actions = system.actions;
     runAcitonList(List<GameActionData> list) async {
-      var innerTaskSystem = TaskSystem(maxQueue: 36);
+      var innerTaskSystem = TaskSystem(maxQueue: 12);
       for (var action in list) {
+        print("action ${action.type}");
         // ignore: prefer_function_declarations_over_variables
         var task = (Function next) => runAction(action, next);
         innerTaskSystem.add(task);
@@ -373,13 +375,26 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
       }
       return;
     }
+    if (type == GameActionType.fade) {
+      var block = vos[action.target];
+      if (item != null && block != null) {
+        block.fadeTo(end: () {
+          block.removeFromParent();
+          system.removeBlock(item);
+          onEnd();
+        });
+      } else {
+        onEnd();
+      }
+      return;
+    }
     if (type == GameActionType.dead) {
       var block = vos[action.target];
       if (item != null && block != null) {
         block.dead(end: () {
           block.removeFromParent();
-          onEnd();
           system.removeBlock(item);
+          onEnd();
           if (item.type == BlockType.hero) {
             gameOver();
           }
@@ -456,7 +471,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
         }
         if (type == GameActionType.injure) {
           // print("${item.id} injour: <- ");
-          block.lifeTo(num: item.life, end: onEnd);
+          block.injure(num: item.life, end: onEnd);
           return;
         }
         if (type == GameActionType.heal) {
@@ -467,7 +482,8 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
         if (type == GameActionType.upgrade) {
           // print("${item.id} upgrade: <- ");
           block.setLevel(item.level);
-          block.lifeTo(num: item.life, end: onEnd);
+          block.upgrade(end: onEnd);
+          // block.lifeTo(num: item.life, end: onEnd);
           return;
         }
       }

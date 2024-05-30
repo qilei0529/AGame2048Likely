@@ -149,6 +149,9 @@ enum GameActionType {
   injure,
 
   // 死亡
+  fade,
+
+  // 死亡
   dead,
 
   // 恢复

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
 
@@ -20,6 +22,7 @@ class BoardItemComponent extends PositionComponent
 
   late final PositionComponent _block = PositionComponent(
     size: size,
+    // anchor: Anchor.center,
   );
 
   late String cover;
@@ -31,6 +34,8 @@ class BoardItemComponent extends PositionComponent
   late final SpriteComponent _body = SpriteComponent(
     sprite: game.elements.getSprite(body),
     size: size,
+    position: Vector2(30, 30),
+    anchor: Anchor.center,
   );
   late String? act = "";
   late int? level = 0;
@@ -71,8 +76,8 @@ class BoardItemComponent extends PositionComponent
   late final SpriteComponent _lifeBg = SpriteComponent(
     sprite: game.blocks.getSprite("bg_life"),
     size: Vector2(22, 22),
-    position: Vector2(4, 34),
-    // anchor: Anchor.center,
+    position: Vector2(10, 46),
+    anchor: Anchor.center,
   );
 
   late final SpriteComponent _actBg;
@@ -96,18 +101,142 @@ class BoardItemComponent extends PositionComponent
     taskSystem.add((next) {
       // var pos = getGroundPositionAt(p.x, p.y);
       EffectController duration(double x) => EffectController(duration: x);
+
+      _lifeBg.add(
+        SequenceEffect(
+          [
+            ScaleEffect.to(Vector2.all(1.5), duration(0.08)),
+            ScaleEffect.to(Vector2.all(1), duration(0.08))
+          ],
+          onComplete: () {
+            life.text = "$num";
+            // change life;
+            if (end != null) {
+              end();
+            }
+            next();
+          },
+        ),
+      );
+    });
+  }
+
+  actTo({required int num, Function? end}) {
+    taskSystem.add((next) {
+      // var pos = getGroundPositionAt(p.x, p.y);
+      EffectController duration(double x) => EffectController(duration: x);
+
+      _actBg.add(
+        SequenceEffect(
+          [
+            ScaleEffect.to(Vector2.all(1.5), duration(0.08), onComplete: () {
+              _act.text = "$act";
+            }),
+            ScaleEffect.to(Vector2.all(1), duration(0.08))
+          ],
+          onComplete: () {
+            if (end != null) {
+              end();
+            }
+            next();
+          },
+        ),
+      );
+    });
+  }
+
+  fadeTo({Function? end}) {
+    taskSystem.add((next) {
+      // var pos = getGroundPositionAt(p.x, p.y);
+      EffectController duration(double x) => EffectController(duration: x);
+
+      _cover.add(
+        SequenceEffect(
+          [
+            OpacityEffect.to(0, duration(0.1)),
+          ],
+        ),
+      );
+      _body.add(
+        SequenceEffect(
+          [
+            // big
+            ScaleEffect.to(Vector2.all(1.3), duration(0.1)),
+            SequenceEffect(
+              [
+                // big
+                ScaleEffect.to(Vector2.all(1), duration(0.08)),
+                OpacityEffect.fadeOut(duration(0.1)),
+              ],
+            ),
+          ],
+          onComplete: () {
+            next();
+            if (end != null) {
+              end();
+            }
+          },
+        ),
+      );
+    });
+  }
+
+  upgrade({Function? end}) {
+    taskSystem.add((next) {
+      // var pos = getGroundPositionAt(p.x, p.y);
+      EffectController duration(double x) => EffectController(duration: x);
+      _body.add(
+        SequenceEffect(
+          [
+            ScaleEffect.to(Vector2.all(1.5), duration(0.1)),
+            ScaleEffect.to(Vector2.all(1), duration(0.1)),
+          ],
+          onComplete: () {
+            next();
+            if (end != null) {
+              end();
+            }
+          },
+        ),
+      );
+    });
+  }
+
+  injure({required int num, Function? end}) {
+    taskSystem.add((next) {
+      // var pos = getGroundPositionAt(p.x, p.y);
+      EffectController duration(double x) => EffectController(duration: x);
+
+      var box = RectangleComponent(
+        size: size,
+      );
+      box.setColor(Colors.red);
+      box.add(
+        SequenceEffect(
+          [
+            OpacityEffect.to(0, duration(0)),
+            OpacityEffect.to(1, duration(0.05)),
+            OpacityEffect.to(0, duration(0.05)),
+          ],
+          onComplete: () {
+            box.removeFromParent();
+          },
+        ),
+      );
+      _block.add(box);
+
       _block.add(
         SequenceEffect(
           [
             MoveToEffect(Vector2(0, 0), duration(0.2)),
           ],
           onComplete: () {
+            next();
             // change life;
             life.text = "$num";
             if (end != null) {
               end();
             }
-            next();
           },
         ),
       );
@@ -153,13 +282,13 @@ class BoardItemComponent extends PositionComponent
       _block.add(
         SequenceEffect(
           [
-            MoveToEffect(Vector2(0, 0), duration(0.2)),
+            MoveToEffect(Vector2(0, 0), duration(0.1)),
           ],
           onComplete: () {
+            next();
             if (end != null) {
               end();
             }
-            next();
           },
         ),
       );
@@ -169,7 +298,6 @@ class BoardItemComponent extends PositionComponent
   attack({Function? end}) {
     taskSystem.add((next) {
       EffectController duration(double x) => EffectController(duration: x);
-      // this.add()
       var p = point.toPosition();
       add(
         SequenceEffect(
@@ -245,7 +373,7 @@ class BoardItemComponent extends PositionComponent
         position: Vector2(38, 34),
         // anchor: Anchor.center,
       );
-      _act.text = "4";
+      _act.text = "1";
       _actBg.add(_act);
       _block.add(_actBg);
     } else if (type == BlockType.element ||
@@ -258,7 +386,7 @@ class BoardItemComponent extends PositionComponent
         position: Vector2(34, 34),
         // anchor: Anchor.center,
       );
-      _actBg.add(_act);
+      _actBg.add(life);
       _block.add(_actBg);
     }
   }
@@ -266,8 +394,9 @@ class BoardItemComponent extends PositionComponent
   setLevel(int level) {
     if (level > 1) {
       _level.removeFromParent();
+      var num = min(level, 3);
       _level = SpriteComponent(
-        sprite: game.blocks.getSprite("bg_level_$level"),
+        sprite: game.blocks.getSprite("bg_level_$num"),
         size: Vector2(20, 20),
         position: Vector2(20, 0),
         // anchor: Anchor.center,
@@ -291,8 +420,8 @@ class BoardItemComponent extends PositionComponent
 
   @override
   void onMount() {
-    _cover.add(_body);
     _block.add(_cover);
+    _block.add(_body);
     if (type == BlockType.hero || type == BlockType.enemy) {
       _lifeBg.add(life);
       _block.add(_lifeBg);

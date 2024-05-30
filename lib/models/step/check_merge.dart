@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_game_2048_fight/models/game_system.dart';
 import 'package:flutter_game_2048_fight/models/system/block.dart';
 import 'package:flutter_game_2048_fight/models/system/game.dart';
@@ -28,24 +30,27 @@ checkMergeStep({
     }
 
     if (canMerge) {
-      // turnAction
-      leftBlock.isDead = true;
-      var eatAction = GameActionData(
-        target: leftBlock.id,
-        type: GameActionType.absorbed,
-      );
-      tempActions.add(eatAction);
-
-      rightBlock.level += 1;
-      rightBlock.life += leftBlock.life;
-      rightBlock.act = rightBlock.level;
-      var upgradeAction = GameActionData(
-        target: rightBlock.id,
-        type: GameActionType.upgrade,
-        value: rightBlock.level,
-        life: rightBlock.life,
-      );
-      tempActions.add(upgradeAction);
+      var level = min(rightBlock.level + 1, 3);
+      if (level != rightBlock.level) {
+        // turnAction
+        leftBlock.isDead = true;
+        var eatAction = GameActionData(
+          target: leftBlock.id,
+          type: GameActionType.absorbed,
+        );
+        tempActions.add(eatAction);
+        //
+        rightBlock.level = level;
+        rightBlock.life += leftBlock.life;
+        rightBlock.act = rightBlock.level;
+        var upgradeAction = GameActionData(
+          target: rightBlock.id,
+          type: GameActionType.upgrade,
+          value: rightBlock.level,
+          life: rightBlock.life,
+        );
+        tempActions.add(upgradeAction);
+      }
     }
   }
   // }

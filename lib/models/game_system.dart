@@ -166,7 +166,7 @@ class GameSystem {
 
   checkBlockStep(BoardItem block) {
     List<GameActionData> tempActions;
-    // 融合
+    // // 融合
     tempActions = checkMergeStep(
       leftBlock: block,
       system: this,
@@ -177,7 +177,7 @@ class GameSystem {
       return;
     }
 
-    // 道具
+    // // 道具
     tempActions = checkElementStep(
       leftBlock: block,
       system: this,
@@ -188,16 +188,16 @@ class GameSystem {
       return;
     }
 
-    // 门
-    tempActions = checkDoorStep(
-      leftBlock: block,
-      system: this,
-    );
-    if (status == GameStatus.play && tempActions.isNotEmpty) {
-      print("has door step $tempActions");
-      actions.addAll(tempActions);
-      return;
-    }
+    // // 门
+    // tempActions = checkDoorStep(
+    //   leftBlock: block,
+    //   system: this,
+    // );
+    // if (status == GameStatus.play && tempActions.isNotEmpty) {
+    //   print("has door step $tempActions");
+    //   actions.addAll(tempActions);
+    //   return;
+    // }
 
     // 主角 攻击
     tempActions = checkHeroStep(

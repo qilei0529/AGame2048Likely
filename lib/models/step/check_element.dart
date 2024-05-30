@@ -28,14 +28,6 @@ List<GameActionData> checkElementStep({
     }
 
     if (canElement) {
-      // do element
-      rightBlock.isDead = true;
-      var deadAction = GameActionData(
-        target: rightBlock.id,
-        type: GameActionType.dead,
-      );
-      tempActions.add(deadAction);
-
       var code = rightBlock.code;
       if (code == BlockMergeCode.element) {
         // heal ad sp
@@ -71,6 +63,14 @@ List<GameActionData> checkElementStep({
         );
         tempActions.add(healAction);
       }
+
+      // do element
+      rightBlock.isDead = true;
+      var deadAction = GameActionData(
+        target: rightBlock.id,
+        type: GameActionType.fade,
+      );
+      tempActions.add(deadAction);
 
       // move to target
       // leftBlock.position = rightBlock.position;
