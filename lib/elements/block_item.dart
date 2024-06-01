@@ -92,7 +92,7 @@ class BoardItemComponent extends PositionComponent
         fontWeight: FontWeight.w500,
       ),
     ),
-    position: Vector2(7, 2),
+    position: Vector2(9, 2),
   );
 
   TaskSystem taskSystem = TaskSystem(maxQueue: 1);
@@ -181,7 +181,7 @@ class BoardItemComponent extends PositionComponent
     });
   }
 
-  upgrade({Function? end}) {
+  upgrade({int? num, Function? end}) {
     taskSystem.add((next) {
       // var pos = getGroundPositionAt(p.x, p.y);
       EffectController duration(double x) => EffectController(duration: x);
@@ -192,6 +192,7 @@ class BoardItemComponent extends PositionComponent
             ScaleEffect.to(Vector2.all(1), duration(0.1)),
           ],
           onComplete: () {
+            life.text = "$num";
             next();
             if (end != null) {
               end();
@@ -370,8 +371,8 @@ class BoardItemComponent extends PositionComponent
       _actBg = SpriteComponent(
         sprite: game.blocks.getSprite("bg_act"),
         size: Vector2(22, 22),
-        position: Vector2(38, 34),
-        // anchor: Anchor.center,
+        position: Vector2(50, 46),
+        anchor: Anchor.center,
       );
       _act.text = "1";
       _actBg.add(_act);

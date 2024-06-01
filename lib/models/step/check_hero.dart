@@ -40,50 +40,17 @@ List<GameActionData> checkHeroStep({
     }
 
     if (canAttack) {
-      // act from leftBlock
-      print("leftBlock act ---- ${leftBlock.act}");
-
       // 判断 当前 游戏还有多少 act
       var act = system.act;
-      var leftLife = leftBlock.life;
-      var rightLife = rightBlock.life;
-
-      // the
-      var acttackLeft = act - rightLife;
-
-      if (acttackLeft >= 0) {
-        // ok need not to give blood
-        // win win
-        // update act to blood left
-        system.act = acttackLeft;
-        // only to do attack
-
-        // right injure
-        rightLife = 0;
-        // right dead
+      if (act <= 0) {
+        // 如果没有 攻击力了 则用基础攻击力
+        act = leftBlock.act;
       } else {
-        // update act to zero
-        system.act = 0;
-        // need to lose life
-        if (acttackLeft + leftLife > 0) {
-          // ops act out
-          // and you need to blood
-          // you alive
-          // left injure
-          leftLife = leftLife + acttackLeft;
-
-          // right injure
-          rightLife = 0;
-          // right dead
-        } else {
-          // no ~~
-          rightLife = rightLife - act;
-          // you are dead
-          leftLife = 0;
-          // need to play hero dead
-        }
+        // 每次攻击少一点
+        system.act = max(act - 1, 0);
       }
 
+      var rightLife = max(rightBlock.life - act, 0);
       // turnAction
       var attackAction = GameActionData(
         target: leftBlock.id,
@@ -106,32 +73,10 @@ List<GameActionData> checkHeroStep({
         tempActions.add(injureAction);
 
         // dead
-        if (rightLife == 0) {
+        if (rightLife <= 0) {
           rightBlock.isDead = true;
           var deadAction = GameActionData(
             target: rightBlock.id,
-            type: GameActionType.dead,
-          );
-          tempActions.add(deadAction);
-        }
-      }
-
-      // 主角 受伤了。
-      if (leftLife != leftBlock.life) {
-        leftBlock.life = leftLife;
-        var injureAction = GameActionData(
-          target: leftBlock.id,
-          type: GameActionType.injure,
-          value: acttackLeft,
-          life: leftLife,
-        );
-        tempActions.add(injureAction);
-
-        // left dead
-        if (leftLife == 0) {
-          leftBlock.isDead = true;
-          var deadAction = GameActionData(
-            target: leftBlock.id,
             type: GameActionType.dead,
           );
           tempActions.add(deadAction);

@@ -42,7 +42,7 @@ checkMergeStep({
         //
         rightBlock.level = level;
         rightBlock.life += leftBlock.life;
-        rightBlock.act = rightBlock.level;
+        rightBlock.act += 1;
         var upgradeAction = GameActionData(
           target: rightBlock.id,
           type: GameActionType.upgrade,

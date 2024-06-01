@@ -93,8 +93,8 @@ class TheGameScene extends FlameGame {
     print("view port ${camera.viewport.size}");
     var size = camera.viewport.size;
     var ratio = size.x / size.y;
-    var width = 400.0;
-    var height = 400 / ratio;
+    var width = 375.0;
+    var height = 375 / ratio;
     if (height < 800) {
       height = 800;
     }

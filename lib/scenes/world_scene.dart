@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 // frame
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
@@ -213,13 +214,15 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
   }
 
   updateAct() {
-    actLabel.text = "act: ${system.act}";
-    try {
-      var hero = vos[system.hero!.id];
-      if (hero != null) {
-        hero.setAct(system.act);
+    var hero = system.hero;
+    if (hero != null) {
+      var block = vos[system.hero!.id];
+      if (block != null) {
+        var act = max(hero.act, system.act);
+        block.setAct(act);
       }
-    } catch (e) {}
+    }
+    actLabel.text = "act: ${system.act}";
   }
 
   updateSta() {
@@ -327,7 +330,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
   runActions() async {
     var actions = system.actions;
     runAcitonList(List<GameActionData> list) async {
-      var innerTaskSystem = TaskSystem(maxQueue: 12);
+      var innerTaskSystem = TaskSystem(maxQueue: 30);
       for (var action in list) {
         print("action ${action.type}");
         // ignore: prefer_function_declarations_over_variables
@@ -482,7 +485,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
         if (type == GameActionType.upgrade) {
           // print("${item.id} upgrade: <- ");
           block.setLevel(item.level);
-          block.upgrade(end: onEnd);
+          block.upgrade(num: item.life, end: onEnd);
           // block.lifeTo(num: item.life, end: onEnd);
           return;
         }

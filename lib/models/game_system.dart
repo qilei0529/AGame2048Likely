@@ -42,7 +42,7 @@ class GameSystem {
   int floor = 1;
 
   // 武力值
-  int act = 10;
+  int act = 0;
 
   // 体力值
   int sta = 10;
@@ -79,9 +79,6 @@ class GameSystem {
   toFloor(int nextFloor) {
     print("to floor $nextFloor");
     floor = nextFloor;
-
-    this.act = 10;
-    this.sta = 10;
   }
 
   toStep(int step) {
@@ -139,6 +136,11 @@ class GameSystem {
 
     toFloor(1);
     toStep(1);
+
+    // 携带攻击力
+    act = 0;
+    // 携带体力
+    sta = 10;
   }
 
   actionNextFloor() {
@@ -188,16 +190,16 @@ class GameSystem {
       return;
     }
 
-    // // 门
-    // tempActions = checkDoorStep(
-    //   leftBlock: block,
-    //   system: this,
-    // );
-    // if (status == GameStatus.play && tempActions.isNotEmpty) {
-    //   print("has door step $tempActions");
-    //   actions.addAll(tempActions);
-    //   return;
-    // }
+    // 门
+    tempActions = checkDoorStep(
+      leftBlock: block,
+      system: this,
+    );
+    if (status == GameStatus.play && tempActions.isNotEmpty) {
+      print("has door step $tempActions");
+      actions.addAll(tempActions);
+      return;
+    }
 
     // 主角 攻击
     tempActions = checkHeroStep(

@@ -26,7 +26,7 @@ bool checkBlockCanMerge(BoardItem leftBlock, BoardItem rightBlock) {
   if (leftBlock.isDead || rightBlock.isDead) {
     return false;
   }
-  if (checkBlockCanMove(leftBlock.type) && checkBlockCanMove(rightBlock.type)) {
+  if (leftBlock.type == BlockType.enemy || leftBlock.type == BlockType.weapon) {
     if (leftBlock.code == rightBlock.code) {
       if (leftBlock.level == rightBlock.level) {
         return true;

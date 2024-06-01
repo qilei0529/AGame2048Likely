@@ -53,7 +53,7 @@ List<GameActionData> checkElementStep({
         tempActions.add(healAction);
       } else if (code == BlockMergeCode.weapon) {
         // heal
-        // TODO: for get weapon
+        // weapon update
         system.act += rightBlock.life;
         var healAction = GameActionData(
           target: leftBlock.id,
