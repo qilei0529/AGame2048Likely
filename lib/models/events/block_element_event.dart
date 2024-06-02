@@ -1,7 +1,7 @@
-import 'package:flutter_game_2048_fight/models/game_system.dart';
-import 'package:flutter_game_2048_fight/models/system/block.dart';
-import 'package:flutter_game_2048_fight/models/system/game.dart';
-import 'package:flutter_game_2048_fight/models/util.dart';
+import '../game_system.dart';
+import '../system/block.dart';
+import '../system/game.dart';
+import '../util.dart';
 
 class BlockElementEvent extends GameBlockEvent {
   GameSystem system;

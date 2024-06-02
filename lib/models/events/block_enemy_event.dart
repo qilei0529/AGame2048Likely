@@ -1,8 +1,8 @@
 import 'dart:math';
 
-import 'package:flutter_game_2048_fight/models/game_system.dart';
-import 'package:flutter_game_2048_fight/models/system/game.dart';
-import 'package:flutter_game_2048_fight/models/util.dart';
+import '../game_system.dart';
+import '../system/game.dart';
+import '../util.dart';
 
 class BlockEnemyEvent extends GameBlockEvent {
   GameSystem system;

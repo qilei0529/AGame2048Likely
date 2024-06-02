@@ -1,7 +1,5 @@
-import 'package:flutter_game_2048_fight/models/game_system.dart';
-import 'package:flutter_game_2048_fight/models/system/board.dart';
-import 'package:flutter_game_2048_fight/models/system/game.dart';
-import 'package:flutter_game_2048_fight/models/util.dart';
+import '../game_system.dart';
+import '../system/game.dart';
 
 class MovePointEvent extends GameMoveEvent {
   GameSystem system;
