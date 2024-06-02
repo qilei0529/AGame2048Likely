@@ -193,3 +193,75 @@ class GameActionData {
     level = 2;
   }
 }
+
+enum GameEventType {
+  // 移动 事件
+  move,
+  // 块 事件
+  block,
+  // 冷却 事件
+  cooling,
+
+  // 回合 事件
+  loop,
+}
+
+abstract class GameEvent<T> {
+  GameEventType type;
+
+  bool? action(T payload);
+  void clear();
+
+  GameEvent({required this.type});
+}
+
+class GameLoopPayload {
+  GameLoopPayload();
+}
+
+class GameLoopEvent extends GameEvent<GameLoopPayload> {
+  // move
+  GameLoopEvent() : super(type: GameEventType.block);
+  @override
+  bool? action(payload) {
+    return null;
+  }
+
+  @override
+  void clear() {}
+}
+
+class GameBlockPayload {
+  BoardItem block;
+  GameBlockPayload(this.block);
+}
+
+class GameBlockEvent extends GameEvent<GameBlockPayload> {
+  // move
+  GameBlockEvent() : super(type: GameEventType.block);
+  @override
+  bool? action(payload) {
+    return null;
+  }
+
+  @override
+  void clear() {}
+}
+
+class GameMovePayload {
+  BoardItem block;
+  GamePoint point;
+  GameMovePayload(this.block, this.point);
+}
+
+class GameMoveEvent extends GameEvent<GameMovePayload> {
+  GameMoveEvent() : super(type: GameEventType.move);
+
+  @override
+  bool? action(payload) {
+    return null;
+  }
+
+  @override
+  void clear() {}
+}

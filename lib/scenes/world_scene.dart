@@ -312,17 +312,21 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
       return;
     }
     isSliding = true;
-    system.actionSlide(point);
+    system.runMoveEvents(point);
+    await runActions();
+    system.runBlockEvents(point);
+    await runActions();
+    system.runMove2Events(point);
+    await runActions();
+    system.runLoopEvents(point);
+    await runActions();
+
     // update step display
     updateStep();
     updateAct();
     updateSta();
-    await runActions();
-    if (system.status == GameStatus.play) {
-      system.checkMovePoint(point: point);
-      system.checkStepForNext();
-      await runActions();
-    }
+    // system.checkStepForNext();
+    // await runActions();
 
     isSliding = false;
   }
@@ -332,7 +336,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     runAcitonList(List<GameActionData> list) async {
       var innerTaskSystem = TaskSystem(maxQueue: 30);
       for (var action in list) {
-        print("action ${action.type}");
+        print("action ${action.type} action ${action.target}");
         // ignore: prefer_function_declarations_over_variables
         var task = (Function next) => runAction(action, next);
         innerTaskSystem.add(task);
@@ -356,6 +360,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
 
   runAction(GameActionData action, Function onEnd) {
     // no actions
+    print(system.status);
     if (system.status != GameStatus.play) {
       onEnd();
       return;

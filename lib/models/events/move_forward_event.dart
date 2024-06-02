@@ -1,46 +1,28 @@
-import 'package:flutter_game_2048_fight/models/system/block.dart';
+import 'package:flutter_game_2048_fight/models/game_system.dart';
 import 'package:flutter_game_2048_fight/models/system/board.dart';
 import 'package:flutter_game_2048_fight/models/system/game.dart';
 import 'package:flutter_game_2048_fight/models/util.dart';
 
-List<BoardItem> getRangeBlocks(List<BoardItem> blocks, GamePoint point) {
-  // 获取 排序
-  List<BoardItem> blocklist = [];
-  // 获取 位置 map 地图
-  for (var element in blocks) {
-    blocklist.add(element);
-  }
-  blocklist.sort((a, b) {
-    var posA = a.position;
-    var posB = b.position;
-    switch (point) {
-      case GamePoint.right:
-        return posB.x - posA.x;
-      case GamePoint.left:
-        return posA.x - posB.x;
-      case GamePoint.top:
-        return posA.y - posB.y;
-      case GamePoint.bottom:
-        return posB.y - posA.y;
-    }
-  });
-  return blocklist;
-}
+class MoveForwardEvent extends GameMoveEvent {
+  GameSystem system;
 
-List<GameActionData> checkMoveStep({
-  required GamePoint point,
-  required List<BoardItem> blocks,
-  required BoardSize size,
-  int? actionLevel,
-  Function? onStep,
-}) {
-  List<GameActionData> moveActions = [];
+  // move
+  MoveForwardEvent({required this.system});
 
-  Map<String, BoardItem> tempVos = {};
+  @override
+  bool? action(payload) {
+    var block = payload.block;
+    var point = payload.point;
+    var size = system.size;
 
-  checkBlockPoint(BoardItem leftBlock, GamePoint point) {
+    int move = block.move;
+
+    int needMove = 0;
+
+    var leftBlock = block;
     // 获取 某一个方向上的位置。
     BoardPosition getPointPosition(BoardPosition pos) {
+      print("leftBlock ${block.id} ${move}");
       // 判断是否可以移动
       if (!checkBlockCanMove(leftBlock.type)) {
         return pos;
@@ -55,13 +37,22 @@ List<GameActionData> checkMoveStep({
       } else {
         // 判断 当前位置是否 有对象
         var key = getBlockKey(newPos);
-        var rightBlock = tempVos[key];
+        var rightBlock = system.posVos[key];
         if (rightBlock != null) {
           return pos;
         }
+        if (move <= 0) {
+          return pos;
+        }
+        // move
+        move -= 1;
+        // need move
+        needMove += 1;
         return getPointPosition(newPos);
       }
     }
+
+    List<GameActionData> moveActions = [];
 
     // get new pos by pos;
     var pos = getPointPosition(leftBlock.position);
@@ -89,22 +80,16 @@ List<GameActionData> checkMoveStep({
         point: point,
         position: pos,
       );
-      moveAction.level = actionLevel ?? 1;
+      moveAction.level = 1;
       moveActions.add(moveAction);
     }
 
     var key = getBlockKey(pos);
-    tempVos[key] = leftBlock;
+    system.posVos[key] = leftBlock;
 
-    if (onStep != null) {
-      onStep(leftBlock);
-    }
+    // add action to system action
+    print("move Actions $moveActions ${leftBlock.position}");
+    system.actions.addAll(moveActions);
+    return null;
   }
-
-  var blocklist = getRangeBlocks(blocks, point);
-  for (var block in blocklist) {
-    checkBlockPoint(block, point);
-  }
-
-  return moveActions;
 }

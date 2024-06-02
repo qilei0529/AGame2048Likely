@@ -57,6 +57,13 @@ bool checkBlockCanDoor(BlockType typeA, BlockType typeB) {
   return false;
 }
 
+bool checkIsBlock(BlockType type) {
+  if (type == BlockType.cloud || type == BlockType.floor) {
+    return false;
+  }
+  return true;
+}
+
 bool checkBlockCanAttack(BlockType typeA, BlockType typeB) {
   var left = [BlockType.hero, BlockType.enemy];
   var right = [BlockType.hero, BlockType.enemy, BlockType.block];

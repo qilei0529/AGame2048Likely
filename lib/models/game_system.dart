@@ -2,15 +2,17 @@
 
 // step
 
-import 'package:flutter_game_2048_fight/models/step/check_game.dart';
-
-import 'step/check_hero.dart';
-import 'step/check_attack.dart';
-import 'step/check_create.dart';
-import 'step/check_door.dart';
-import 'step/check_element.dart';
-import 'step/check_merge.dart';
-import 'step/check_move.dart';
+import 'events/loop_create_event.dart';
+import 'events/loop_step_event.dart';
+//
+import 'events/block_door_event.dart';
+import 'events/block_hero_event.dart';
+import 'events/block_element_event.dart';
+import 'events/block_enemy_event.dart';
+import 'events/block_enemy_mixin_event.dart';
+//
+import 'events/move_forward_event.dart';
+import 'events/move_point_event.dart';
 
 // system
 import 'system/level.dart';
@@ -29,10 +31,19 @@ class GameSystem {
   GameStatus status = GameStatus.start;
   // 所有 block
   final Map<String, BoardItem> _vos = {};
+
+  final Map<String, BoardItem> posVos = {};
+
   // list block
   List<BoardItem> get blocks => _vos.values.toList();
   // 记录行为
   final List<GameActionData> actions = [];
+
+  List<GameEvent> loopEvents = [];
+  List<GameEvent> moveEvents = [];
+  List<GameEvent> move2Events = [];
+
+  final Map<BlockType, List<GameEvent>> eventMap = {};
 
   BoardItem? get hero => findBlockByType(BlockType.hero);
 
@@ -49,7 +60,35 @@ class GameSystem {
 
   // 初始化
   GameSystem() {
+    // ignore: avoid_print
     print("world init");
+    initEventMap();
+  }
+
+  initEventMap() {
+    eventMap[BlockType.hero] = [
+      BlockElementEvent(system: this),
+      BlockHeroEvent(system: this),
+      BlockEnemyEvent(system: this),
+      BlockDoorEvent(system: this),
+    ];
+    eventMap[BlockType.enemy] = [
+      BlockEnemyMixinEvent(system: this),
+      BlockEnemyEvent(system: this),
+    ];
+
+    // 移动
+    moveEvents = [
+      MovePointEvent(system: this),
+    ];
+    // 移动
+    move2Events = [
+      MoveForwardEvent(system: this),
+    ];
+    loopEvents = [
+      LoopStepEvent(system: this),
+      LoopCreateEvent(system: this),
+    ];
   }
 
   BoardItem? findBlockByType(BlockType targetType) {
@@ -72,17 +111,13 @@ class GameSystem {
 
     // sync the size
     size = level.size;
-
-    print("load level $level");
   }
 
   toFloor(int nextFloor) {
-    print("to floor $nextFloor");
     floor = nextFloor;
   }
 
   toStep(int step) {
-    print("to step $step");
     this.step = step;
     var stepData = level.getStepData(
       step: step,
@@ -100,27 +135,26 @@ class GameSystem {
     return _vos[id];
   }
 
+  createBlock() {}
+
   addBlock(BoardItem block) {
     if (_vos[block.id] != null) {
+      // ignore: avoid_print
       print("has block exist ${block.id}");
     }
     _vos[block.id] = block;
-  }
-
-  addAction(GameActionData action) {
-    actions.add(action);
   }
 
   removeBlock(BoardItem block) {
     _vos.remove(block.id);
   }
 
-  gameStart() {
-    status = GameStatus.start;
+  addAction(GameActionData action) {
+    actions.add(action);
   }
 
-  gamePause() {
-    status = GameStatus.pause;
+  gameStart() {
+    status = GameStatus.start;
   }
 
   gameOver() {
@@ -158,109 +192,111 @@ class GameSystem {
     toStep(1);
   }
 
-  actionSlide(GamePoint point) {
-    checkMovePoint(point: point);
+  List<GameEvent> getEventsByType(BlockType type, GameEventType eventType) {
+    var events = eventMap[type];
+    if (events != null) {
+      var list = events.where((event) => event.type == eventType).toList();
+      if (list.isNotEmpty) {
+        return list;
+      }
+    }
+    return [];
+  }
+
+  runLoopEvents(GamePoint point) {
+    // 获取 所有 方向的 block
+    // ignore: avoid_print
+    var events = loopEvents;
+    events.forEach((item) {
+      var event = item as GameLoopEvent;
+      var payload = GameLoopPayload();
+      event.action(payload);
+    });
+    posVos.clear();
+    // ignore: avoid_print
+    print("finish $point");
+  }
+
+  runMoveEvents(GamePoint point) {
+    // 获取 所有 方向的 block
     var blocklist = getRangeBlocks(blocks, point);
+    // ignore: avoid_print
+    var events = moveEvents;
     for (var block in blocklist) {
-      checkBlockStep(block);
+      // ignore: avoid_function_literals_in_foreach_calls
+      events.forEach((item) {
+        var event = item as GameMoveEvent;
+        var payload = GameMovePayload(block, point);
+        event.action(payload);
+      });
     }
+    posVos.clear();
+    // ignore: avoid_print
+    print("finish $point");
   }
 
-  checkBlockStep(BoardItem block) {
-    List<GameActionData> tempActions;
-    // // 融合
-    tempActions = checkMergeStep(
-      leftBlock: block,
-      system: this,
-    );
-    if (status == GameStatus.play && tempActions.isNotEmpty) {
-      print("has merge step $tempActions");
-      actions.addAll(tempActions);
-      return;
+  runMove2Events(GamePoint point) {
+    // 获取 所有 方向的 block
+    var blocklist = getRangeBlocks(blocks, point);
+    // ignore: avoid_print
+    var events = move2Events;
+    for (var block in blocklist) {
+      // ignore: avoid_function_literals_in_foreach_calls
+      events.forEach((item) {
+        var event = item as GameMoveEvent;
+        var payload = GameMovePayload(block, point);
+        event.action(payload);
+      });
     }
-
-    // // 道具
-    tempActions = checkElementStep(
-      leftBlock: block,
-      system: this,
-    );
-    if (status == GameStatus.play && tempActions.isNotEmpty) {
-      print("has element step $tempActions");
-      actions.addAll(tempActions);
-      return;
-    }
-
-    // 门
-    tempActions = checkDoorStep(
-      leftBlock: block,
-      system: this,
-    );
-    if (status == GameStatus.play && tempActions.isNotEmpty) {
-      print("has door step $tempActions");
-      actions.addAll(tempActions);
-      return;
-    }
-
-    // 主角 攻击
-    tempActions = checkHeroStep(
-      leftBlock: block,
-      system: this,
-    );
-    if (status == GameStatus.play && tempActions.isNotEmpty) {
-      print("has attack step $tempActions");
-      actions.addAll(tempActions);
-      return;
-    }
-
-    // 攻击
-    tempActions = checkAttackStep(
-      leftBlock: block,
-      system: this,
-    );
-    if (status == GameStatus.play && tempActions.isNotEmpty) {
-      print("has attack step $tempActions");
-      actions.addAll(tempActions);
-      return;
-    }
+    posVos.clear();
+    // ignore: avoid_print
+    print("finish $point");
   }
 
-  checkStepForNext() {
-    // go next step
-    var tempActions = checkGameStep(system: this);
-    if (status == GameStatus.play && tempActions.isNotEmpty) {
-      print("has game step $tempActions");
-      actions.addAll(tempActions);
+  runBlockEvents(GamePoint point) {
+    // 获取 所有 方向的 block
+    var blocklist = getRangeBlocks(blocks, point);
+    // ignore: avoid_print
+    print("start $point");
+    for (var block in blocklist) {
+      // 运行 所有 move Event
+      bool? flag;
+      var events = getEventsByType(block.type, GameEventType.block);
+      // ignore: avoid_function_literals_in_foreach_calls
+      events.forEach((item) {
+        var event = item as GameBlockEvent;
+        var payload = GameBlockPayload(block);
+        // 只要命中一个就跳出 类似 switch
+        if (flag != true) {
+          flag = event.action(payload);
+        }
+      });
     }
-
-    var [createActions, createBlocks] = checkCreateStep(
-      blocks: blocks,
-      size: size,
-      level: level,
-      step: step,
-      floor: floor,
-    );
-
-    // create Block
-    createBlocks.forEach((item) => addBlock(item));
-    if (status == GameStatus.play && createActions.isNotEmpty) {
-      actions.addAll(createActions);
-    }
+    // ignore: avoid_print
+    print("finish $point");
   }
+}
 
-  checkMovePoint({
-    required GamePoint point,
-    int? actionLevel,
-    Function? onStep,
-  }) {
-    var tempActions = checkMoveStep(
-      point: point,
-      blocks: blocks,
-      size: size,
-      actionLevel: actionLevel,
-      onStep: onStep,
-    );
-    if (status == GameStatus.play && tempActions.isNotEmpty) {
-      actions.addAll(tempActions);
-    }
+List<BoardItem> getRangeBlocks(List<BoardItem> blocks, GamePoint point) {
+  // 获取 排序
+  List<BoardItem> blocklist = [];
+  // 获取 位置 map 地图
+  for (var element in blocks) {
+    blocklist.add(element);
   }
+  blocklist.sort((a, b) {
+    var posA = a.position;
+    var posB = b.position;
+    switch (point) {
+      case GamePoint.right:
+        return posB.x - posA.x;
+      case GamePoint.left:
+        return posA.x - posB.x;
+      case GamePoint.top:
+        return posA.y - posB.y;
+      case GamePoint.bottom:
+        return posB.y - posA.y;
+    }
+  });
+  return blocklist;
 }

@@ -1,3 +1,4 @@
+import 'package:flutter_game_2048_fight/models/util.dart';
 import 'package:uuid/uuid.dart';
 
 import 'game.dart';
@@ -8,16 +9,16 @@ enum BlockType {
   hero,
   // 敌人
   enemy,
-  // sta
+  // 恢复 体力
   element,
-  // 生命
+  // 恢复 生命
   heal,
-  // 武器
+  // 增加 武器
   weapon,
   // 云
   cloud,
-  // 宝箱
-  chest,
+  // 地形
+  floor,
   // 石头
   block,
   // door
@@ -131,31 +132,54 @@ extension BlockMergeCodeExtension on BlockMergeCode {
   }
 }
 
-class BoardItem<T> extends BlockData with WithPosition, WithLevel {
-  late T? body;
-
+class BoardItem extends BlockData with WithPosition, WithLevel {
   late int life;
   late GamePoint point;
 
   // 攻击力
   int act = 0;
-  // 耐力值
-  int sta = 0;
+  // 敏捷, 用于影响 移动能力。
+  int agi = 6;
 
+  // 移动力
+  int move = 0;
+
+  // 是否 锁定
+  bool isLock = false;
+
+  // 是否 死亡
   bool isDead = false;
+
+  // 是否 刚体
+  bool isBlock = false;
+
+  // 是否 地形
+  bool isFloor = false;
+
+  // 是否 环境
+  bool isTree = false;
 
   BlockMergeCode code = BlockMergeCode.none;
 
   BoardItem({
     String? id,
     String? name,
+    int? life,
     BlockType? type,
     GamePoint? point,
+    int? move,
   }) {
     this.id = id ?? const Uuid().v4().toString();
     this.name = name ?? "";
     this.type = type ?? BlockType.block;
+
+    isBlock = checkIsBlock(this.type);
+
+    // 默认 方向朝下
     this.point = point ?? GamePoint.bottom;
+    this.life = life ?? 1;
+
+    this.move = move ?? 6;
   }
 
   BoardItem copy() {
@@ -165,6 +189,8 @@ class BoardItem<T> extends BlockData with WithPosition, WithLevel {
     item.level = level;
     item.code = code;
     item.act = act;
+    item.agi = agi;
+    item.move = move;
     return item;
   }
 }
