@@ -120,10 +120,13 @@ extension ActionMixin on WorldScene {
         // 处理 turn
         if (type == GameActionType.turn) {
           print("${item.id} turen: ------ > ${action.point}");
-          if (action.point != null) {
             block.point = action.point!;
-          }
-          onEnd();
+          block.turnTo(
+            point: action.point!,
+            end: onEnd,
+            needTurn:
+                block.type == BlockType.hero || block.type == BlockType.enemy,
+          );
           return;
         }
         if (type == GameActionType.move) {

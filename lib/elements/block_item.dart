@@ -42,6 +42,8 @@ class BoardItemComponent extends PositionComponent
   late int level = 0;
   late int count = 0;
 
+  late Vector2 face = Vector2(1, 1);
+
   final TextComponent _count = TextComponent(
     text: "",
     textRenderer: TextPaint(
@@ -215,6 +217,36 @@ class BoardItemComponent extends PositionComponent
                 OpacityEffect.fadeOut(duration(0.1)),
               ],
             ),
+          ],
+          onComplete: () {
+            next();
+            if (end != null) {
+              end();
+            }
+          },
+        ),
+      );
+    });
+  }
+
+  turnTo({required GamePoint point, bool needTurn = false, Function? end}) {
+    taskSystem.add((next) {
+      // var pos = getGroundPositionAt(p.x, p.y);
+      EffectController duration(double x) => EffectController(duration: x);
+
+      if (needTurn) {
+        if (point == GamePoint.right) {
+          face = Vector2(-1, 1);
+        } else if (point == GamePoint.left) {
+          face = Vector2(1, 1);
+        }
+      }
+
+      _body.add(
+        SequenceEffect(
+          [
+            // big
+            ScaleEffect.to(face, duration(0.06)),
           ],
           onComplete: () {
             next();
