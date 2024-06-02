@@ -33,7 +33,8 @@ class BlockHeroEvent extends GameBlockEvent {
       }
 
       var canAttack = false;
-      print("has block on ${key}");
+      // ignore: avoid_print
+      print("has block on $key");
       if (rightBlock.isDead) {
         // oh it is dead
         // only reduce hero check

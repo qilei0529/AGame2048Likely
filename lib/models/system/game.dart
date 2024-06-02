@@ -137,8 +137,6 @@ enum GameActionType {
   turn,
   // 移动
   move,
-  // 移动
-  moveIn,
   // 进入
   enter,
 
@@ -164,6 +162,9 @@ enum GameActionType {
   upgrade,
   // 吸收
   absorbed,
+
+  // 出现 楼梯
+  showStair,
 }
 
 class GameActionData {

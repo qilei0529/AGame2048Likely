@@ -60,6 +60,7 @@ class BlockDoorEvent extends GameBlockEvent {
           );
           tempActions.add(itemAction);
         } else if (rightBlock.life == 0) {
+          // 修改 主角移动 变为 1  方便刚好落在 门的位置上
           leftBlock.move = 1;
 
           rightBlock.isDead = true;
@@ -68,6 +69,12 @@ class BlockDoorEvent extends GameBlockEvent {
             type: GameActionType.dead,
           );
           tempActions.add(deadAction);
+
+          var showAction = GameActionData(
+            target: rightBlock.id,
+            type: GameActionType.showStair,
+          );
+          tempActions.add(showAction);
         }
         system.actions.addAll(tempActions);
         return true;

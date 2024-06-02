@@ -3,16 +3,21 @@ import 'dart:math';
 // frame
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_game_2048_fight/models/game_system.dart';
-import 'package:flutter_game_2048_fight/models/system/block.dart';
+
+// minxins
+import 'package:flutter_game_2048_fight/mixins/block_mixin.dart';
+import 'package:flutter_game_2048_fight/mixins/event_mixin.dart';
+
+// models
 import 'package:flutter_game_2048_fight/models/util.dart';
+import 'package:flutter_game_2048_fight/models/game_system.dart';
+import 'package:flutter_game_2048_fight/models/system/task.dart';
+import 'package:flutter_game_2048_fight/models/system/game.dart';
 
 // scene
 import 'package:flutter_game_2048_fight/scenes/game_scene.dart';
 
 // elements
-import 'package:flutter_game_2048_fight/models/system/task.dart';
-import 'package:flutter_game_2048_fight/models/system/game.dart';
 import 'package:flutter_game_2048_fight/elements/button.dart';
 import 'package:flutter_game_2048_fight/elements/block.dart';
 import 'package:flutter_game_2048_fight/elements/block_item.dart';
@@ -41,75 +46,13 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
   initBlocks() {
     print("init blocks ${system.blocks}");
     for (var item in system.blocks) {
-      addBlock(item);
-    }
-  }
+      var block = createBlock(item);
+      // block.setCode(item.code.toCodeString());
+      board.add(block);
 
-  BoardItemComponent addBlock(BoardItem item) {
-    var pos = item.position;
-    var position = getBoardPositionAt(pos.x, pos.y);
-
-    var color = Colors.blueGrey.shade300;
-
-    var cover = "cover_element";
-    var body = "element_hp";
-    var act;
-
-    if (item.type == BlockType.enemy) {
-      color = Colors.red.shade400;
-      cover = "cover_enemy";
-      body = "element_enemy_1";
+      // link vos with block ref
+      vos[item.id] = block;
     }
-    if (item.type == BlockType.hero) {
-      color = Colors.blue.shade400;
-      cover = "cover_hero";
-      body = "element_hero";
-      act = "4";
-    }
-    if (item.type == BlockType.element) {
-      color = Colors.orange.shade200;
-      body = "element_sp";
-    }
-    if (item.type == BlockType.heal) {
-      color = Colors.green.shade400;
-      body = "element_hp";
-    }
-    if (item.type == BlockType.weapon) {
-      color = Colors.blueGrey.shade500;
-      body = "element_weapon";
-    }
-    if (item.type == BlockType.door) {
-      color = Colors.orange.shade400;
-      body = "element_door";
-    }
-    if (item.type == BlockType.block) {
-      color = Colors.red.shade400;
-      cover = "cover_rock";
-      body = "element_rock";
-    }
-    var block = BoardItemComponent(
-      // key: ComponentKey.named(item.id),
-      position: position,
-      color: color,
-      size: Vector2(60, 60),
-      cover: cover,
-      body: body,
-      act: act,
-      type: item.type,
-    );
-    // block.debugMode = true;
-    block.debugColor = Colors.black26;
-    block.point = item.point;
-    if (item.life > 0) {
-      block.setLife(item.life);
-    }
-    block.setLevel(item.level);
-    // block.setCode(item.code.toCodeString());
-    board.add(block);
-
-    // link vos with block ref
-    vos[item.id] = block;
-    return block;
   }
 
   gameStart() async {
@@ -129,10 +72,10 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
 
     system.gameStart();
     initBlocks();
-    updateStep();
-    updateFloor();
     updateAct();
     updateSta();
+    updateStep();
+    updateFloor();
   }
 
   gameNextFloor() {
@@ -292,15 +235,6 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     add(block);
   }
 
-  // get the position from int x y
-  Vector2 getBoardPositionAt(int x, int y) {
-    var width = globalBlockSize.x;
-    var height = globalBlockSize.y;
-    var dx = width * x.toDouble() - width / 2;
-    var dy = height * y.toDouble() - height / 2;
-    return Vector2(dx, dy);
-  }
-
   actionSlide(GamePoint point) async {
     if (system.status == GameStatus.start) {
       system.status = GameStatus.play;
@@ -316,6 +250,10 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     await runActions();
     system.runBlockEvents(point);
     await runActions();
+    // update act and sta
+    updateAct();
+    updateSta();
+
     system.runMove2Events(point);
     await runActions();
     system.runLoopEvents(point);
@@ -323,8 +261,6 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
 
     // update step display
     updateStep();
-    updateAct();
-    updateSta();
     // system.checkStepForNext();
     // await runActions();
 
@@ -358,147 +294,6 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     await taskSystem.run();
   }
 
-  runAction(GameActionData action, Function onEnd) {
-    // no actions
-    print(system.status);
-    if (system.status != GameStatus.play) {
-      onEnd();
-      return;
-    }
-
-    var type = action.type;
-    var item = system.getBlock(action.target);
-
-    if (type == GameActionType.enter) {
-      var block = vos[action.target];
-      if (item != null && block != null) {
-        // to play enter
-        block.dead(end: () {
-          block.removeFromParent();
-          onEnd();
-          if (item.type == BlockType.hero) {
-            gameNextFloor();
-          }
-        });
-      }
-      return;
-    }
-    if (type == GameActionType.fade) {
-      var block = vos[action.target];
-      if (item != null && block != null) {
-        block.fadeTo(end: () {
-          block.removeFromParent();
-          system.removeBlock(item);
-          onEnd();
-        });
-      } else {
-        onEnd();
-      }
-      return;
-    }
-    if (type == GameActionType.dead) {
-      var block = vos[action.target];
-      if (item != null && block != null) {
-        block.dead(end: () {
-          block.removeFromParent();
-          system.removeBlock(item);
-          onEnd();
-          if (item.type == BlockType.hero) {
-            gameOver();
-          }
-        });
-      } else {
-        onEnd();
-      }
-      return;
-    }
-    if (type == GameActionType.absorbed) {
-      var block = vos[action.target];
-      if (item != null && block != null) {
-        block.dead(end: () {
-          block.removeFromParent();
-          onEnd();
-        });
-        system.removeBlock(item);
-      } else {
-        onEnd();
-      }
-      return;
-    }
-    // do create
-    if (type == GameActionType.create) {
-      if (item != null) {
-        Future.delayed(const Duration(milliseconds: 300), () {
-          addBlock(item);
-          var block = vos[item.id];
-          if (block != null) {
-            block.born(end: onEnd);
-          } else {
-            onEnd();
-          }
-        });
-      } else {
-        onEnd();
-      }
-      return;
-    }
-
-    if (item != null) {
-      var block = vos[action.target];
-      if (block != null) {
-        // 处理 turn
-        if (type == GameActionType.turn) {
-          if (action.point != null) {
-            block.point = action.point!;
-          }
-          onEnd();
-          return;
-        }
-        if (type == GameActionType.move) {
-          var pos = action.position!;
-          block.moveTo(x: pos.x, y: pos.y, end: onEnd);
-          return;
-        }
-        if (type == GameActionType.moveIn) {
-          var pos = action.position!;
-          block.moveTo(
-              x: pos.x,
-              y: pos.y,
-              end: () {
-                //  moveIn
-                item.position = pos;
-                onEnd();
-              });
-          return;
-        }
-        // attac
-        if (type == GameActionType.attack) {
-          // print("${item.id} attck: -> ");
-          block.attack(end: onEnd);
-          return;
-        }
-        if (type == GameActionType.injure) {
-          // print("${item.id} injour: <- ");
-          block.injure(num: item.life, end: onEnd);
-          return;
-        }
-        if (type == GameActionType.heal) {
-          // print("${item.id} heal: <- ");
-          block.lifeTo(num: item.life, end: onEnd);
-          return;
-        }
-        if (type == GameActionType.upgrade) {
-          // print("${item.id} upgrade: <- ");
-          block.setLevel(item.level);
-          block.upgrade(num: item.life, end: onEnd);
-          // block.lifeTo(num: item.life, end: onEnd);
-          return;
-        }
-      }
-    }
-    onEnd();
-  }
-
   @override
   FutureOr<void> onLoad() {
     // init header
@@ -515,4 +310,13 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     gameStart();
     return super.onLoad();
   }
+}
+
+// get the position from int x y
+Vector2 getBoardPositionAt(int x, int y) {
+  var width = globalBlockSize.x;
+  var height = globalBlockSize.y;
+  var dx = width * x.toDouble() - width / 2;
+  var dy = height * y.toDouble() - height / 2;
+  return Vector2(dx, dy);
 }

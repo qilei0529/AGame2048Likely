@@ -86,24 +86,9 @@ GameStepData getGameStepData({
     }
 
     for (var data in blocks) {
-      var id = data["id"];
-      var name = data["name"];
-      var type = BlockType.block.toType(data["type"]);
-      var code = BlockMergeCode.none.toCode(data["code"] ?? "");
-
-      var block = BoardItem(
-        id: id,
-        name: name,
-        type: type,
-      );
-
-      block.code = code;
-
-      if (type == BlockType.hero) {
-        block.act = 1;
-      } else if (type == BlockType.enemy) {
-        block.act = 1;
-      }
+      // add block to step.blocks
+      var block = createBlockWidthData(data);
+      step.addBlock(block);
 
       List<dynamic>? pos = data["position"];
       if (pos != null) {
@@ -123,16 +108,36 @@ GameStepData getGameStepData({
         var key = getBlockKey(block.position);
         allTargets.remove(key);
       }
-
-      int life = data["life"] ?? 1;
-      block.life = life;
-
-      int level = data["level"] ?? 1;
-      block.level = level;
-
-      // add block to step.blocks
-      step.addBlock(block);
     }
   }
   return step;
+}
+
+BoardItem createBlockWidthData(dynamic data) {
+  var id = data["id"];
+  var name = data["name"];
+  var type = BlockType.block.toType(data["type"]);
+  var code = BlockMergeCode.none.toCode(data["code"] ?? "");
+
+  var block = BoardItem(
+    id: id,
+    name: name,
+    type: type,
+  );
+
+  block.code = code;
+
+  if (type == BlockType.hero) {
+    block.act = 1;
+  } else if (type == BlockType.enemy) {
+    block.act = 1;
+  }
+
+  int life = data["life"] ?? 1;
+  block.life = life;
+
+  int level = data["level"] ?? 1;
+  block.level = level;
+
+  return block;
 }

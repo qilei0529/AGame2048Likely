@@ -152,7 +152,6 @@ getRandomBlock(
   item.life = life;
   item.level = 1;
   item.code = code;
-
   item.act = 1;
   // item.position = pos;
   return item;

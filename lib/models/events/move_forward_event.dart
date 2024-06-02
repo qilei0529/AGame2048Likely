@@ -1,7 +1,7 @@
-import 'package:flutter_game_2048_fight/models/game_system.dart';
-import 'package:flutter_game_2048_fight/models/system/board.dart';
-import 'package:flutter_game_2048_fight/models/system/game.dart';
-import 'package:flutter_game_2048_fight/models/util.dart';
+import '../game_system.dart';
+import '../system/board.dart';
+import '../system/game.dart';
+import '../util.dart';
 
 class MoveForwardEvent extends GameMoveEvent {
   GameSystem system;
@@ -22,7 +22,8 @@ class MoveForwardEvent extends GameMoveEvent {
     var leftBlock = block;
     // 获取 某一个方向上的位置。
     BoardPosition getPointPosition(BoardPosition pos) {
-      print("leftBlock ${block.id} ${move}");
+      // ignore: avoid_print
+      print("leftBlock ${block.id} $move");
       // 判断是否可以移动
       if (!checkBlockCanMove(leftBlock.type)) {
         return pos;
@@ -37,7 +38,7 @@ class MoveForwardEvent extends GameMoveEvent {
       } else {
         // 判断 当前位置是否 有对象
         var key = getBlockKey(newPos);
-        var rightBlock = system.posVos[key];
+        var rightBlock = system.getPosMap(key);
         if (rightBlock != null) {
           return pos;
         }
@@ -73,6 +74,7 @@ class MoveForwardEvent extends GameMoveEvent {
     if (!isEqualPosition(pos, leftBlock.position)) {
       // change the pos
       leftBlock.position = pos;
+      leftBlock.move -= needMove;
       // moveActions
       var moveAction = GameActionData(
         target: leftBlock.id,
@@ -85,9 +87,10 @@ class MoveForwardEvent extends GameMoveEvent {
     }
 
     var key = getBlockKey(pos);
-    system.posVos[key] = leftBlock;
+    system.setPosMap(key, leftBlock);
 
     // add action to system action
+    // ignore: avoid_print
     print("move Actions $moveActions ${leftBlock.position}");
     system.actions.addAll(moveActions);
     return null;

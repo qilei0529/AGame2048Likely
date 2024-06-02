@@ -31,18 +31,24 @@ class GameSystem {
   GameStatus status = GameStatus.start;
   // 所有 block
   final Map<String, BoardItem> _vos = {};
+  // 所有 block
+  final Map<String, BoardItem> _ground = {};
 
-  final Map<String, BoardItem> posVos = {};
+  // 临时存当前 block 位置
+  final Map<String, BoardItem> _posMap = {};
 
   // list block
   List<BoardItem> get blocks => _vos.values.toList();
-  // 记录行为
+
+  // action list
   final List<GameActionData> actions = [];
 
+  // 事件
   List<GameEvent> loopEvents = [];
   List<GameEvent> moveEvents = [];
-  List<GameEvent> move2Events = [];
+  List<GameEvent> floorEvents = [];
 
+  // block eventMap
   final Map<BlockType, List<GameEvent>> eventMap = {};
 
   BoardItem? get hero => findBlockByType(BlockType.hero);
@@ -76,13 +82,19 @@ class GameSystem {
       BlockEnemyMixinEvent(system: this),
       BlockEnemyEvent(system: this),
     ];
+    eventMap[BlockType.weapon] = [
+      BlockEnemyMixinEvent(system: this),
+    ];
+    eventMap[BlockType.heal] = [
+      BlockEnemyMixinEvent(system: this),
+    ];
+    eventMap[BlockType.element] = [
+      BlockEnemyMixinEvent(system: this),
+    ];
 
     // 移动
     moveEvents = [
       MovePointEvent(system: this),
-    ];
-    // 移动
-    move2Events = [
       MoveForwardEvent(system: this),
     ];
     loopEvents = [
@@ -177,6 +189,14 @@ class GameSystem {
     sta = 10;
   }
 
+  BoardItem? getPosMap(String key) {
+    return _posMap[key];
+  }
+
+  setPosMap(String key, BoardItem block) {
+    _posMap[key] = block;
+  }
+
   actionNextFloor() {
     status = GameStatus.start;
 
@@ -212,7 +232,6 @@ class GameSystem {
       var payload = GameLoopPayload();
       event.action(payload);
     });
-    posVos.clear();
     // ignore: avoid_print
     print("finish $point");
   }
@@ -230,7 +249,7 @@ class GameSystem {
         event.action(payload);
       });
     }
-    posVos.clear();
+    _posMap.clear();
     // ignore: avoid_print
     print("finish $point");
   }
@@ -239,7 +258,9 @@ class GameSystem {
     // 获取 所有 方向的 block
     var blocklist = getRangeBlocks(blocks, point);
     // ignore: avoid_print
-    var events = move2Events;
+    var events = [
+      MoveForwardEvent(system: this),
+    ];
     for (var block in blocklist) {
       // ignore: avoid_function_literals_in_foreach_calls
       events.forEach((item) {
@@ -248,7 +269,7 @@ class GameSystem {
         event.action(payload);
       });
     }
-    posVos.clear();
+    _posMap.clear();
     // ignore: avoid_print
     print("finish $point");
   }
