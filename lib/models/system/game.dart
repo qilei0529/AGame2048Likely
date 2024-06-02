@@ -163,6 +163,9 @@ enum GameActionType {
   // 吸收
   absorbed,
 
+  // 倒计时
+  count,
+
   // 出现 楼梯
   showStair,
 }

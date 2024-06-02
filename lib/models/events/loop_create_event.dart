@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter_game_2048_fight/models/events/block_enemy_exproll.dart';
 import 'package:flutter_game_2048_fight/models/events/block_hero_step_hurt_event.dart';
 
 import '../util.dart';
@@ -68,20 +69,20 @@ class LoopCreateEvent extends GameLoopEvent {
 
       for (var item in stepData.blocks) {
         BoardPosition pos;
-        if (item.type == BlockType.door) {
-          pos = getRandomEdge();
-        } else {
-          pos = getRandomPos();
+        if (item.position == null) {
+          if (item.type == BlockType.door) {
+            pos = getRandomEdge();
+          } else {
+            pos = getRandomPos();
+          }
+          // print("create block at: ${pos.x}, ${pos.y}");
+          // remove new key from allTargets
+          item.position = pos;
         }
-        // print("create block at: ${pos.x}, ${pos.y}");
-        // remove new key from allTargets
-        item.position = pos;
 
         var block = item.copy();
-        // add hero event
-        if (block.type == BlockType.hero) {
-          block.events.add(BlockHeroStepHurtEvent(system: system));
-        }
+
+        createBlockEvent(block: block, system: system);
         createBlocks.add(block);
         addCreateAction(item);
       }
@@ -103,6 +104,7 @@ class LoopCreateEvent extends GameLoopEvent {
           var item = getRandomBlock(list, size);
           item.position = pos;
           // allTargets.remove(key)
+          createBlockEvent(block: item, system: system);
           createBlocks.add(item);
           // create
           addCreateAction(item);
@@ -161,6 +163,29 @@ getRandomBlock(
   item.act = 1;
   // item.position = pos;
   return item;
+}
+
+createBlockEvent({
+  required BoardItem block,
+  required GameSystem system,
+}) {
+  // 根据 block 的 type
+  // 以及 code
+  // 添加
+
+  // add hero event
+  if (block.type == BlockType.hero) {
+    block.events.add(BlockHeroStepHurtEvent(system: system));
+  }
+  if (block.type == BlockType.enemy) {
+    var event = BlockEnemyExprollEvent(system: system);
+    var random = Random();
+    int maxCount = random.nextInt(3) + 2;
+    event.maxCount = maxCount;
+    event.count = maxCount;
+    block.count = event.count;
+    block.events.add(event);
+  }
 }
 
 BlockType getRandomTypeSuper({

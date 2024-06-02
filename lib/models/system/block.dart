@@ -144,6 +144,9 @@ class BoardItem extends BlockData with WithPosition, WithLevel {
   // 移动力
   int move = 0;
 
+  // 倒计时
+  int count = 0;
+
   // 是否 锁定
   bool isLock = false;
 

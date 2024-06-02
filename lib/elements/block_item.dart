@@ -38,7 +38,22 @@ class BoardItemComponent extends PositionComponent
     anchor: Anchor.center,
   );
   late String? act = "";
-  late int? level = 0;
+
+  late int level = 0;
+  late int count = 0;
+
+  final TextComponent _count = TextComponent(
+    text: "",
+    textRenderer: TextPaint(
+      style: const TextStyle(
+        fontSize: 18,
+        color: Colors.red,
+        fontWeight: FontWeight.w500,
+      ),
+    ),
+    position: Vector2(10, 10),
+    anchor: Anchor.center,
+  );
 
   BoardItemComponent({
     super.key,
@@ -46,6 +61,7 @@ class BoardItemComponent extends PositionComponent
     Vector2? size,
     Color? color,
     int? life,
+    int? count,
     GamePoint? point,
     String? cover,
     String? body,
@@ -56,6 +72,7 @@ class BoardItemComponent extends PositionComponent
     this.cover = cover ?? "cover_element";
     this.body = body ?? "element_hp";
     this.act = act ?? "";
+    this.count = count ?? 0;
     super.size = size ?? globalBlockSize;
     super.anchor = Anchor.center;
   }
@@ -110,6 +127,35 @@ class BoardItemComponent extends PositionComponent
           ],
           onComplete: () {
             life.text = "$num";
+            // change life;
+            if (end != null) {
+              end();
+            }
+            next();
+          },
+        ),
+      );
+    });
+  }
+
+  countTo({required int count, Function? end}) {
+    taskSystem.add((next) {
+      // var pos = getGroundPositionAt(p.x, p.y);
+      EffectController duration(double x) => EffectController(duration: x);
+
+      _count.add(
+        SequenceEffect(
+          [
+            ScaleEffect.to(Vector2.all(1.5), duration(0.1)),
+            ScaleEffect.to(
+              Vector2.all(1),
+              duration(0.1),
+              onComplete: () {
+                _count.text = "$count";
+              },
+            ),
+          ],
+          onComplete: () {
             // change life;
             if (end != null) {
               end();
@@ -420,6 +466,11 @@ class BoardItemComponent extends PositionComponent
     // _block.add(level);
   }
 
+  initCount() {
+    _count.text = count > 0 ? count.toString() : '';
+    _block.add(_count);
+  }
+
   @override
   void onMount() {
     _block.add(_cover);
@@ -431,6 +482,7 @@ class BoardItemComponent extends PositionComponent
 
     initAct();
     initLevel();
+    initCount();
     add(_block);
     super.onMount();
   }

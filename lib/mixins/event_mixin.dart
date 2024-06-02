@@ -143,6 +143,12 @@ extension ActionMixin on WorldScene {
           block.injure(num: item.life, end: onEnd);
           return;
         }
+        if (type == GameActionType.count) {
+          print("set Count ${action.value}");
+          var count = action.value ?? 0;
+          block.countTo(count: count, end: onEnd);
+          return;
+        }
         if (type == GameActionType.heal) {
           // print("${item.id} heal: <- ");
           block.lifeTo(num: item.life, end: onEnd);

@@ -16,10 +16,14 @@ extension BlockMixin on WorldScene {
     var body = "element_hp";
     var act;
 
+    var count;
+
     if (item.type == BlockType.enemy) {
       color = Colors.red.shade400;
       cover = "cover_enemy";
       body = "element_enemy_1";
+
+      count = item.count;
     }
     if (item.type == BlockType.hero) {
       color = Colors.blue.shade400;
@@ -49,7 +53,6 @@ extension BlockMixin on WorldScene {
       body = "element_rock";
     }
     var block = BoardItemComponent(
-      // key: ComponentKey.named(item.id),
       position: position,
       color: color,
       size: Vector2(60, 60),
@@ -57,6 +60,7 @@ extension BlockMixin on WorldScene {
       body: body,
       act: act,
       type: item.type,
+      count: item.count,
     );
     // block.debugMode = true;
     block.debugColor = Colors.black26;
