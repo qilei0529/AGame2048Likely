@@ -161,6 +161,8 @@ class BoardItem extends BlockData with WithPosition, WithLevel {
 
   BlockMergeCode code = BlockMergeCode.none;
 
+  List<GameEvent> events = [];
+
   BoardItem({
     String? id,
     String? name,

@@ -202,7 +202,6 @@ enum GameEventType {
   block,
   // 冷却 事件
   cooling,
-
   // 回合 事件
   loop,
 }

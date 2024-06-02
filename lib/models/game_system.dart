@@ -30,15 +30,17 @@ class GameSystem {
   // 游戏状态
   GameStatus status = GameStatus.start;
   // 所有 block
-  final Map<String, BoardItem> _vos = {};
-  // 所有 block
-  final Map<String, BoardItem> _ground = {};
+  final Map<String, BoardItem> _blockVos = {};
+  // 所有 地砖
+  final Map<String, BoardItem> _floorVos = {};
 
   // 临时存当前 block 位置
   final Map<String, BoardItem> _posMap = {};
 
   // list block
-  List<BoardItem> get blocks => _vos.values.toList();
+  List<BoardItem> get blocks => _blockVos.values.toList();
+  // list floors
+  List<BoardItem> get floors => _floorVos.values.toList();
 
   // action list
   final List<GameActionData> actions = [];
@@ -46,7 +48,6 @@ class GameSystem {
   // 事件
   List<GameEvent> loopEvents = [];
   List<GameEvent> moveEvents = [];
-  List<GameEvent> floorEvents = [];
 
   // block eventMap
   final Map<BlockType, List<GameEvent>> eventMap = {};
@@ -105,7 +106,7 @@ class GameSystem {
 
   BoardItem? findBlockByType(BlockType targetType) {
     BoardItem? result;
-    _vos.forEach((key, value) {
+    _blockVos.forEach((key, value) {
       if (value.type == targetType) {
         result = value;
       }
@@ -130,39 +131,44 @@ class GameSystem {
   }
 
   toStep(int step) {
+    print("step: $step");
     this.step = step;
-    var stepData = level.getStepData(
-      step: step,
-      floor: floor,
-      blocks: blocks,
-    );
-    if (stepData != null) {
-      for (var block in stepData.blocks) {
-        addBlock(block.copy());
-      }
-    }
+    // 运行
+    var event = LoopCreateEvent(system: this);
+    event.action(GameLoopPayload());
+
+    print("blocks: $blocks");
+    print("floors: $floors");
+  }
+
+  BoardItem? getFloor(String id) {
+    return _floorVos[id];
   }
 
   BoardItem? getBlock(String id) {
-    return _vos[id];
+    return _blockVos[id];
   }
 
   createBlock() {}
 
+  addFloor(BoardItem block) {
+    if (_floorVos[block.id] != null) {
+      // ignore: avoid_print
+      print("has floor exist ${block.id}");
+    }
+    _floorVos[block.id] = block;
+  }
+
   addBlock(BoardItem block) {
-    if (_vos[block.id] != null) {
+    if (_blockVos[block.id] != null) {
       // ignore: avoid_print
       print("has block exist ${block.id}");
     }
-    _vos[block.id] = block;
+    _blockVos[block.id] = block;
   }
 
   removeBlock(BoardItem block) {
-    _vos.remove(block.id);
-  }
-
-  addAction(GameActionData action) {
-    actions.add(action);
+    _blockVos.remove(block.id);
   }
 
   gameStart() {
@@ -176,7 +182,7 @@ class GameSystem {
   gameRestart() {
     status = GameStatus.start;
     // clean blocks
-    _vos.clear();
+    _blockVos.clear();
     // clean actions
     actions.clear();
 
@@ -199,13 +205,26 @@ class GameSystem {
 
   actionNextFloor() {
     status = GameStatus.start;
-
     // 过滤出 hero
-    var hero = _vos.values.firstWhere((block) => block.type == BlockType.hero);
-    _vos.clear();
+    var hero =
+        _blockVos.values.firstWhere((block) => block.type == BlockType.hero);
+
+    // clear
+    _blockVos.clear();
+    // clear
+    _floorVos.clear();
+
     // add the hero to next level
     if (hero != null) {
       addBlock(hero);
+
+      var createAction = GameActionData(
+        target: hero.id,
+        type: GameActionType.create,
+        position: hero.position,
+      );
+      // add create action
+      actions.addAll([createAction]);
     }
 
     toFloor(floor + 1);
@@ -223,7 +242,7 @@ class GameSystem {
     return [];
   }
 
-  runLoopEvents(GamePoint point) {
+  runLoopEvents() {
     // 获取 所有 方向的 block
     // ignore: avoid_print
     var events = loopEvents;
@@ -233,7 +252,7 @@ class GameSystem {
       event.action(payload);
     });
     // ignore: avoid_print
-    print("finish $point");
+    print("finish ");
   }
 
   runMoveEvents(GamePoint point) {
@@ -241,6 +260,7 @@ class GameSystem {
     var blocklist = getRangeBlocks(blocks, point);
     // ignore: avoid_print
     var events = moveEvents;
+    _posMap.clear();
     for (var block in blocklist) {
       // ignore: avoid_function_literals_in_foreach_calls
       events.forEach((item) {
@@ -249,13 +269,13 @@ class GameSystem {
         event.action(payload);
       });
     }
-    _posMap.clear();
     // ignore: avoid_print
-    print("finish $point");
+    print("finish move $point $actions");
   }
 
   runMove2Events(GamePoint point) {
     // 获取 所有 方向的 block
+    _posMap.clear();
     var blocklist = getRangeBlocks(blocks, point);
     // ignore: avoid_print
     var events = [
@@ -269,7 +289,6 @@ class GameSystem {
         event.action(payload);
       });
     }
-    _posMap.clear();
     // ignore: avoid_print
     print("finish $point");
   }
@@ -295,6 +314,53 @@ class GameSystem {
     }
     // ignore: avoid_print
     print("finish $point");
+  }
+
+  runCoolBlockEvents(GamePoint point) {
+    // 获取 所有 方向的 block
+    var blocklist = getRangeBlocks(blocks, point);
+    // ignore: avoid_print
+    print("start $point");
+    for (var block in blocklist) {
+      // 运行 所有 block Event
+      var events = block.events
+          .where((event) => event.type == GameEventType.block)
+          .toList();
+      if (events.isNotEmpty) {
+        // ignore: avoid_function_literals_in_foreach_calls
+        events.forEach((item) {
+          var event = item as GameBlockEvent;
+          var payload = GameBlockPayload(block);
+          event.action(payload);
+        });
+      }
+    }
+    // ignore: avoid_print
+    print("finish $point");
+  }
+
+  runFloorEvents() {
+    // 获取 所有 方向的 block
+    // ignore: avoid_print
+    print("start floor events");
+    for (var block in floors) {
+      // 运行 所有 block Event
+      var events = block.events
+          .where((event) => event.type == GameEventType.block)
+          .toList();
+      print("floor $events");
+      if (events.isNotEmpty) {
+        // ignore: avoid_function_literals_in_foreach_calls
+        events.forEach((item) {
+          var event = item as GameBlockEvent;
+          var payload = GameBlockPayload(block);
+          event.action(payload);
+        });
+      }
+      // ignore: avoid_function_literals_in_foreach_calls
+    }
+    // ignore: avoid_print
+    print("finish");
   }
 }
 

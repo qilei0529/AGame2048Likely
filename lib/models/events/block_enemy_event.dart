@@ -44,6 +44,7 @@ class BlockEnemyEvent extends GameBlockEvent {
           type: GameActionType.attack,
           toTarget: rightBlock.id,
           value: act,
+          point: leftBlock.point,
         );
 
         tempActions.add(attackAction);

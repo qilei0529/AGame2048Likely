@@ -1,3 +1,6 @@
+import 'package:flutter_game_2048_fight/models/events/block_door_down_stair_event.dart';
+import 'package:flutter_game_2048_fight/models/system/block.dart';
+
 import '../game_system.dart';
 import '../system/game.dart';
 import '../util.dart';
@@ -59,6 +62,20 @@ class BlockDoorEvent extends GameBlockEvent {
             value: rightBlock.level,
           );
           tempActions.add(itemAction);
+
+          // add a floor on the system
+          var block = BoardItem(type: BlockType.floor);
+          block.position = rightBlock.position;
+          // 添加 去下一层的事件。
+          block.events.add(BlockDownStireEvent(system: system));
+          system.addFloor(block);
+
+          var showAction = GameActionData(
+            target: block.id,
+            type: GameActionType.showStair,
+            position: block.position,
+          );
+          tempActions.add(showAction);
         } else if (rightBlock.life == 0) {
           // 修改 主角移动 变为 1  方便刚好落在 门的位置上
           leftBlock.move = 1;
@@ -69,12 +86,6 @@ class BlockDoorEvent extends GameBlockEvent {
             type: GameActionType.dead,
           );
           tempActions.add(deadAction);
-
-          var showAction = GameActionData(
-            target: rightBlock.id,
-            type: GameActionType.showStair,
-          );
-          tempActions.add(showAction);
         }
         system.actions.addAll(tempActions);
         return true;

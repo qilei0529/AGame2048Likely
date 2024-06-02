@@ -200,7 +200,6 @@ List<BlockType> getBlockTypes(List<BoardItem> blocks, BoardSize size) {
     if (key != BlockType.enemy) {
       var num = (value / 100 * maxSize).toInt();
       var has = vos[key] ?? 0;
-      print("num $key $num $has");
       num = max(0, num - has);
       total -= num;
       for (var i = 0; i < num; i++) {
@@ -214,8 +213,6 @@ List<BlockType> getBlockTypes(List<BoardItem> blocks, BoardSize size) {
   for (var i = 0; i < total; i++) {
     res.add(BlockType.enemy);
   }
-
-  print("lay list $res");
 
   return res;
 }

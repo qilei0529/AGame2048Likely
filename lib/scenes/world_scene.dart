@@ -25,13 +25,18 @@ import 'package:flutter_game_2048_fight/elements/block_item.dart';
 // system
 class WorldScene extends World with HasGameReference<TheGameScene> {
   late BlockComponent board;
+  late BlockComponent ground;
   late BlockComponent popup;
   late TextComponent floorLabel;
   late TextComponent stepLabel;
   late TextComponent actLabel;
   late TextComponent staLabel;
 
-  Map<String, BoardItemComponent> vos = {};
+  // 块 vos
+  Map<String, BoardItemComponent> blockVos = {};
+
+  // 地 vos
+  Map<String, Component> floorVos = {};
 
   GameSystem system;
 
@@ -43,20 +48,25 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
 
   bool isPending = false;
 
-  initBlocks() {
+  initBlocks() async {
     print("init blocks ${system.blocks}");
-    for (var item in system.blocks) {
-      var block = createBlock(item);
-      // block.setCode(item.code.toCodeString());
-      board.add(block);
 
-      // link vos with block ref
-      vos[item.id] = block;
+    if (system.actions.isNotEmpty) {
+      system.status = GameStatus.play;
+      await runActions();
     }
+    // system.actions.clear();
+
+    // for (var item in system.blocks) {
+    //   var block = createBlock(item);
+    //   // block.setCode(item.code.toCodeString());
+    //   board.add(block);
+    //   // link vos with block ref
+    //   blockVos[item.id] = block;
+    // }
   }
 
   gameStart() async {
-    print("game start");
     // 初始化 英雄
     gameRestart();
   }
@@ -65,10 +75,10 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     system.gameRestart();
     popup.removeFromParent();
 
-    vos.forEach((key, value) {
+    blockVos.forEach((key, value) {
       value.removeFromParent();
     });
-    vos.clear();
+    blockVos.clear();
 
     system.gameStart();
     initBlocks();
@@ -83,12 +93,20 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     system.actionNextFloor();
 
     // clean blocks
-    vos.forEach((key, value) {
+    blockVos.forEach((key, value) {
       value.removeFromParent();
     });
-    vos.clear();
+    blockVos.clear();
+    // clean floors
+    floorVos.forEach((key, value) {
+      value.removeFromParent();
+    });
+    floorVos.clear();
 
     initBlocks();
+    print(system.blocks);
+    print(system.floors);
+
     updateStep();
     updateFloor();
     updateAct();
@@ -121,9 +139,14 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
   }
 
   initBoard() {
-    board = BlockComponent(
+    ground = BlockComponent(
       size: globalBoardSize,
       color: Colors.black87,
+      position: Vector2(0, -60),
+    );
+    board = BlockComponent(
+      size: globalBoardSize,
+      color: Colors.transparent,
       position: Vector2(0, -60),
     );
 
@@ -145,6 +168,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
       count++;
     }
     // board.debugMode = true;
+    add(ground);
     add(board);
   }
 
@@ -159,7 +183,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
   updateAct() {
     var hero = system.hero;
     if (hero != null) {
-      var block = vos[system.hero!.id];
+      var block = blockVos[system.hero!.id];
       if (block != null) {
         var act = max(hero.act, system.act);
         block.setAct(act);
@@ -253,10 +277,13 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     // update act and sta
     updateAct();
     updateSta();
-
     system.runMove2Events(point);
     await runActions();
-    system.runLoopEvents(point);
+    system.runCoolBlockEvents(point);
+    await runActions();
+    system.runFloorEvents();
+    await runActions();
+    system.runLoopEvents();
     await runActions();
 
     // update step display
@@ -272,7 +299,6 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     runAcitonList(List<GameActionData> list) async {
       var innerTaskSystem = TaskSystem(maxQueue: 30);
       for (var action in list) {
-        print("action ${action.type} action ${action.target}");
         // ignore: prefer_function_declarations_over_variables
         var task = (Function next) => runAction(action, next);
         innerTaskSystem.add(task);

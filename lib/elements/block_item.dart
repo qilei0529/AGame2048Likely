@@ -299,6 +299,7 @@ class BoardItemComponent extends PositionComponent
   attack({Function? end}) {
     taskSystem.add((next) {
       EffectController duration(double x) => EffectController(duration: x);
+      print("aact ------------- > ${point}");
       var p = point.toPosition();
       add(
         SequenceEffect(

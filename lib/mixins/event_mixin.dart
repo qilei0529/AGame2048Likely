@@ -1,3 +1,6 @@
+import 'package:flame/extensions.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_game_2048_fight/elements/block.dart';
 import 'package:flutter_game_2048_fight/models/system/block.dart';
 import 'package:flutter_game_2048_fight/models/system/game.dart';
 import 'package:flutter_game_2048_fight/scenes/world_scene.dart';
@@ -7,17 +10,36 @@ import 'package:flutter_game_2048_fight/mixins/block_mixin.dart';
 extension ActionMixin on WorldScene {
   runAction(GameActionData action, Function onEnd) {
     // no actions
-    print(system.status);
     if (system.status != GameStatus.play) {
       onEnd();
       return;
     }
 
     var type = action.type;
+    // 出现 楼梯
+    if (type == GameActionType.showStair) {
+      // 新建一个 地板 样式 楼梯
+      var item = system.getFloor(action.target);
+      if (item != null) {
+        var p = item.position;
+        var pos = getBoardPositionAt(p.x, p.y);
+        var block = BlockComponent(
+          size: Vector2(60, 60),
+          color: Colors.yellow.shade100,
+          position: pos,
+        );
+        ground.add(block);
+        // set ref
+        floorVos[item.id] = block;
+      }
+      onEnd();
+      return;
+    }
+
     var item = system.getBlock(action.target);
 
     if (type == GameActionType.enter) {
-      var block = vos[action.target];
+      var block = blockVos[action.target];
       if (item != null && block != null) {
         // to play enter
         block.dead(end: () {
@@ -30,8 +52,9 @@ extension ActionMixin on WorldScene {
       }
       return;
     }
+
     if (type == GameActionType.fade) {
-      var block = vos[action.target];
+      var block = blockVos[action.target];
       if (item != null && block != null) {
         block.fadeTo(end: () {
           block.removeFromParent();
@@ -44,7 +67,7 @@ extension ActionMixin on WorldScene {
       return;
     }
     if (type == GameActionType.dead) {
-      var block = vos[action.target];
+      var block = blockVos[action.target];
       if (item != null && block != null) {
         block.dead(end: () {
           block.removeFromParent();
@@ -60,7 +83,7 @@ extension ActionMixin on WorldScene {
       return;
     }
     if (type == GameActionType.absorbed) {
-      var block = vos[action.target];
+      var block = blockVos[action.target];
       if (item != null && block != null) {
         block.dead(end: () {
           block.removeFromParent();
@@ -78,7 +101,7 @@ extension ActionMixin on WorldScene {
         Future.delayed(const Duration(milliseconds: 300), () {
           var block = createBlock(item);
           board.add(block);
-          vos[item.id] = block;
+          blockVos[item.id] = block;
           if (block != null) {
             block.born(end: onEnd);
           } else {
@@ -92,10 +115,11 @@ extension ActionMixin on WorldScene {
     }
 
     if (item != null) {
-      var block = vos[action.target];
+      var block = blockVos[action.target];
       if (block != null) {
         // 处理 turn
         if (type == GameActionType.turn) {
+          print("${item.id} turen: ------ > ${action.point}");
           if (action.point != null) {
             block.point = action.point!;
           }
@@ -109,7 +133,8 @@ extension ActionMixin on WorldScene {
         }
         // attac
         if (type == GameActionType.attack) {
-          // print("${item.id} attck: -> ");
+          // ignore: avoid_print
+          print("${item.id} attck: ------ > ${item.point}");
           block.attack(end: onEnd);
           return;
         }

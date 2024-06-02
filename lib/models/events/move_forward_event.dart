@@ -23,7 +23,6 @@ class MoveForwardEvent extends GameMoveEvent {
     // 获取 某一个方向上的位置。
     BoardPosition getPointPosition(BoardPosition pos) {
       // ignore: avoid_print
-      print("leftBlock ${block.id} $move");
       // 判断是否可以移动
       if (!checkBlockCanMove(leftBlock.type)) {
         return pos;
@@ -58,18 +57,6 @@ class MoveForwardEvent extends GameMoveEvent {
     // get new pos by pos;
     var pos = getPointPosition(leftBlock.position);
 
-    if (point != leftBlock.point) {
-      // change the data
-      leftBlock.point = point;
-      // turnAction
-      var turnAction = GameActionData(
-        target: leftBlock.id,
-        type: GameActionType.turn,
-        point: point,
-      );
-      turnAction.level = 1;
-      moveActions.add(turnAction);
-    }
     // is dif pos; need to move;
     if (!isEqualPosition(pos, leftBlock.position)) {
       // change the pos
@@ -79,7 +66,7 @@ class MoveForwardEvent extends GameMoveEvent {
       var moveAction = GameActionData(
         target: leftBlock.id,
         type: GameActionType.move,
-        point: point,
+        point: leftBlock.point,
         position: pos,
       );
       moveAction.level = 1;

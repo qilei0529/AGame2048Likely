@@ -9,12 +9,29 @@ class MovePointEvent extends GameMoveEvent {
 
   @override
   bool? action(payload) {
-    var block = payload.block;
+    var leftBlock = payload.block;
     var point = payload.point;
 
     // 初始化 行动力 通常 跟敏捷有关
-    block.move = block.agi;
-    block.point = point;
+    leftBlock.move = leftBlock.agi;
+
+    print("turn? $point ${leftBlock.point}");
+
+    if (point != leftBlock.point) {
+      // change the data
+      leftBlock.point = point;
+      // turnAction
+      var turnAction = GameActionData(
+        target: leftBlock.id,
+        type: GameActionType.turn,
+        point: leftBlock.point,
+      );
+
+      turnAction.level = 1;
+
+      system.actions.addAll([turnAction]);
+    }
+    // todo add point action
 
     return null;
   }
