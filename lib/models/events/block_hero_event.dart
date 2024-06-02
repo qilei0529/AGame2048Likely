@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:flutter_game_2048_fight/models/events/block_enemy_event.dart';
+
 import '../game_system.dart';
 import '../system/block.dart';
 import '../system/game.dart';
@@ -53,7 +55,6 @@ class BlockHeroEvent extends GameBlockEvent {
           system.act = max(act - 1, 0);
         }
 
-        var rightLife = max(rightBlock.life - act, 0);
         // turnAction
         var attackAction = GameActionData(
           target: leftBlock.id,
@@ -64,27 +65,12 @@ class BlockHeroEvent extends GameBlockEvent {
 
         tempActions.add(attackAction);
 
-        // do right block
-        if (rightLife != rightBlock.life) {
-          rightBlock.life = rightLife;
-          var injureAction = GameActionData(
-            target: rightBlock.id,
-            type: GameActionType.injure,
-            value: act,
-            life: rightLife,
-          );
-          tempActions.add(injureAction);
+        reduceInjourAction(
+          block: rightBlock,
+          act: act,
+          system: system,
+        );
 
-          // dead
-          if (rightLife <= 0) {
-            rightBlock.isDead = true;
-            var deadAction = GameActionData(
-              target: rightBlock.id,
-              type: GameActionType.dead,
-            );
-            tempActions.add(deadAction);
-          }
-        }
         system.actions.addAll(tempActions);
         return true;
       }

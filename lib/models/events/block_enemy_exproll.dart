@@ -1,3 +1,5 @@
+import 'package:flutter_game_2048_fight/models/events/block_enemy_event.dart';
+
 import '../game_system.dart';
 import '../system/game.dart';
 
@@ -32,14 +34,11 @@ class BlockEnemyExprollEvent extends GameBlockEvent {
       countAction.level = 1;
       system.actions.add(countAction);
 
-      leftBlock.life -= 1;
-      var injourAction = GameActionData(
-        target: leftBlock.id,
-        type: GameActionType.injure,
-        value: leftBlock.level,
-        life: leftBlock.life,
+      reduceInjourAction(
+        block: leftBlock,
+        act: 1,
+        system: system,
       );
-      system.actions.add(injourAction);
 
       reset();
 
@@ -52,12 +51,6 @@ class BlockEnemyExprollEvent extends GameBlockEvent {
         );
         countAction.level = 3;
         system.actions.add(countAction);
-      } else {
-        var deadAction = GameActionData(
-          target: leftBlock.id,
-          type: GameActionType.dead,
-        );
-        system.actions.add(deadAction);
       }
     } else {
       print("block count ------- > $count");

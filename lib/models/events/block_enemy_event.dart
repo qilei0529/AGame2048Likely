@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:flutter_game_2048_fight/models/system/block.dart';
+
 import '../game_system.dart';
 import '../system/game.dart';
 import '../util.dart';
@@ -46,31 +48,45 @@ class BlockEnemyEvent extends GameBlockEvent {
           value: act,
           point: leftBlock.point,
         );
-
         tempActions.add(attackAction);
 
-        var rightLife = max(0, rightBlock.life - act);
-        rightBlock.life = rightLife;
-
-        var injureAction = GameActionData(
-          target: rightBlock.id,
-          type: GameActionType.injure,
-          value: act,
-          life: rightLife,
+        reduceInjourAction(
+          block: rightBlock,
+          act: act,
+          system: system,
         );
-        tempActions.add(injureAction);
-
-        if (rightLife == 0) {
-          rightBlock.isDead = true;
-          var deadAction = GameActionData(
-            target: rightBlock.id,
-            type: GameActionType.dead,
-          );
-          tempActions.add(deadAction);
-        }
       }
     }
     system.actions.addAll(tempActions);
     return null;
+  }
+}
+
+reduceInjourAction({
+  required BoardItem block,
+  required int act,
+  required GameSystem system,
+}) {
+  var life = max(0, block.life - act);
+
+  if (block.life != life) {
+    block.life = life;
+
+    var injureAction = GameActionData(
+      target: block.id,
+      type: GameActionType.injure,
+      value: act,
+      life: life,
+    );
+    system.actions.add(injureAction);
+
+    if (life == 0) {
+      block.isDead = true;
+      var deadAction = GameActionData(
+        target: block.id,
+        type: GameActionType.dead,
+      );
+      system.actions.add(deadAction);
+    }
   }
 }

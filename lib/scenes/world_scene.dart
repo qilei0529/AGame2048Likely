@@ -279,14 +279,16 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     await runActions();
     system.runFloorEvents();
     await runActions();
-    system.runLoopEvents();
-    await runActions();
 
     updateAct();
     updateSta();
 
     // update step display
     updateStep();
+
+    system.runLoopEvents();
+    await runActions();
+
     // system.checkStepForNext();
     // await runActions();
 
