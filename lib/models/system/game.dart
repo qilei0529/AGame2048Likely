@@ -34,6 +34,19 @@ extension PointTypeExtension on GamePoint {
     }
   }
 
+  GamePoint toBack() {
+    switch (this) {
+      case GamePoint.left:
+        return GamePoint.right;
+      case GamePoint.right:
+        return GamePoint.left;
+      case GamePoint.top:
+        return GamePoint.bottom;
+      case GamePoint.bottom:
+        return GamePoint.top;
+    }
+  }
+
   BoardPosition addPosition(BoardPosition pos) {
     switch (this) {
       case GamePoint.left:
@@ -157,6 +170,8 @@ enum GameActionType {
 
   // 新建
   create,
+  // 新建
+  createFloor,
 
   // 升级
   upgrade,

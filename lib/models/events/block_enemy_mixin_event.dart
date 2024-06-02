@@ -20,9 +20,9 @@ class BlockEnemyMixinEvent extends GameBlockEvent {
     // for (var leftBlock in blocks) {
     var point = leftBlock.point;
     // 获取 block 射程范围内 是否有 对象
-    var attackPoisiton = point.addPosition(leftBlock.position);
+    var mergePoisiton = point.toBack().addPosition(leftBlock.position);
 
-    var key = getBlockKey(attackPoisiton);
+    var key = getBlockKey(mergePoisiton);
     var rightBlock = vos[key];
     if (rightBlock != null) {
       var canMerge = false;
@@ -36,21 +36,21 @@ class BlockEnemyMixinEvent extends GameBlockEvent {
         var level = min(rightBlock.level + 1, 3);
         if (level != rightBlock.level) {
           // turnAction
-          leftBlock.isDead = true;
+          rightBlock.isDead = true;
           var eatAction = GameActionData(
-            target: leftBlock.id,
+            target: rightBlock.id,
             type: GameActionType.absorbed,
           );
           tempActions.add(eatAction);
           //
-          rightBlock.level = level;
-          rightBlock.life += leftBlock.life;
-          rightBlock.act += 1;
+          leftBlock.level = level;
+          leftBlock.life += rightBlock.life;
+          leftBlock.act += 1;
           var upgradeAction = GameActionData(
-            target: rightBlock.id,
+            target: leftBlock.id,
             type: GameActionType.upgrade,
-            value: rightBlock.level,
-            life: rightBlock.life,
+            value: leftBlock.level,
+            life: leftBlock.life,
           );
           tempActions.add(upgradeAction);
 
