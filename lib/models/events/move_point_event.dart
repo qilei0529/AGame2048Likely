@@ -15,8 +15,6 @@ class MovePointEvent extends GameMoveEvent {
     // 初始化 行动力 通常 跟敏捷有关
     leftBlock.move = leftBlock.agi;
 
-    print("turn? $point ${leftBlock.point}");
-
     if (point != leftBlock.point) {
       // change the data
       leftBlock.point = point;

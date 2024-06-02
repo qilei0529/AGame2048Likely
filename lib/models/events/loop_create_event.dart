@@ -1,7 +1,9 @@
 import 'dart:math';
 
-import 'package:flutter_game_2048_fight/models/events/block_enemy_exproll.dart';
-import 'package:flutter_game_2048_fight/models/events/block_hero_step_hurt_event.dart';
+import '../events/block_enemy_exproll.dart';
+import '../events/block_hero_step_hurt_event.dart';
+import '../events/floor_green_event.dart';
+import '../events/floor_red_event.dart';
 
 import '../util.dart';
 import '../game_system.dart';
@@ -24,29 +26,6 @@ class LoopCreateEvent extends GameLoopEvent {
     var floor = system.floor;
     var allTargets = getExtraBlocks(blocks: blocks, size: size);
 
-    BoardPosition getRandomPos() {
-      List<BoardPosition> list = allTargets.values.toList();
-      var random = Random();
-      int index = random.nextInt(list.length);
-      var pos = list[index];
-      allTargets.remove(getBlockKey(pos));
-      return pos;
-    }
-
-    getRandomEdge() {
-      List<BoardPosition> list = [];
-      allTargets.values.forEach((pos) {
-        if (pos.x == 1 || pos.y == 1) {
-          list.add(pos);
-        }
-      });
-      var random = Random();
-      int index = random.nextInt(list.length);
-      var pos = list[index];
-      allTargets.remove(getBlockKey(pos));
-      return pos;
-    }
-
     List<GameActionData> createActions = [];
     List<BoardItem> createBlocks = [];
     addCreateAction(BoardItem block) {
@@ -68,19 +47,21 @@ class LoopCreateEvent extends GameLoopEvent {
       print(stepData.blocks);
 
       for (var item in stepData.blocks) {
+        var block = item.copy();
         BoardPosition pos;
-        if (item.position == null) {
-          if (item.type == BlockType.door) {
-            pos = getRandomEdge();
+        if (item.position.x == -1) {
+          if (block.type == BlockType.door) {
+            pos = getRandomEdge(allTargets.values.toList());
           } else {
-            pos = getRandomPos();
+            pos = getRandomPos(allTargets.values.toList());
           }
+          // remove key vos
           // print("create block at: ${pos.x}, ${pos.y}");
           // remove new key from allTargets
-          item.position = pos;
+          block.position = pos;
         }
-
-        var block = item.copy();
+        // remove the pos
+        allTargets.remove(getBlockKey(block.position));
 
         createBlockEvent(block: block, system: system);
         createBlocks.add(block);
@@ -89,13 +70,13 @@ class LoopCreateEvent extends GameLoopEvent {
     } else if (step % 1 == 0) {
       print("create a random block --------------- ");
 
-      // 每次 生成 随机 3个
+      // 每次 生成 随机 2个  floor
       var random = Random();
       int num = random.nextInt(2) + 1;
 
       for (var i = 0; i < num; i++) {
         if (allTargets.isNotEmpty) {
-          var pos = getRandomPos();
+          var pos = getRandomPos(allTargets.values.toList());
 
           List<BoardItem> list = [];
           list.addAll(blocks);
@@ -103,11 +84,38 @@ class LoopCreateEvent extends GameLoopEvent {
           print("create list length: ${list.length}");
           var item = getRandomBlock(list, size);
           item.position = pos;
-          // allTargets.remove(key)
           createBlockEvent(block: item, system: system);
           createBlocks.add(item);
           // create
           addCreateAction(item);
+        }
+      }
+
+      // 每次 生成 随机 个
+      var allFloors = getExtraBlocks(blocks: system.floors, size: size);
+      int count = Random().nextInt(4);
+      print("create floor list length: ${count}");
+      if (count > 0) {
+        for (var i = 0; i < count; i++) {
+          if (allFloors.isNotEmpty) {
+            var pos = getRandomPos(allFloors.values.toList());
+            var block = BoardItem(
+              name: "name",
+              type: BlockType.floor,
+            );
+            block.position = pos;
+            allFloors.remove(getBlockKey(pos));
+            // 添加事件
+            createFloorEvent(block: block, system: system);
+            system.addFloor(block);
+
+            var createAction = GameActionData(
+              target: block.id,
+              type: GameActionType.createFloor,
+              position: block.position,
+            );
+            system.actions.add(createAction);
+          }
         }
       }
     }
@@ -163,6 +171,26 @@ getRandomBlock(
   item.act = 1;
   // item.position = pos;
   return item;
+}
+
+createFloorEvent({
+  required BoardItem block,
+  required GameSystem system,
+}) {
+  // 随机
+  var num = Random().nextInt(2);
+  print(num);
+  if (num == 1) {
+    block.code = BlockMergeCode.red;
+    var event = FloorRedEvent(system: system);
+    event.type = GameEventType.floor;
+    block.events.add(event);
+  } else if (num == 0) {
+    block.code = BlockMergeCode.green;
+    var event = FloorGreenEvent(system: system);
+    event.type = GameEventType.move;
+    block.events.add(event);
+  }
 }
 
 createBlockEvent({
@@ -246,4 +274,29 @@ List<BlockType> getBlockTypes(List<BoardItem> blocks, BoardSize size) {
   }
 
   return res;
+}
+
+BoardPosition getRandomPos(List<BoardPosition> list) {
+  var random = Random();
+  int index = random.nextInt(list.length);
+  var pos = list[index];
+  return pos;
+}
+
+BoardPosition getRandomEdge(List<BoardPosition> lists) {
+  List<BoardPosition> edgelist = [];
+  // ignore: avoid_function_literals_in_foreach_calls
+  lists.forEach((pos) {
+    if (pos.x == 1 || pos.y == 1) {
+      edgelist.add(pos);
+    }
+  });
+  print("edgelist ${edgelist}");
+  edgelist.forEach((e) {
+    print("${e.x}, ${e.y}");
+  });
+  var random = Random();
+  int index = random.nextInt(edgelist.length);
+  var pos = edgelist[index];
+  return pos;
 }

@@ -56,35 +56,6 @@ GameStepData getGameStepData({
   List<dynamic>? blocks = item["blocks"];
 
   if (blocks != null) {
-    // all target
-    var allTargets = getExtraBlocks(
-      blocks: leftBlocks ?? [],
-      size: size,
-    );
-    getRandomPos() {
-      List<BoardPosition> list = allTargets.values.toList();
-      var random = Random();
-      int index = random.nextInt(list.length);
-      var pos = list[index];
-      allTargets.remove(getBlockKey(pos));
-      return pos;
-    }
-
-    getRandomEdge() {
-      List<BoardPosition> list = [];
-      allTargets.values.forEach((pos) {
-        if (pos.x == 1 || pos.y == 1) {
-          list.add(pos);
-        }
-      });
-      print("the edge list $list");
-      var random = Random();
-      int index = random.nextInt(list.length);
-      var pos = list[index];
-      allTargets.remove(getBlockKey(pos));
-      return pos;
-    }
-
     for (var data in blocks) {
       // add block to step.blocks
       var block = createBlockWidthData(data);
@@ -95,18 +66,10 @@ GameStepData getGameStepData({
         var x = pos[0] as int;
         var y = pos[1] as int;
         block.position = BoardPosition(x, y);
-        var key = getBlockKey(block.position);
-        allTargets.remove(key);
       } else {
         BoardPosition pos;
-        if (block.type == BlockType.door) {
-          pos = getRandomEdge();
-        } else {
-          pos = getRandomPos();
-        }
+        pos = BoardPosition(-1, -1);
         block.position = pos;
-        var key = getBlockKey(block.position);
-        allTargets.remove(key);
       }
     }
   }

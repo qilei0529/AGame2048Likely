@@ -86,6 +86,8 @@ enum BlockMergeCode {
   weapon,
   door,
   rock,
+  green,
+  red,
   none,
 }
 
@@ -128,6 +130,11 @@ extension BlockMergeCodeExtension on BlockMergeCode {
         return "rock";
       case BlockMergeCode.none:
         return "none";
+
+      case BlockMergeCode.green:
+        return "green";
+      case BlockMergeCode.red:
+        return "red";
     }
   }
 }

@@ -36,6 +36,17 @@ extension ActionMixin on WorldScene {
       return;
     }
 
+    if (type == GameActionType.removeFloor) {
+      var block = floorVos[action.target];
+      var item = system.getFloor(action.target);
+      if (item != null && block != null) {
+        block.removeFromParent();
+        system.removeFloor(item);
+      }
+      onEnd();
+      return;
+    }
+
     var item = system.getBlock(action.target);
 
     if (type == GameActionType.enter) {
@@ -98,17 +109,36 @@ extension ActionMixin on WorldScene {
     // do create
     if (type == GameActionType.create) {
       if (item != null) {
-        Future.delayed(const Duration(milliseconds: 300), () {
-          var block = createBlock(item);
-          board.add(block);
-          blockVos[item.id] = block;
-          if (block != null) {
-            block.born(end: onEnd);
-          } else {
-            onEnd();
-          }
-        });
+        var block = createBlock(item);
+        board.add(block);
+        blockVos[item.id] = block;
+        if (block != null) {
+          block.born(end: onEnd);
+        } else {
+          onEnd();
+        }
       } else {
+        onEnd();
+      }
+      return;
+    }
+    // do create
+    if (type == GameActionType.createFloor) {
+      // 新建一个 地板 样式 楼梯
+      var item = system.getFloor(action.target);
+      if (item != null) {
+        var p = item.position;
+        var pos = getBoardPositionAt(p.x, p.y);
+        var block = BlockComponent(
+          size: Vector2(58, 58),
+          color: item.code == BlockMergeCode.green
+              ? Colors.green.shade100
+              : Colors.red.shade100,
+          position: pos,
+        );
+        ground.add(block);
+        // set ref
+        floorVos[item.id] = block;
         onEnd();
       }
       return;
@@ -120,7 +150,7 @@ extension ActionMixin on WorldScene {
         // 处理 turn
         if (type == GameActionType.turn) {
           print("${item.id} turen: ------ > ${action.point}");
-            block.point = action.point!;
+          block.point = action.point!;
           block.turnTo(
             point: action.point!,
             end: onEnd,

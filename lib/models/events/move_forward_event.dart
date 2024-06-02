@@ -15,18 +15,44 @@ class MoveForwardEvent extends GameMoveEvent {
     var point = payload.point;
     var size = system.size;
 
-    int move = block.move;
+    // 有块事件是 move 事件
+    var events = block.events
+        .where((event) => event.type == GameEventType.move)
+        .toList();
 
+    // count need move
     int needMove = 0;
 
     var leftBlock = block;
     // 获取 某一个方向上的位置。
     BoardPosition getPointPosition(BoardPosition pos) {
       // ignore: avoid_print
+
+      // 判断 当前块是否 有 block.move事件
+      if (events.isNotEmpty) {
+        events.forEach((event) {
+          event.action(payload);
+        });
+      }
+
+      // 判断 当前块 是否有 floor 事件
+      var floor = system.getFloorAt(pos);
+      if (floor != null && floor.events.isNotEmpty) {
+        var events = floor.events
+            .where((event) => event.type == GameEventType.move)
+            .toList();
+        if (events.isNotEmpty) {
+          events.forEach((event) {
+            event.action(GameBlockPayload(leftBlock));
+          });
+        }
+      }
+
       // 判断是否可以移动
       if (!checkBlockCanMove(leftBlock.type)) {
         return pos;
       }
+
       // 获取 新位置
       var newPos = point.addPosition(pos);
       // 判断 新位置是否到边界
@@ -34,22 +60,21 @@ class MoveForwardEvent extends GameMoveEvent {
       // 返回 当前 pos
       if (isEdge) {
         return pos;
-      } else {
-        // 判断 当前位置是否 有对象
-        var key = getBlockKey(newPos);
-        var rightBlock = system.getPosMap(key);
-        if (rightBlock != null) {
-          return pos;
-        }
-        if (move <= 0) {
-          return pos;
-        }
-        // move
-        move -= 1;
-        // need move
-        needMove += 1;
-        return getPointPosition(newPos);
       }
+
+      // 判断 当前位置是否 有对象
+      var key = getBlockKey(newPos);
+      var rightBlock = system.getPosMap(key);
+      if (rightBlock != null) {
+        return pos;
+      }
+      if (leftBlock.move <= 0) {
+        return pos;
+      }
+      leftBlock.move -= 1;
+      // need move
+      needMove += 1;
+      return getPointPosition(newPos);
     }
 
     List<GameActionData> moveActions = [];
@@ -61,7 +86,6 @@ class MoveForwardEvent extends GameMoveEvent {
     if (!isEqualPosition(pos, leftBlock.position)) {
       // change the pos
       leftBlock.position = pos;
-      leftBlock.move -= needMove;
       // moveActions
       var moveAction = GameActionData(
         target: leftBlock.id,

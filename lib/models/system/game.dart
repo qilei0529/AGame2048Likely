@@ -173,6 +173,9 @@ enum GameActionType {
   // 新建
   createFloor,
 
+  // 移除 floor
+  removeFloor,
+
   // 升级
   upgrade,
   // 吸收
@@ -218,6 +221,8 @@ enum GameEventType {
   move,
   // 块 事件
   block,
+  // 地板 事件
+  floor,
   // 冷却 事件
   cooling,
   // 回合 事件

@@ -80,13 +80,20 @@ reduceInjourAction({
     );
     system.actions.add(injureAction);
 
-    if (life == 0) {
-      block.isDead = true;
-      var deadAction = GameActionData(
-        target: block.id,
-        type: GameActionType.dead,
-      );
-      system.actions.add(deadAction);
-    }
+    reduceDeadAction(block: block, system: system);
+  }
+}
+
+reduceDeadAction({
+  required BoardItem block,
+  required GameSystem system,
+}) {
+  if (block.life == 0) {
+    block.isDead = true;
+    var deadAction = GameActionData(
+      target: block.id,
+      type: GameActionType.dead,
+    );
+    system.actions.add(deadAction);
   }
 }

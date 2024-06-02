@@ -2,6 +2,8 @@
 
 // step
 
+import 'util.dart';
+
 import 'events/loop_create_event.dart';
 import 'events/loop_step_event.dart';
 //
@@ -31,6 +33,7 @@ class GameSystem {
   GameStatus status = GameStatus.start;
   // 所有 block
   final Map<String, BoardItem> _blockVos = {};
+
   // 所有 地砖
   final Map<String, BoardItem> _floorVos = {};
 
@@ -41,6 +44,10 @@ class GameSystem {
   List<BoardItem> get blocks => _blockVos.values.toList();
   // list floors
   List<BoardItem> get floors => _floorVos.values.toList();
+
+  // pos vos
+  Map<String, BoardItem> get blockPosVos => getBlockPosVos(blocks: blocks);
+  Map<String, BoardItem> get floorPosVos => getBlockPosVos(blocks: floors);
 
   // action list
   final List<GameActionData> actions = [];
@@ -157,6 +164,20 @@ class GameSystem {
       print("has floor exist ${block.id}");
     }
     _floorVos[block.id] = block;
+  }
+
+  removeFloor(BoardItem block) {
+    _floorVos.remove(block.id);
+  }
+
+  BoardItem? getFloorAt(BoardPosition position) {
+    var key = getBlockKey(position);
+    return floorPosVos[key];
+  }
+
+  BoardItem? getBlockAt(BoardPosition position) {
+    var key = getBlockKey(position);
+    return blockPosVos[key];
   }
 
   addBlock(BoardItem block) {
@@ -346,9 +367,10 @@ class GameSystem {
     for (var block in floors) {
       // 运行 所有 block Event
       var events = block.events
-          .where((event) => event.type == GameEventType.block)
+          .where((event) => event.type == GameEventType.floor)
           .toList();
-      print("floor $events");
+      // has
+      print("floor events ============== $events");
       if (events.isNotEmpty) {
         // ignore: avoid_function_literals_in_foreach_calls
         events.forEach((item) {
