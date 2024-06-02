@@ -63,7 +63,7 @@ class GameSystem {
   int act = 0;
 
   // 体力值
-  int sta = 10;
+  int sta = 0;
 
   // 初始化
   GameSystem() {

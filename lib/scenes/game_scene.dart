@@ -59,8 +59,6 @@ class TheGameScene extends FlameGame {
         boardImage,
         await rootBundle.loadString('assets/sheets/block.xml'),
       );
-      print(elements);
-      print(blocks);
 
       var item = elements.getSprite("element_hp");
       print(item);
@@ -123,7 +121,6 @@ class XmlSpriteSheet {
       final height = double.parse(node.getAttribute('height')!);
       _rects[name] = Rect.fromLTWH(x, y, width, height);
     }
-    print(_rects);
   }
 
   final ui.Image image;

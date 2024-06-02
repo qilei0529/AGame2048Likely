@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:flutter_game_2048_fight/models/events/block_hero_step_hurt_event.dart';
+
 import '../util.dart';
 import '../game_system.dart';
 import '../system/block.dart';
@@ -71,11 +73,16 @@ class LoopCreateEvent extends GameLoopEvent {
         } else {
           pos = getRandomPos();
         }
-        print("create block at: ${pos.x}, ${pos.y}");
+        // print("create block at: ${pos.x}, ${pos.y}");
         // remove new key from allTargets
         item.position = pos;
 
-        createBlocks.add(item.copy());
+        var block = item.copy();
+        // add hero event
+        if (block.type == BlockType.hero) {
+          block.events.add(BlockHeroStepHurtEvent(system: system));
+        }
+        createBlocks.add(block);
         addCreateAction(item);
       }
     } else if (step % 1 == 0) {
@@ -94,7 +101,6 @@ class LoopCreateEvent extends GameLoopEvent {
           list.addAll(createBlocks);
           print("create list length: ${list.length}");
           var item = getRandomBlock(list, size);
-
           item.position = pos;
           // allTargets.remove(key)
           createBlocks.add(item);
@@ -119,6 +125,11 @@ getRandomBlock(
   BoardSize size,
 ) {
   var type = getRandomTypeSuper(blocks: blocks, size: size);
+
+  var item = BoardItem(
+    name: "name",
+    type: type,
+  );
   var code = BlockMergeCode.none;
   if (type == BlockType.hero) {
     code = BlockMergeCode.hero;
@@ -126,11 +137,6 @@ getRandomBlock(
   if (type == BlockType.enemy) {
     code = BlockMergeCode.enemy;
   }
-
-  var item = BoardItem(
-    name: "name",
-    type: type,
-  );
   var random = Random();
   int life = random.nextInt(5) + 1;
   if (type == BlockType.block) {

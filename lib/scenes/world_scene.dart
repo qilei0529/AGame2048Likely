@@ -104,8 +104,6 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     floorVos.clear();
 
     initBlocks();
-    print(system.blocks);
-    print(system.floors);
 
     updateStep();
     updateFloor();
@@ -275,8 +273,6 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     system.runBlockEvents(point);
     await runActions();
     // update act and sta
-    updateAct();
-    updateSta();
     system.runMove2Events(point);
     await runActions();
     system.runCoolBlockEvents(point);
@@ -285,6 +281,9 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     await runActions();
     system.runLoopEvents();
     await runActions();
+
+    updateAct();
+    updateSta();
 
     // update step display
     updateStep();
