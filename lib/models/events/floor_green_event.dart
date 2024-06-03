@@ -22,6 +22,7 @@ class FloorGreenEvent extends GameBlockEvent {
         target: floor.id,
         type: GameActionType.removeFloor,
       );
+      system.removeFloor(floor);
       system.actions.add(deadAction);
     }
 

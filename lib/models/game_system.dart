@@ -225,7 +225,7 @@ class GameSystem {
   }
 
   actionNextFloor() {
-    status = GameStatus.start;
+    status = GameStatus.next;
     // 过滤出 hero
     var hero =
         _blockVos.values.firstWhere((block) => block.type == BlockType.hero);
@@ -390,8 +390,8 @@ List<BoardItem> getRangeBlocks(List<BoardItem> blocks, GamePoint point) {
   // 获取 排序
   List<BoardItem> blocklist = [];
   // 获取 位置 map 地图
-  for (var element in blocks) {
-    blocklist.add(element);
+  for (var block in blocks) {
+    blocklist.add(block);
   }
   blocklist.sort((a, b) {
     var posA = a.position;

@@ -67,7 +67,9 @@ class BlockDoorEvent extends GameBlockEvent {
           var block = BoardItem(type: BlockType.floor);
           block.position = rightBlock.position;
           // 添加 去下一层的事件。
-          block.events.add(BlockDownStireEvent(system: system));
+          var event = BlockDownStireEvent(system: system);
+          event.type = GameEventType.floor;
+          block.events.add(event);
           system.addFloor(block);
 
           var showAction = GameActionData(

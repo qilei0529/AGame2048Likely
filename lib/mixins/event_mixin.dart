@@ -38,10 +38,8 @@ extension ActionMixin on WorldScene {
 
     if (type == GameActionType.removeFloor) {
       var block = floorVos[action.target];
-      var item = system.getFloor(action.target);
-      if (item != null && block != null) {
+      if (block != null) {
         block.removeFromParent();
-        system.removeFloor(item);
       }
       onEnd();
       return;
@@ -57,7 +55,8 @@ extension ActionMixin on WorldScene {
           block.removeFromParent();
           onEnd();
           if (item.type == BlockType.hero) {
-            gameNextFloor();
+            // gameNextFloor();
+            system.status = GameStatus.next;
           }
         });
       }
@@ -85,7 +84,8 @@ extension ActionMixin on WorldScene {
           system.removeBlock(item);
           onEnd();
           if (item.type == BlockType.hero) {
-            gameOver();
+            // gameOver();
+            system.status = GameStatus.end;
           }
         });
       } else {
@@ -149,6 +149,7 @@ extension ActionMixin on WorldScene {
       if (block != null) {
         // 处理 turn
         if (type == GameActionType.turn) {
+          // ignore: avoid_print
           print("${item.id} turen: ------ > ${action.point}");
           block.point = action.point!;
           block.turnTo(

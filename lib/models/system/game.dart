@@ -8,6 +8,7 @@ import 'block.dart';
 enum GameStatus {
   start,
   play,
+  next,
   pause,
   end,
 }

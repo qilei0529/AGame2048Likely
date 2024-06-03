@@ -5,7 +5,6 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
 // minxins
-import 'package:flutter_game_2048_fight/mixins/block_mixin.dart';
 import 'package:flutter_game_2048_fight/mixins/event_mixin.dart';
 
 // models
@@ -46,24 +45,14 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
 
   bool isSliding = false;
 
-  bool isPending = false;
-
   initBlocks() async {
+    // ignore: avoid_print
     print("init blocks ${system.blocks}");
 
     if (system.actions.isNotEmpty) {
       system.status = GameStatus.play;
       await runActions();
     }
-    // system.actions.clear();
-
-    // for (var item in system.blocks) {
-    //   var block = createBlock(item);
-    //   // block.setCode(item.code.toCodeString());
-    //   board.add(block);
-    //   // link vos with block ref
-    //   blockVos[item.id] = block;
-    // }
   }
 
   gameStart() async {
@@ -73,6 +62,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
 
   gameRestart() {
     system.gameRestart();
+
     popup.removeFromParent();
 
     blockVos.forEach((key, value) {
@@ -80,7 +70,6 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     });
     blockVos.clear();
 
-    system.gameStart();
     initBlocks();
     updateAct();
     updateSta();
@@ -89,7 +78,6 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
   }
 
   gameNextFloor() {
-    isPending = true;
     system.actionNextFloor();
 
     // clean blocks
@@ -110,13 +98,13 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     updateAct();
     updateSta();
 
+    // 播放什么动画之后 进入
     Future.delayed(const Duration(milliseconds: 1000), () {
-      isPending = false;
+      system.status = GameStatus.start;
     });
   }
 
   gameOver() {
-    system.gameOver();
     initPopup();
     add(popup);
   }
@@ -157,8 +145,9 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
         var pos = getBoardPositionAt(x, y);
         var block = BlockComponent(
           size: Vector2(60, 60),
-          color:
-              hasColor ? Color.fromARGB(10, 255, 255, 255) : Colors.transparent,
+          color: hasColor
+              ? const Color.fromARGB(10, 255, 255, 255)
+              : Colors.transparent,
           position: pos,
         );
         board.add(block);
@@ -239,6 +228,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
           position: Vector2(200 + top.toDouble(), 80 + left.toDouble()),
           size: Vector2(60, 60),
           onPressed: () {
+            // ignore: avoid_print
             print('on pressed $text $point');
             actionSlide(point);
           });
@@ -247,8 +237,8 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
 
     stepLabel = TextComponent(text: "step: 0", position: Vector2(200, 0));
     floorLabel = TextComponent(text: "floor: 0", position: Vector2(200, 30));
-    staLabel = TextComponent(text: "体力: 0", position: Vector2(200, 60));
-    actLabel = TextComponent(text: "武器: 0", position: Vector2(200, 90));
+    staLabel = TextComponent(text: "sta: 0", position: Vector2(200, 60));
+    actLabel = TextComponent(text: "act: 0", position: Vector2(200, 90));
     block.add(stepLabel);
     block.add(floorLabel);
     block.add(staLabel);
@@ -272,7 +262,6 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     await runActions();
     system.runBlockEvents(point);
     await runActions();
-    // update act and sta
     system.runMove2Events(point);
     await runActions();
     system.runCoolBlockEvents(point);
@@ -280,7 +269,9 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     system.runFloorEvents();
     await runActions();
 
+    // 更新 攻击力
     updateAct();
+    // 更新 体力
     updateSta();
 
     // update step display
@@ -289,10 +280,19 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     system.runLoopEvents();
     await runActions();
 
-    // system.checkStepForNext();
-    // await runActions();
-
+    // 所有动作都结束？
     isSliding = false;
+
+    checkGameStatus();
+  }
+
+  checkGameStatus() {
+    if (system.status == GameStatus.next) {
+      gameNextFloor();
+    }
+    if (system.status == GameStatus.end) {
+      gameOver();
+    }
   }
 
   runActions() async {
@@ -325,12 +325,11 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
   FutureOr<void> onLoad() {
     // init header
     initHeader();
-
     // init Board
     initBoard();
-
+    // init control
     initControl();
-
+    // init popup
     initPopup();
 
     // wait for a moment
