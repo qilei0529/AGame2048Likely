@@ -1,6 +1,9 @@
 import 'dart:math';
 
+import 'package:flutter_game_2048_fight/models/events/effect_hero_attack_event.dart';
 import 'package:flutter_game_2048_fight/models/system/block.dart';
+import 'package:flutter_game_2048_fight/models/system/board.dart';
+import 'package:flutter_game_2048_fight/models/system/level.dart';
 
 import '../game_system.dart';
 import '../system/game.dart';
@@ -99,4 +102,31 @@ reduceDeadAction({
     );
     system.actions.add(deadAction);
   }
+}
+
+reduceAttackEffect({
+  required BoardPosition position,
+  required GameSystem system,
+  int? act,
+}) {
+  // for add event to asign attack
+  // add attack event
+  var effectBlock = createEffectBlock();
+  // effect position
+  effectBlock.position = position;
+  // add attack event
+  var event = EffectHeroAttackEvent(system: system);
+  event.act = act ?? 1;
+  // bind parent
+  event.parent = effectBlock;
+  effectBlock.events.add(event);
+  // add to system
+  system.addEffect(effectBlock);
+
+  // turnAction
+  var effectAction = GameActionData(
+    target: effectBlock.id,
+    type: GameActionType.createEffect,
+  );
+  system.actions.add(effectAction);
 }

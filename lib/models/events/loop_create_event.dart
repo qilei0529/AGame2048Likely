@@ -140,29 +140,29 @@ getRandomBlock(
     name: "name",
     type: type,
   );
-  var code = BlockMergeCode.none;
+  var code = "none";
   if (type == BlockType.hero) {
-    code = BlockMergeCode.hero;
+    code = "hero";
   }
   if (type == BlockType.enemy) {
-    code = BlockMergeCode.enemy;
+    code = "enemy";
   }
   var random = Random();
   int life = random.nextInt(5) + 1;
   if (type == BlockType.block) {
-    code = BlockMergeCode.rock;
+    code = "rock";
     life = 6;
   }
   if (type == BlockType.element) {
-    code = BlockMergeCode.element;
+    code = "element";
     life = 4;
   }
   if (type == BlockType.heal) {
-    code = BlockMergeCode.heal;
+    code = "heal";
     life = 3;
   }
   if (type == BlockType.weapon) {
-    code = BlockMergeCode.weapon;
+    code = "weapon";
     life = 3;
   }
   item.life = life;
@@ -179,14 +179,13 @@ createFloorEvent({
 }) {
   // 随机
   var num = Random().nextInt(2);
-  print(num);
   if (num == 1) {
-    block.code = BlockMergeCode.red;
+    block.code = "red";
     var event = FloorRedEvent(system: system);
     event.type = GameEventType.floor;
     block.events.add(event);
   } else if (num == 0) {
-    block.code = BlockMergeCode.green;
+    block.code = "green";
     var event = FloorGreenEvent(system: system);
     event.type = GameEventType.move;
     block.events.add(event);

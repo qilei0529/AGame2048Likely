@@ -76,11 +76,18 @@ GameStepData getGameStepData({
   return step;
 }
 
+BoardItem createEffectBlock() {
+  var block = BoardItem(
+    type: BlockType.effect,
+  );
+  return block;
+}
+
 BoardItem createBlockWidthData(dynamic data) {
   var id = data["id"];
   var name = data["name"];
   var type = BlockType.block.toType(data["type"]);
-  var code = BlockMergeCode.none.toCode(data["code"] ?? "");
+  var code = data["code"] ?? "none";
 
   var block = BoardItem(
     id: id,

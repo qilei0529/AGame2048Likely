@@ -36,6 +36,8 @@ class GameSystem {
 
   // 所有 地砖
   final Map<String, BoardItem> _floorVos = {};
+  // 所有 效果块
+  final Map<String, BoardItem> _effectVos = {};
 
   // 临时存当前 block 位置
   final Map<String, BoardItem> _posMap = {};
@@ -44,6 +46,8 @@ class GameSystem {
   List<BoardItem> get blocks => _blockVos.values.toList();
   // list floors
   List<BoardItem> get floors => _floorVos.values.toList();
+  // list effects
+  List<BoardItem> get effects => _effectVos.values.toList();
 
   // pos vos
   Map<String, BoardItem> get blockPosVos => getBlockPosVos(blocks: blocks);
@@ -156,6 +160,10 @@ class GameSystem {
     return _blockVos[id];
   }
 
+  BoardItem? getEffect(String id) {
+    return _effectVos[id];
+  }
+
   createBlock() {}
 
   addFloor(BoardItem block) {
@@ -180,6 +188,14 @@ class GameSystem {
     return blockPosVos[key];
   }
 
+  addEffect(BoardItem block) {
+    if (_effectVos[block.id] != null) {
+      // ignore: avoid_print
+      print("has effect exist ${block.id}");
+    }
+    _effectVos[block.id] = block;
+  }
+
   addBlock(BoardItem block) {
     if (_blockVos[block.id] != null) {
       // ignore: avoid_print
@@ -190,6 +206,10 @@ class GameSystem {
 
   removeBlock(BoardItem block) {
     _blockVos.remove(block.id);
+  }
+
+  removeEffect(BoardItem block) {
+    _effectVos.remove(block.id);
   }
 
   gameStart() {
@@ -335,6 +355,29 @@ class GameSystem {
     }
     // ignore: avoid_print
     print("finish $point");
+  }
+
+  // 执行 效果 事件。
+  runEffectEvents() {
+    // ignore: avoid_print
+    print("start effect $effects");
+    for (var effect in effects) {
+      // 运行 所有 move Event
+      var block = getBlockAt(effect.position);
+      if (block != null) {
+        var events = effect.events;
+        if (events.isNotEmpty) {
+          // ignore: avoid_function_literals_in_foreach_calls
+          events.forEach((item) {
+            var event = item as GameBlockEvent;
+            var payload = GameBlockPayload(block);
+            event.action(payload);
+          });
+        }
+      }
+    }
+    // ignore: avoid_print
+    print("finish effect");
   }
 
   runCoolBlockEvents(GamePoint point) {

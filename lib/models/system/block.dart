@@ -23,6 +23,8 @@ enum BlockType {
   block,
   // door
   door,
+  // 效果
+  effect,
 }
 
 extension BlockTypeExtension on BlockType {
@@ -77,68 +79,6 @@ mixin WithLevel on BlockData {
   }
 }
 
-enum BlockMergeCode {
-  // 英雄
-  hero,
-  enemy,
-  element,
-  heal,
-  weapon,
-  door,
-  rock,
-  green,
-  red,
-  none,
-}
-
-extension BlockMergeCodeExtension on BlockMergeCode {
-  BlockMergeCode toCode(String code) {
-    switch (code) {
-      case "enemy":
-        return BlockMergeCode.enemy;
-      case "hero":
-        return BlockMergeCode.hero;
-      case "element":
-        return BlockMergeCode.element;
-      case "weapon":
-        return BlockMergeCode.weapon;
-      case "heal":
-        return BlockMergeCode.heal;
-      case "door":
-        return BlockMergeCode.door;
-      case "rock":
-        return BlockMergeCode.rock;
-    }
-    return BlockMergeCode.none;
-  }
-
-  String toCodeString() {
-    switch (this) {
-      case BlockMergeCode.enemy:
-        return "enemy";
-      case BlockMergeCode.hero:
-        return "hero";
-      case BlockMergeCode.element:
-        return "sp";
-      case BlockMergeCode.heal:
-        return "hp";
-      case BlockMergeCode.weapon:
-        return "act";
-      case BlockMergeCode.door:
-        return "door";
-      case BlockMergeCode.rock:
-        return "rock";
-      case BlockMergeCode.none:
-        return "none";
-
-      case BlockMergeCode.green:
-        return "green";
-      case BlockMergeCode.red:
-        return "red";
-    }
-  }
-}
-
 class BoardItem extends BlockData with WithPosition, WithLevel {
   late int life;
   late GamePoint point;
@@ -169,7 +109,8 @@ class BoardItem extends BlockData with WithPosition, WithLevel {
   // 是否 环境
   bool isTree = false;
 
-  BlockMergeCode code = BlockMergeCode.none;
+  // block 的 code
+  String code = '';
 
   List<GameEvent> events = [];
 

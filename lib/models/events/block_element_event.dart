@@ -33,7 +33,7 @@ class BlockElementEvent extends GameBlockEvent {
 
       if (canElement) {
         var code = rightBlock.code;
-        if (code == BlockMergeCode.element) {
+        if (code == "element") {
           // heal ad sp
           var heal = rightBlock.life;
           system.sta += heal;
@@ -44,7 +44,7 @@ class BlockElementEvent extends GameBlockEvent {
             value: heal,
           );
           tempActions.add(healAction);
-        } else if (code == BlockMergeCode.heal) {
+        } else if (code == "heal") {
           // heal
           var heal = rightBlock.life;
           leftBlock.life += heal;
@@ -55,7 +55,7 @@ class BlockElementEvent extends GameBlockEvent {
             value: heal,
           );
           tempActions.add(healAction);
-        } else if (code == BlockMergeCode.weapon) {
+        } else if (code == "weapon") {
           // heal
           // weapon update
           system.act += rightBlock.life;

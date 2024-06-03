@@ -28,7 +28,7 @@ extension ActionMixin on WorldScene {
           color: Colors.yellow.shade100,
           position: pos,
         );
-        ground.add(block);
+        groundLayer.add(block);
         // set ref
         floorVos[item.id] = block;
       }
@@ -38,6 +38,15 @@ extension ActionMixin on WorldScene {
 
     if (type == GameActionType.removeFloor) {
       var block = floorVos[action.target];
+      if (block != null) {
+        block.removeFromParent();
+      }
+      onEnd();
+      return;
+    }
+
+    if (type == GameActionType.removeEffect) {
+      var block = effectVos[action.target];
       if (block != null) {
         block.removeFromParent();
       }
@@ -110,7 +119,7 @@ extension ActionMixin on WorldScene {
     if (type == GameActionType.create) {
       if (item != null) {
         var block = createBlock(item);
-        board.add(block);
+        boardLayer.add(block);
         blockVos[item.id] = block;
         if (block != null) {
           block.born(end: onEnd);
@@ -131,14 +140,34 @@ extension ActionMixin on WorldScene {
         var pos = getBoardPositionAt(p.x, p.y);
         var block = BlockComponent(
           size: Vector2(58, 58),
-          color: item.code == BlockMergeCode.green
+          color: item.code == "green"
               ? Colors.green.shade100
               : Colors.red.shade100,
           position: pos,
         );
-        ground.add(block);
+        groundLayer.add(block);
         // set ref
         floorVos[item.id] = block;
+        onEnd();
+      }
+      return;
+    }
+    // do create
+    if (type == GameActionType.createEffect) {
+      // 新建一个 效果
+      var item = system.getEffect(action.target);
+      if (item != null) {
+        var p = item.position;
+        var pos = getBoardPositionAt(p.x, p.y);
+        // TODO 后续 效果 的 UI
+        var block = BlockComponent(
+          size: Vector2(58, 58),
+          color: const Color.fromARGB(0, 255, 255, 255),
+          position: pos,
+        );
+        effectLayer.add(block);
+        // set ref
+        effectVos[item.id] = block;
         onEnd();
       }
       return;
@@ -172,6 +201,7 @@ extension ActionMixin on WorldScene {
           block.attack(end: onEnd);
           return;
         }
+
         if (type == GameActionType.injure) {
           // print("${item.id} injour: <- ");
           block.injure(num: item.life, end: onEnd);

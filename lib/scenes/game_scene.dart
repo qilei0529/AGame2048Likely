@@ -61,10 +61,10 @@ class TheGameScene extends FlameGame {
       );
 
       var item = elements.getSprite("element_hp");
-      print(item);
+      // print(item);
 
       var block = blocks.getSprite("cover_hero");
-      print(item);
+      // print(item);
     } catch (e) {
       print(e);
     }

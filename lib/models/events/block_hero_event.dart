@@ -1,11 +1,14 @@
 import 'dart:math';
+import 'package:flutter_game_2048_fight/models/events/effect_hero_attack_event.dart';
 
-import 'package:flutter_game_2048_fight/models/events/block_enemy_event.dart';
+import '../util.dart';
 
 import '../game_system.dart';
+import '../system/level.dart';
 import '../system/block.dart';
 import '../system/game.dart';
-import '../util.dart';
+
+import '../events/block_enemy_event.dart';
 
 class BlockHeroEvent extends GameBlockEvent {
   GameSystem system;
@@ -65,7 +68,6 @@ class BlockHeroEvent extends GameBlockEvent {
           toTarget: rightBlock.id,
           value: act,
         );
-
         tempActions.add(attackAction);
 
         reduceInjourAction(

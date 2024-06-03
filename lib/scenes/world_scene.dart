@@ -3,9 +3,14 @@ import 'dart:math';
 // frame
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_game_2048_fight/elements/blocks/block_element.dart';
+import 'package:flutter_game_2048_fight/elements/blocks/block_enemy.dart';
+import 'package:flutter_game_2048_fight/elements/blocks/block_hero.dart';
+import 'package:flutter_game_2048_fight/elements/blocks/block_wall.dart';
 
 // minxins
 import 'package:flutter_game_2048_fight/mixins/event_mixin.dart';
+import 'package:flutter_game_2048_fight/models/system/board.dart';
 
 // models
 import 'package:flutter_game_2048_fight/models/util.dart';
@@ -23,8 +28,9 @@ import 'package:flutter_game_2048_fight/elements/block_item.dart';
 
 // system
 class WorldScene extends World with HasGameReference<TheGameScene> {
-  late BlockComponent board;
-  late BlockComponent ground;
+  late BlockComponent boardLayer;
+  late BlockComponent groundLayer;
+  late BlockComponent effectLayer;
   late BlockComponent popup;
   late TextComponent floorLabel;
   late TextComponent stepLabel;
@@ -36,6 +42,9 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
 
   // 地 vos
   Map<String, Component> floorVos = {};
+
+  // 效果 vos
+  Map<String, Component> effectVos = {};
 
   GameSystem system;
 
@@ -125,12 +134,17 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
   }
 
   initBoard() {
-    ground = BlockComponent(
+    groundLayer = BlockComponent(
       size: globalBoardSize,
       color: Colors.black87,
       position: Vector2(0, -60),
     );
-    board = BlockComponent(
+    effectLayer = BlockComponent(
+      size: globalBoardSize,
+      color: Colors.transparent,
+      position: Vector2(0, -60),
+    );
+    boardLayer = BlockComponent(
       size: globalBoardSize,
       color: Colors.transparent,
       position: Vector2(0, -60),
@@ -150,13 +164,14 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
               : Colors.transparent,
           position: pos,
         );
-        board.add(block);
+        boardLayer.add(block);
       }
       count++;
     }
     // board.debugMode = true;
-    add(ground);
-    add(board);
+    add(groundLayer);
+    add(boardLayer);
+    add(effectLayer);
   }
 
   updateStep() {
@@ -262,10 +277,17 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     await runActions();
     system.runBlockEvents(point);
     await runActions();
+
+    // check effect
+    // system.runEffectEvents();
+    // await runActions();
+
     system.runMove2Events(point);
     await runActions();
+
     system.runCoolBlockEvents(point);
     await runActions();
+
     system.runFloorEvents();
     await runActions();
 
@@ -319,6 +341,28 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     }
     system.actions.clear();
     await taskSystem.run();
+
+    // do while system action is empty
+    if (system.actions.isNotEmpty) {
+      await runActions();
+    }
+  }
+
+  initHero() {
+    var block = BlockHeroItemWidget(pos: BoardPosition(1, 1));
+    boardLayer.add(block);
+    var block2 = BlockWallItemWidget(pos: BoardPosition(2, 1));
+    boardLayer.add(block2);
+    var block3 = BlockEnemyItemWidget(pos: BoardPosition(3, 1));
+    boardLayer.add(block3);
+    var block4 = BlockElementItemWidget(pos: BoardPosition(1, 2));
+    boardLayer.add(block4);
+
+    // ok we can change the sprite
+    // block4.setBody(
+    //   game.elements.getSprite("element_weapon"),
+    // );
+    // block4.body
   }
 
   @override
@@ -331,6 +375,8 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     initControl();
     // init popup
     initPopup();
+
+    initHero();
 
     // wait for a moment
     gameStart();

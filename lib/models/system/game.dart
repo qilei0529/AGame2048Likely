@@ -171,11 +171,15 @@ enum GameActionType {
 
   // 新建
   create,
-  // 新建
+  // 新建 地砖
   createFloor,
+  // 新建 效果
+  createEffect,
 
   // 移除 floor
   removeFloor,
+  // 移除 effect
+  removeEffect,
 
   // 升级
   upgrade,
