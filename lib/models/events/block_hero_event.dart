@@ -41,7 +41,10 @@ class BlockHeroEvent extends GameBlockEvent {
         // oh it is dead
         // only reduce hero check
       } else if (checkBlockCanAttack(leftBlock.type, rightBlock.type)) {
-        canAttack = true;
+        // move must above 0 then can attack
+        if (leftBlock.move > 0) {
+          canAttack = true;
+        }
       }
 
       if (canAttack) {
