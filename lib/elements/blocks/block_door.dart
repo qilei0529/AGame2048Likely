@@ -1,27 +1,49 @@
+import 'package:flame/components.dart';
+
 import 'package:flutter_game_2048_fight/elements/blocks/block_base.dart';
+import 'package:flutter_game_2048_fight/models/util.dart';
+import 'package:flutter_game_2048_fight/scenes/game_scene.dart';
 
-class BoardDoorItemWidget extends BoardItemWidget {
-  @override
-  toBorn() {
-    // TODO: implement toBorn
-    throw UnimplementedError();
+class BlockDoorItemWidget extends BlockItem
+    with HasGameReference<TheGameScene> {
+  BlockDoorItemWidget() {
+    size = globalBlockSize;
+    anchor = Anchor.center;
+  }
+
+  // ignore: non_constant_identifier_names
+  String _body_code = "element_door";
+
+  setBody({required String code}) {
+    _body_code = code;
   }
 
   @override
-  toDead() {
-    // TODO: implement toDead
-    throw UnimplementedError();
+  onLoad() {
+    super.onLoad();
+    // block
+    block = PositionComponent(
+      size: size,
+    );
+    body = SpriteComponent(
+      sprite: game.elements.getSprite(_body_code),
+      size: size,
+      position: Vector2(30, 30),
+      anchor: Anchor.center,
+    );
+    cover = SpriteComponent(
+      sprite: game.blocks.getSprite("cover_hero"),
+      size: size,
+    );
   }
 
   @override
-  toTrigger() {
-    // TODO: implement toTrigger
-    throw UnimplementedError();
-  }
+  void onMount() {
+    super.onMount();
 
-  @override
-  toWait() {
-    // TODO: implement toWait
-    throw UnimplementedError();
+    block.add(cover);
+    block.add(body);
+    //
+    add(block);
   }
 }

@@ -3,6 +3,7 @@ import 'dart:math';
 // frame
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_game_2048_fight/elements/blocks/block_base.dart';
 import 'package:flutter_game_2048_fight/elements/blocks/block_element.dart';
 import 'package:flutter_game_2048_fight/elements/blocks/block_enemy.dart';
 import 'package:flutter_game_2048_fight/elements/blocks/block_hero.dart';
@@ -10,7 +11,6 @@ import 'package:flutter_game_2048_fight/elements/blocks/block_wall.dart';
 
 // minxins
 import 'package:flutter_game_2048_fight/mixins/event_mixin.dart';
-import 'package:flutter_game_2048_fight/models/system/board.dart';
 
 // models
 import 'package:flutter_game_2048_fight/models/util.dart';
@@ -24,7 +24,6 @@ import 'package:flutter_game_2048_fight/scenes/game_scene.dart';
 // elements
 import 'package:flutter_game_2048_fight/elements/button.dart';
 import 'package:flutter_game_2048_fight/elements/block.dart';
-import 'package:flutter_game_2048_fight/elements/block_item.dart';
 
 // system
 class WorldScene extends World with HasGameReference<TheGameScene> {
@@ -38,7 +37,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
   late TextComponent staLabel;
 
   // 块 vos
-  Map<String, BoardItemComponent> blockVos = {};
+  Map<String, BlockItem> blockVos = {};
 
   // 地 vos
   Map<String, Component> floorVos = {};
@@ -188,7 +187,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
       var block = blockVos[system.hero!.id];
       if (block != null) {
         var act = max(hero.act, system.act);
-        block.setAct(act);
+        // block.setAct(act);
       }
     }
     actLabel.text = "act: ${system.act}";
@@ -349,15 +348,6 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
   }
 
   initHero() {
-    var block = BlockHeroItemWidget(pos: BoardPosition(1, 1));
-    boardLayer.add(block);
-    var block2 = BlockWallItemWidget(pos: BoardPosition(2, 1));
-    boardLayer.add(block2);
-    var block3 = BlockEnemyItemWidget(pos: BoardPosition(3, 1));
-    boardLayer.add(block3);
-    var block4 = BlockElementItemWidget(pos: BoardPosition(1, 2));
-    boardLayer.add(block4);
-
     // ok we can change the sprite
     // block4.setBody(
     //   game.elements.getSprite("element_weapon"),

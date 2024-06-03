@@ -205,13 +205,13 @@ createBlockEvent({
     block.events.add(BlockHeroStepHurtEvent(system: system));
   }
   if (block.type == BlockType.enemy) {
-    var event = BlockEnemyExprollEvent(system: system);
-    var random = Random();
-    int maxCount = random.nextInt(3) + 2;
-    event.maxCount = maxCount;
-    event.count = maxCount;
-    block.count = event.count;
-    block.events.add(event);
+    // var event = BlockEnemyExprollEvent(system: system);
+    // var random = Random();
+    // int maxCount = random.nextInt(3) + 2;
+    // event.maxCount = maxCount;
+    // event.count = maxCount;
+    // block.count = event.count;
+    // block.events.add(event);
   }
 }
 

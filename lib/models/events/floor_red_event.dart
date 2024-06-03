@@ -7,6 +7,11 @@ import '../system/game.dart';
 class FloorRedEvent extends GameBlockEvent {
   GameSystem system;
 
+  int maxCount = 2;
+  int count = 2;
+
+  int limit = 999;
+
   // move
   FloorRedEvent({required this.system});
 
@@ -15,6 +20,16 @@ class FloorRedEvent extends GameBlockEvent {
     print("event floor red ------->");
     var leftBlock = payload.block;
 
+    if (count == 0) {
+      var deadAction = GameActionData(
+        target: leftBlock.id,
+        type: GameActionType.removeFloor,
+      );
+      system.removeFloor(leftBlock);
+      system.actions.add(deadAction);
+
+      return null;
+    }
     var block = system.getBlockAt(leftBlock.position);
     if (block != null) {
       if (block.type == BlockType.door) {
@@ -32,7 +47,9 @@ class FloorRedEvent extends GameBlockEvent {
       );
       system.removeFloor(leftBlock);
       system.actions.add(deadAction);
-    }
+    } else {}
+
+    count -= 1;
 
     return null;
   }

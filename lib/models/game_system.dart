@@ -164,8 +164,6 @@ class GameSystem {
     return _effectVos[id];
   }
 
-  createBlock() {}
-
   addFloor(BoardItem block) {
     if (_floorVos[block.id] != null) {
       // ignore: avoid_print

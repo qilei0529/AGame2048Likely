@@ -1,6 +1,7 @@
 import 'package:flame/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_game_2048_fight/elements/block.dart';
+import 'package:flutter_game_2048_fight/elements/blocks/block_base.dart';
 import 'package:flutter_game_2048_fight/models/system/block.dart';
 import 'package:flutter_game_2048_fight/models/system/game.dart';
 import 'package:flutter_game_2048_fight/scenes/world_scene.dart';
@@ -9,120 +10,21 @@ import 'package:flutter_game_2048_fight/mixins/block_mixin.dart';
 
 extension ActionMixin on WorldScene {
   runAction(GameActionData action, Function onEnd) {
-    // no actions
     if (system.status != GameStatus.play) {
       onEnd();
       return;
     }
-
     var type = action.type;
-    // 出现 楼梯
-    if (type == GameActionType.showStair) {
-      // 新建一个 地板 样式 楼梯
-      var item = system.getFloor(action.target);
-      if (item != null) {
-        var p = item.position;
-        var pos = getBoardPositionAt(p.x, p.y);
-        var block = BlockComponent(
-          size: Vector2(60, 60),
-          color: Colors.yellow.shade100,
-          position: pos,
-        );
-        groundLayer.add(block);
-        // set ref
-        floorVos[item.id] = block;
-      }
-      onEnd();
-      return;
-    }
 
-    if (type == GameActionType.removeFloor) {
-      var block = floorVos[action.target];
-      if (block != null) {
-        block.removeFromParent();
-      }
-      onEnd();
-      return;
-    }
-
-    if (type == GameActionType.removeEffect) {
-      var block = effectVos[action.target];
-      if (block != null) {
-        block.removeFromParent();
-      }
-      onEnd();
-      return;
-    }
-
-    var item = system.getBlock(action.target);
-
-    if (type == GameActionType.enter) {
-      var block = blockVos[action.target];
-      if (item != null && block != null) {
-        // to play enter
-        block.dead(end: () {
-          block.removeFromParent();
-          onEnd();
-          if (item.type == BlockType.hero) {
-            // gameNextFloor();
-            system.status = GameStatus.next;
-          }
-        });
-      }
-      return;
-    }
-
-    if (type == GameActionType.fade) {
-      var block = blockVos[action.target];
-      if (item != null && block != null) {
-        block.fadeTo(end: () {
-          block.removeFromParent();
-          system.removeBlock(item);
-          onEnd();
-        });
-      } else {
-        onEnd();
-      }
-      return;
-    }
-    if (type == GameActionType.dead) {
-      var block = blockVos[action.target];
-      if (item != null && block != null) {
-        block.dead(end: () {
-          block.removeFromParent();
-          system.removeBlock(item);
-          onEnd();
-          if (item.type == BlockType.hero) {
-            // gameOver();
-            system.status = GameStatus.end;
-          }
-        });
-      } else {
-        onEnd();
-      }
-      return;
-    }
-    if (type == GameActionType.absorbed) {
-      var block = blockVos[action.target];
-      if (item != null && block != null) {
-        block.dead(end: () {
-          block.removeFromParent();
-          onEnd();
-        });
-        system.removeBlock(item);
-      } else {
-        onEnd();
-      }
-      return;
-    }
-    // do create
+    // normal
     if (type == GameActionType.create) {
+      var item = system.getBlock(action.target);
       if (item != null) {
-        var block = createBlock(item);
-        boardLayer.add(block);
-        blockVos[item.id] = block;
+        var block = createBlockItem(item);
         if (block != null) {
-          block.born(end: onEnd);
+          boardLayer.add(block);
+          blockVos[item.id] = block;
+          block.toBorn(onComplete: onEnd);
         } else {
           onEnd();
         }
@@ -131,7 +33,114 @@ extension ActionMixin on WorldScene {
       }
       return;
     }
-    // do create
+
+    if (type == GameActionType.dead) {
+      var block = blockVos[action.target];
+
+      var item = system.getBlock(action.target);
+      if (block != null) {
+        block.toDead(onComplete: () {
+          block.removeFromParent();
+          blockVos.remove(action.target);
+          if (item != null) {
+            system.removeBlock(item);
+            if (item.type == BlockType.hero) {
+              system.status = GameStatus.end;
+            }
+          }
+          onEnd();
+        });
+      }
+      onEnd();
+      return;
+    }
+
+    if (type == GameActionType.move) {
+      var block = blockVos[action.target];
+      if (block != null) {
+        block.toMove(pos: action.position!, onComplete: onEnd);
+      } else {
+        onEnd();
+      }
+      return;
+    }
+    // hero
+
+    // enemy
+    if (type == GameActionType.absorbed) {
+      var block = blockVos[action.target];
+      var item = system.getBlock(action.target);
+      if (block != null && item != null) {
+        block.toDead(onComplete: () {
+          block.removeFromParent();
+
+          // clean data
+          blockVos.remove(action.target);
+          system.removeBlock(item);
+          onEnd();
+        });
+      } else {
+        onEnd();
+      }
+      return;
+    }
+
+    // attac
+    if (type == GameActionType.turn) {
+      var block = blockVos[action.target];
+      var item = system.getBlock(action.target);
+      if (block != null && item != null) {
+        block.toTurn(
+          point: action.point!,
+          onComplete: onEnd,
+          needTurn: item.type == BlockType.hero || item.type == BlockType.enemy,
+        );
+      } else {
+        onEnd();
+      }
+      return;
+    }
+    if (type == GameActionType.attack) {
+      var block = blockVos[action.target];
+      if (block != null && block is BlockActiveItem) {
+        block.toAttack(onComplete: onEnd);
+      } else {
+        onEnd();
+      }
+      return;
+    }
+
+    if (type == GameActionType.injure) {
+      var block = blockVos[action.target];
+      if (block != null && block is BlockActiveItem) {
+        block.toInjure(life: action.life, onComplete: onEnd);
+      } else {
+        onEnd();
+      }
+      return;
+    }
+
+    // element
+
+    if (type == GameActionType.fade) {
+      var block = blockVos[action.target];
+      var item = system.getBlock(action.target);
+      if (block != null && item != null) {
+        block.toTrigger(onComplete: () {
+          block.removeFromParent();
+          // clean data
+          floorVos.remove(action.target);
+          system.removeBlock(item);
+          onEnd();
+        });
+      } else {
+        onEnd();
+      }
+
+      return;
+    }
+
+    // floor
     if (type == GameActionType.createFloor) {
       // 新建一个 地板 样式 楼梯
       var item = system.getFloor(action.target);
@@ -152,7 +161,66 @@ extension ActionMixin on WorldScene {
       }
       return;
     }
-    // do create
+
+    if (type == GameActionType.removeFloor) {
+      var block = floorVos[action.target];
+      if (block != null) {
+        block.removeFromParent();
+        floorVos.remove(action.target);
+
+        var item = system.getFloor(action.target);
+        if (item != null) {
+          system.removeFloor(item);
+        }
+      }
+      onEnd();
+      return;
+    }
+
+    // door
+    // 出现 楼梯
+    if (type == GameActionType.showStair) {
+      // 新建一个 地板 样式 楼梯
+      var item = system.getFloor(action.target);
+      if (item != null) {
+        var p = item.position;
+        var pos = getBoardPositionAt(p.x, p.y);
+        var block = BlockComponent(
+          size: Vector2(60, 60),
+          color: Colors.yellow.shade100,
+          position: pos,
+        );
+        groundLayer.add(block);
+        // set ref
+        floorVos[item.id] = block;
+      }
+      onEnd();
+      return;
+    }
+
+    if (type == GameActionType.enter) {
+      var block = blockVos[action.target];
+      var item = system.getBlock(action.target);
+      if (item != null && block != null) {
+        // to play enter
+        if (item.type == BlockType.hero) {
+          // gameNextFloor();
+          system.status = GameStatus.next;
+        }
+        onEnd();
+      }
+      return;
+    }
+
+    if (type == GameActionType.upgrade) {
+      // print("${item.id} upgrade: <- ");
+      // block.setLevel(item.level);
+      // block.upgrade(num: item.life, end: onEnd);
+      // block.lifeTo(num: item.life, end: onEnd);
+      // return;
+    }
+
+    // effect
     if (type == GameActionType.createEffect) {
       // 新建一个 效果
       var item = system.getEffect(action.target);
@@ -172,61 +240,7 @@ extension ActionMixin on WorldScene {
       }
       return;
     }
-
-    if (item != null) {
-      var block = blockVos[action.target];
-      if (block != null) {
-        // 处理 turn
-        if (type == GameActionType.turn) {
-          // ignore: avoid_print
-          print("${item.id} turen: ------ > ${action.point}");
-          block.point = action.point!;
-          block.turnTo(
-            point: action.point!,
-            end: onEnd,
-            needTurn:
-                block.type == BlockType.hero || block.type == BlockType.enemy,
-          );
-          return;
-        }
-        if (type == GameActionType.move) {
-          var pos = action.position!;
-          block.moveTo(x: pos.x, y: pos.y, end: onEnd);
-          return;
-        }
-        // attac
-        if (type == GameActionType.attack) {
-          // ignore: avoid_print
-          print("${item.id} attck: ------ > ${item.point}");
-          block.attack(end: onEnd);
-          return;
-        }
-
-        if (type == GameActionType.injure) {
-          // print("${item.id} injour: <- ");
-          block.injure(num: item.life, end: onEnd);
-          return;
-        }
-        if (type == GameActionType.count) {
-          print("set Count ${action.value}");
-          var count = action.value ?? 0;
-          block.countTo(count: count, end: onEnd);
-          return;
-        }
-        if (type == GameActionType.heal) {
-          // print("${item.id} heal: <- ");
-          block.lifeTo(num: item.life, end: onEnd);
-          return;
-        }
-        if (type == GameActionType.upgrade) {
-          // print("${item.id} upgrade: <- ");
-          block.setLevel(item.level);
-          block.upgrade(num: item.life, end: onEnd);
-          // block.lifeTo(num: item.life, end: onEnd);
-          return;
-        }
-      }
-    }
+    print(type);
     onEnd();
   }
 }
