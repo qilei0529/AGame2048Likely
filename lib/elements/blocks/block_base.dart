@@ -157,6 +157,14 @@ class BlockActiveItem extends BlockItem {
   int life = 0;
   int act = 0;
 
+  toLife(int life) {
+    this.life = life;
+  }
+
+  toAct(int act) {
+    this.act = act;
+  }
+
   toInjure({int? life, Function? onComplete}) {
     task.add((next) {
       var box = RectangleComponent(
@@ -172,20 +180,12 @@ class BlockActiveItem extends BlockItem {
           ],
           onComplete: () {
             box.removeFromParent();
-          },
-        ),
-      );
-      block.add(box);
-
-      block.add(
-        SequenceEffect(
-          [MoveToEffect(Vector2(0, 0), dur(0.2))],
-          onComplete: () {
             next();
             onComplete != null ? onComplete() : null;
           },
         ),
       );
+      block.add(box);
     });
   }
 

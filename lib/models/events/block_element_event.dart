@@ -39,8 +39,7 @@ class BlockElementEvent extends GameBlockEvent {
           system.sta += heal;
           var healAction = GameActionData(
             target: leftBlock.id,
-            type: GameActionType.heal,
-            life: leftBlock.life,
+            type: GameActionType.healSP,
             value: heal,
           );
           tempActions.add(healAction);
@@ -50,8 +49,7 @@ class BlockElementEvent extends GameBlockEvent {
           leftBlock.life += heal;
           var healAction = GameActionData(
             target: leftBlock.id,
-            type: GameActionType.heal,
-            life: leftBlock.life,
+            type: GameActionType.healHP,
             value: heal,
           );
           tempActions.add(healAction);
@@ -61,9 +59,8 @@ class BlockElementEvent extends GameBlockEvent {
           system.act += rightBlock.life;
           var healAction = GameActionData(
             target: leftBlock.id,
-            type: GameActionType.heal,
-            life: leftBlock.life,
-            value: 0,
+            type: GameActionType.healACT,
+            value: system.act,
           );
           tempActions.add(healAction);
         }

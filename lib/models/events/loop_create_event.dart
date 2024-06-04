@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import '../events/block_enemy_exproll.dart';
 import '../events/block_hero_step_hurt_event.dart';
 import '../events/floor_green_event.dart';
 import '../events/floor_red_event.dart';
@@ -93,7 +92,7 @@ class LoopCreateEvent extends GameLoopEvent {
 
       // 每次 生成 随机 个
       var allFloors = getExtraBlocks(blocks: system.floors, size: size);
-      int count = Random().nextInt(4);
+      int count = Random().nextInt(3);
       print("create floor list length: ${count}");
       if (count > 0) {
         for (var i = 0; i < count; i++) {

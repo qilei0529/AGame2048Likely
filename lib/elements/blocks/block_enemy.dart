@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_game_2048_fight/elements/blocks/block_base.dart';
@@ -45,7 +46,7 @@ class BlockEnemyItemWidget extends BlockActiveItem
       anchor: Anchor.center,
     );
 
-    // _level.opacity = 0;
+    _level.opacity = 0;
 
     _life_cover = SpriteComponent(
       sprite: game.blocks.getSprite("bg_life"),
@@ -78,6 +79,20 @@ class BlockEnemyItemWidget extends BlockActiveItem
       var item = body as SpriteComponent;
       item.sprite = game.elements.getSprite("element_enemy_v$num");
     }
+  }
+
+  @override
+  toLife(int life) {
+    super.toLife(life);
+    _life.text = life.toString();
+    _life_cover.add(
+      SequenceEffect(
+        [
+          ScaleEffect.to(Vector2.all(1.5), dur(0.1)),
+          ScaleEffect.to(Vector2.all(1), dur(0.1)),
+        ],
+      ),
+    );
   }
 
   @override

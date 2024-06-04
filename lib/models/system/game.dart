@@ -167,7 +167,11 @@ enum GameActionType {
   dead,
 
   // 恢复
-  heal,
+  healHP,
+  // 恢复 act
+  healACT,
+  // 恢复 sp
+  healSP,
 
   // 新建
   create,

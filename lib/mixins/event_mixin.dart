@@ -50,8 +50,9 @@ extension ActionMixin on WorldScene {
           }
           onEnd();
         });
+      } else {
+        onEnd();
       }
-      onEnd();
       return;
     }
 
@@ -66,12 +67,47 @@ extension ActionMixin on WorldScene {
     }
     // hero
 
+    if (type == GameActionType.healHP) {
+      var block = blockVos[action.target];
+      if (block != null && block is BlockActiveItem) {
+        block.toLife(action.value!);
+        onEnd();
+      } else {
+        onEnd();
+      }
+      return;
+    }
+
+    if (type == GameActionType.healACT) {
+      var block = blockVos[action.target];
+      if (block != null && block is BlockActiveItem) {
+        block.toAct(action.value!);
+        updateAct();
+        onEnd();
+      } else {
+        onEnd();
+      }
+      return;
+    }
+
+    if (type == GameActionType.healSP) {
+      var block = blockVos[action.target];
+      if (block != null && block is BlockActiveItem) {
+        updateSta();
+        onEnd();
+      } else {
+        onEnd();
+      }
+      return;
+    }
+
     // enemy
     if (type == GameActionType.absorbed) {
       var block = blockVos[action.target];
       var item = system.getBlock(action.target);
       if (block != null && item != null) {
-        block.toDead(onComplete: () {
+        // block.fa
+        block.toTrigger(onComplete: () {
           block.removeFromParent();
 
           // clean data
@@ -121,7 +157,6 @@ extension ActionMixin on WorldScene {
     }
 
     // element
-
     if (type == GameActionType.fade) {
       var block = blockVos[action.target];
       var item = system.getBlock(action.target);
@@ -136,7 +171,6 @@ extension ActionMixin on WorldScene {
       } else {
         onEnd();
       }
-
       return;
     }
 
@@ -207,19 +241,23 @@ extension ActionMixin on WorldScene {
           // gameNextFloor();
           system.status = GameStatus.next;
         }
-        onEnd();
       }
+      onEnd();
       return;
     }
 
     if (type == GameActionType.upgrade) {
       var block = blockVos[action.target];
       if (block != null) {
+        print("block level upgrade --------------> ${action.value}");
         block.toGrow(
           life: action.life,
-          level: action.level,
+          level: action.value,
           onComplete: onEnd,
         );
+        if (action.life != null && block is BlockActiveItem) {
+          block.toLife(action.life!);
+        }
       } else {
         onEnd();
       }
@@ -242,8 +280,8 @@ extension ActionMixin on WorldScene {
         effectLayer.add(block);
         // set ref
         effectVos[item.id] = block;
-        onEnd();
       }
+      onEnd();
       return;
     }
     print(type);

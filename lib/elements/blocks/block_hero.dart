@@ -1,4 +1,5 @@
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
 
 //
@@ -76,6 +77,34 @@ class BlockHeroItemWidget extends BlockActiveItem
         ),
       ),
       position: Vector2(9, 2),
+    );
+  }
+
+  @override
+  toLife(int life) {
+    super.toLife(life);
+    _life.text = life.toString();
+    _life_cover.add(
+      SequenceEffect(
+        [
+          ScaleEffect.to(Vector2.all(1.5), dur(0.1)),
+          ScaleEffect.to(Vector2.all(1), dur(0.1)),
+        ],
+      ),
+    );
+  }
+
+  @override
+  toAct(int act) {
+    super.toAct(act);
+    _act.text = act.toString();
+    _act_cover.add(
+      SequenceEffect(
+        [
+          ScaleEffect.to(Vector2.all(1.5), dur(0.1)),
+          ScaleEffect.to(Vector2.all(1), dur(0.1)),
+        ],
+      ),
     );
   }
 

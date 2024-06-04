@@ -33,8 +33,8 @@ class BlockEnemyMixinEvent extends GameBlockEvent {
       }
 
       if (canMerge) {
-        var level = min(rightBlock.level + 1, 3);
-        if (level != rightBlock.level) {
+        var level = min(leftBlock.level + 1, 3);
+        if (level != leftBlock.level) {
           // turnAction
           rightBlock.isDead = true;
           var eatAction = GameActionData(
@@ -46,6 +46,7 @@ class BlockEnemyMixinEvent extends GameBlockEvent {
           leftBlock.level = level;
           leftBlock.life += rightBlock.life;
           leftBlock.act += 1;
+          print("333333333333 ------ ${leftBlock.level}");
           var upgradeAction = GameActionData(
             target: leftBlock.id,
             type: GameActionType.upgrade,
