@@ -17,6 +17,7 @@ extension BlockMixin on WorldScene {
     if (item.type == BlockType.hero) {
       block = BlockHeroItemWidget();
       block as BlockHeroItemWidget;
+      block.type = item.type;
       block.position = position;
       block.life = item.life;
       block.act = 1;
@@ -26,6 +27,7 @@ extension BlockMixin on WorldScene {
     if (item.type == BlockType.enemy) {
       block = BlockEnemyItemWidget();
       block as BlockEnemyItemWidget;
+      block.type = item.type;
       block.position = position;
       block.life = item.life;
 
@@ -34,12 +36,14 @@ extension BlockMixin on WorldScene {
 
     if (item.type == BlockType.block) {
       block = BlockWallItemWidget();
+      block.type = item.type;
       block.position = position;
       return block;
     }
 
     if (item.type == BlockType.door) {
       block = BlockDoorItemWidget();
+      block.type = item.type;
       block.position = position;
       return block;
     }
@@ -47,6 +51,7 @@ extension BlockMixin on WorldScene {
     if (item.type == BlockType.element) {
       block = BlockElementItemWidget();
       block as BlockElementItemWidget;
+      block.type = item.type;
       block.position = position;
       block.setBody(code: "element_sp");
       return block;
@@ -55,6 +60,7 @@ extension BlockMixin on WorldScene {
     if (item.type == BlockType.heal) {
       block = BlockElementItemWidget();
       block as BlockElementItemWidget;
+      block.type = item.type;
       block.position = position;
       block.setBody(code: "element_hp");
       return block;
@@ -63,8 +69,9 @@ extension BlockMixin on WorldScene {
     if (item.type == BlockType.weapon) {
       block = BlockElementItemWidget();
       block as BlockElementItemWidget;
+      block.type = item.type;
       block.position = position;
-      block.setBody(code: "element_weapon");
+      block.setBody(code: "element_weapon_v1");
       return block;
     }
 

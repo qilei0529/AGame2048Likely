@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
@@ -16,6 +18,8 @@ class BlockEnemyItemWidget extends BlockActiveItem
   late final SpriteComponent _life_cover;
   late final TextComponent _life;
 
+  late SpriteComponent _level;
+
   @override
   onLoad() {
     super.onLoad();
@@ -24,7 +28,7 @@ class BlockEnemyItemWidget extends BlockActiveItem
       size: size,
     );
     body = SpriteComponent(
-      sprite: game.elements.getSprite("element_enemy_1"),
+      sprite: game.elements.getSprite("element_enemy_v1"),
       size: size,
       position: Vector2(30, 30),
       anchor: Anchor.center,
@@ -33,6 +37,15 @@ class BlockEnemyItemWidget extends BlockActiveItem
       sprite: game.blocks.getSprite("cover_enemy"),
       size: size,
     );
+
+    _level = SpriteComponent(
+      sprite: game.blocks.getSprite("bg_level_v1"),
+      size: Vector2(20, 20),
+      position: Vector2(30, 10),
+      anchor: Anchor.center,
+    );
+
+    // _level.opacity = 0;
 
     _life_cover = SpriteComponent(
       sprite: game.blocks.getSprite("bg_life"),
@@ -55,6 +68,26 @@ class BlockEnemyItemWidget extends BlockActiveItem
     );
   }
 
+  setLevel(int level) {
+    if (level > 1) {
+      var num = min(level, 3);
+      _level.sprite = game.blocks.getSprite("bg_level_v$num");
+      _level.opacity = 1;
+
+      // change de sprite
+      var item = body as SpriteComponent;
+      item.sprite = game.elements.getSprite("element_enemy_v$num");
+    }
+  }
+
+  @override
+  toGrow({int? life, int? level, Function? onComplete}) {
+    if (level != null) {
+      setLevel(level);
+    }
+    super.toGrow(life: life, level: level, onComplete: onComplete);
+  }
+
   @override
   toInjure({int? life, Function? onComplete}) {
     super.toInjure(
@@ -75,6 +108,7 @@ class BlockEnemyItemWidget extends BlockActiveItem
     // life
     _life_cover.add(_life);
     block.add(_life_cover);
+    block.add(_level);
 
     add(block);
   }

@@ -1,6 +1,7 @@
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_game_2048_fight/models/system/block.dart';
 import 'package:flutter_game_2048_fight/models/system/board.dart';
 import 'package:flutter_game_2048_fight/models/system/game.dart';
 import 'package:flutter_game_2048_fight/models/system/task.dart';
@@ -25,6 +26,7 @@ abstract class BoardItemWidget extends PositionComponent {
 class BlockItem extends BoardItemWidget {
   final TaskSystem task = TaskSystem(maxQueue: 1);
 
+  late final BlockType type;
   late final Component block;
   late final Component cover;
   late final Component body;
@@ -36,6 +38,20 @@ class BlockItem extends BoardItemWidget {
     // var position = getBoardPositionAt(pos.x, pos.y);
     // this.position = position;
     task.add((next) {
+      cover.add(SequenceEffect(
+        [
+          OpacityEffect.to(0, dur(0)),
+          OpacityEffect.to(0, dur(0.1)),
+          OpacityEffect.to(1, dur(0.1))
+        ],
+      ));
+      body.add(SequenceEffect(
+        [
+          OpacityEffect.to(0, dur(0)),
+          OpacityEffect.to(0, dur(0.1)),
+          OpacityEffect.to(1, dur(0.1))
+        ],
+      ));
       // move self
       block.add(
         createBornEffect(
@@ -109,6 +125,24 @@ class BlockItem extends BoardItemWidget {
       add(
         createMoveEffect(
           position: position,
+          onComplete: () {
+            next();
+            onComplete != null ? onComplete() : null;
+          },
+        ),
+      );
+    });
+  }
+
+  toGrow({int? life, int? level, Function? onComplete}) {
+    task.add((next) {
+      // move self
+      body.add(
+        SequenceEffect(
+          [
+            ScaleEffect.to(Vector2.all(1.5), dur(0.1)),
+            ScaleEffect.to(Vector2.all(1), dur(0.1)),
+          ],
           onComplete: () {
             next();
             onComplete != null ? onComplete() : null;

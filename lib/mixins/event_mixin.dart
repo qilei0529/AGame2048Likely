@@ -213,11 +213,17 @@ extension ActionMixin on WorldScene {
     }
 
     if (type == GameActionType.upgrade) {
-      // print("${item.id} upgrade: <- ");
-      // block.setLevel(item.level);
-      // block.upgrade(num: item.life, end: onEnd);
-      // block.lifeTo(num: item.life, end: onEnd);
-      // return;
+      var block = blockVos[action.target];
+      if (block != null) {
+        block.toGrow(
+          life: action.life,
+          level: action.level,
+          onComplete: onEnd,
+        );
+      } else {
+        onEnd();
+      }
+      return;
     }
 
     // effect

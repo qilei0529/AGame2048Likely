@@ -347,13 +347,7 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     }
   }
 
-  initHero() {
-    // ok we can change the sprite
-    // block4.setBody(
-    //   game.elements.getSprite("element_weapon"),
-    // );
-    // block4.body
-  }
+  initHero() {}
 
   @override
   FutureOr<void> onLoad() {

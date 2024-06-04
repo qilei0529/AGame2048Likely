@@ -1,10 +1,13 @@
 <TextureAtlas imagePath="sheet.png">
 	<SubTexture name="element_hp" x="0" y="0" width="120" height="120"/>
 	<SubTexture name="element_sp" x="120" y="0" width="120" height="120"/>
-	<SubTexture name="element_weapon" x="120" y="120" width="120" height="120"/>
 	<SubTexture name="element_rock" x="240" y="0" width="120" height="120"/>
 	<SubTexture name="element_door" x="360" y="0" width="120" height="120"/>
-	<SubTexture name="element_hero" x="240" y="120" width="120" height="120"/>
-	<SubTexture name="element_enemy_1" x="360" y="120" width="120" height="120"/>
-	<SubTexture name="element_enemy_2" x="480" y="120" width="120" height="120"/>
+	<SubTexture name="element_hero" x="0" y="360" width="120" height="120"/>
+	<SubTexture name="element_weapon_v1" x="0" y="120" width="120" height="120"/>
+	<SubTexture name="element_weapon_v2" x="120" y="120" width="120" height="120"/>
+	<SubTexture name="element_weapon_v3" x="240" y="120" width="120" height="120"/>
+	<SubTexture name="element_enemy_v1" x="0" y="240" width="120" height="120"/>
+	<SubTexture name="element_enemy_v2" x="120" y="240" width="120" height="120"/>
+	<SubTexture name="element_enemy_v3" x="240" y="240" width="120" height="120"/>
 </TextureAtlas>

@@ -1,7 +1,10 @@
+import 'dart:math';
+
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 
 import 'package:flutter_game_2048_fight/elements/blocks/block_base.dart';
+import 'package:flutter_game_2048_fight/models/system/block.dart';
 import 'package:flutter_game_2048_fight/models/util.dart';
 import 'package:flutter_game_2048_fight/scenes/game_scene.dart';
 
@@ -18,6 +21,8 @@ class BlockElementItemWidget extends BlockItem
   setBody({required String code}) {
     _body_code = code;
   }
+
+  late SpriteComponent _level;
 
   @override
   onLoad() {
@@ -36,6 +41,36 @@ class BlockElementItemWidget extends BlockItem
       sprite: game.blocks.getSprite("cover_element"),
       size: size,
     );
+
+    _level = SpriteComponent(
+      sprite: game.blocks.getSprite("bg_level_m1"),
+      size: Vector2(20, 20),
+      position: Vector2(30, 10),
+      anchor: Anchor.center,
+    );
+
+    _level.opacity = 0;
+  }
+
+  setLevel(int level) {
+    if (level > 1) {
+      var num = min(level, 3);
+      _level.sprite = game.blocks.getSprite("bg_level_m$num");
+      _level.opacity = 1;
+      // change de sprite
+      if (type == BlockType.weapon) {
+        var item = body as SpriteComponent;
+        item.sprite = game.elements.getSprite("element_weapon_v$num");
+      }
+    }
+  }
+
+  @override
+  toGrow({int? life, int? level, Function? onComplete}) {
+    if (level != null) {
+      setLevel(level);
+    }
+    super.toGrow(life: life, level: level, onComplete: onComplete);
   }
 
   @override
@@ -66,6 +101,7 @@ class BlockElementItemWidget extends BlockItem
 
     block.add(cover);
     block.add(body);
+    body.add(_level);
     //
     add(block);
   }
