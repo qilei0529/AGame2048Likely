@@ -59,6 +59,7 @@ class EffectHeroAttackEvent extends GameBlockEvent {
         block: rightBlock,
         act: act,
         system: system,
+        fromBlock: leftBlock,
       );
     }
 

@@ -269,6 +269,8 @@ class GameLoopEvent extends GameEvent<GameLoopPayload> {
 
 class GameBlockPayload {
   BoardItem block;
+  // event suffer from
+  BoardItem? fromBlock;
   GameBlockPayload(this.block);
 }
 

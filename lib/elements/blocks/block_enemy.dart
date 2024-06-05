@@ -82,17 +82,23 @@ class BlockEnemyItemWidget extends BlockActiveItem
   }
 
   @override
-  toLife(int life) {
-    super.toLife(life);
-    _life.text = life.toString();
-    _life_cover.add(
-      SequenceEffect(
-        [
-          ScaleEffect.to(Vector2.all(1.5), dur(0.1)),
-          ScaleEffect.to(Vector2.all(1), dur(0.1)),
-        ],
-      ),
-    );
+  toLife({required int life, Function? onComplete}) {
+    super.toLife(life: life);
+    task.add((next) {
+      _life.text = life.toString();
+      _life_cover.add(
+        SequenceEffect(
+          [
+            ScaleEffect.to(Vector2.all(1.5), dur(0.1)),
+            ScaleEffect.to(Vector2.all(1), dur(0.1)),
+          ],
+          onComplete: () {
+            next();
+            onComplete != null ? onComplete() : null;
+          },
+        ),
+      );
+    });
   }
 
   @override

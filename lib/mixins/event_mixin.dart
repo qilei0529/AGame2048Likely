@@ -62,8 +62,11 @@ extension ActionMixin on WorldScene {
     if (type == GameActionType.healHP) {
       var block = blockVos[action.target];
       if (block != null && block is BlockActiveItem) {
-        block.toLife(action.value!);
-        onEnd();
+        if (action.life != null) {
+          block.toLife(life: action.life!, onComplete: onEnd);
+        } else {
+          onEnd();
+        }
       } else {
         onEnd();
       }
@@ -73,9 +76,8 @@ extension ActionMixin on WorldScene {
     if (type == GameActionType.healACT) {
       var block = blockVos[action.target];
       if (block != null && block is BlockActiveItem) {
-        block.toAct(action.value!);
+        block.toAct(act: action.value!, onComplete: onEnd);
         updateAct();
-        onEnd();
       } else {
         onEnd();
       }
@@ -144,7 +146,7 @@ extension ActionMixin on WorldScene {
       var block = blockVos[action.target];
       if (block != null && block is BlockActiveItem) {
         if (action.life != null) {
-          block.toLife(action.life!);
+          block.toLife(life: action.life!);
         }
         block.toInjure(onComplete: onEnd);
       } else {
@@ -250,7 +252,7 @@ extension ActionMixin on WorldScene {
           onComplete: onEnd,
         );
         if (action.life != null && block is BlockActiveItem) {
-          block.toLife(action.life!);
+          block.toLife(life: action.life!);
         }
       } else {
         onEnd();

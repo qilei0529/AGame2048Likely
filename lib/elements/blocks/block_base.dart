@@ -155,12 +155,14 @@ class BlockActiveItem extends BlockItem {
   int life = 0;
   int act = 0;
 
-  toLife(int life) {
+  toLife({required int life, Function? onComplete}) {
     this.life = life;
+    onComplete != null ? onComplete() : null;
   }
 
-  toAct(int act) {
+  toAct({required int act, Function? onComplete}) {
     this.act = act;
+    onComplete != null ? onComplete() : null;
   }
 
   toAbsorb({Function? onComplete}) {

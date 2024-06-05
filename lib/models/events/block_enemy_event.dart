@@ -48,7 +48,9 @@ reduceInjourAction({
   required BoardItem block,
   required int act,
   required GameSystem system,
+  BoardItem? fromBlock,
 }) {
+  // injour from left to right
   var life = max(0, block.life - act);
 
   if (block.life != life) {
@@ -62,13 +64,18 @@ reduceInjourAction({
     );
     system.actions.add(injureAction);
 
-    reduceDeadAction(block: block, system: system);
+    reduceDeadAction(
+      block: block,
+      system: system,
+      formBlock: fromBlock,
+    );
   }
 }
 
 reduceDeadAction({
   required BoardItem block,
   required GameSystem system,
+  BoardItem? formBlock,
 }) {
   if (block.life == 0) {
     block.isDead = true;
@@ -77,6 +84,16 @@ reduceDeadAction({
       type: GameActionType.dead,
     );
     system.actions.add(deadAction);
+    var events =
+        block.events.where((event) => event.type == GameEventType.dead);
+    // 获取 当前 block dead event
+    if (events.isNotEmpty) {
+      for (var event in events) {
+        var payload = GameBlockPayload(block);
+        payload.fromBlock = formBlock;
+        event.action(payload);
+      }
+    }
   }
 }
 

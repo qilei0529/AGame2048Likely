@@ -50,6 +50,7 @@ class BlockElementEvent extends GameBlockEvent {
           var healAction = GameActionData(
             target: leftBlock.id,
             type: GameActionType.healHP,
+            life: leftBlock.life,
             value: heal,
           );
           tempActions.add(healAction);

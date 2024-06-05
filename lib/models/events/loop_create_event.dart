@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter_game_2048_fight/models/events/effect_enemy_attack_event.dart';
+import 'package:flutter_game_2048_fight/models/events/effect_enemy_dead_heal_event.dart';
 
 import '../events/effect_hero_attack_event.dart';
 
@@ -212,6 +213,9 @@ createBlockEvent({
   }
   if (block.type == BlockType.enemy) {
     block.events.add(EffectEnemyAttackEvent(system: system));
+
+    // add dead event
+    block.events.add(EffectEnemyDeadEvent(system: system));
     // var event = BlockEnemyExprollEvent(system: system);
     // var random = Random();
     // int maxCount = random.nextInt(3) + 2;

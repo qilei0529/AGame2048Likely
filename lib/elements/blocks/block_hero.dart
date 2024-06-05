@@ -81,32 +81,43 @@ class BlockHeroItemWidget extends BlockActiveItem
   }
 
   @override
-  toLife(int life) {
-    super.toLife(life);
-    _life.text = life.toString();
-    _life_cover.add(
-      SequenceEffect(
-        [
-          ScaleEffect.to(Vector2.all(1.5), dur(0.1)),
-          ScaleEffect.to(Vector2.all(1), dur(0.1)),
-        ],
-      ),
-    );
+  toLife({required int life, Function? onComplete}) {
+    super.toLife(life: life);
+    task.add((next) {
+      _life.text = life.toString();
+      _life_cover.add(
+        SequenceEffect(
+          [
+            ScaleEffect.to(Vector2.all(1.5), dur(0.1)),
+            ScaleEffect.to(Vector2.all(1), dur(0.1)),
+          ],
+          onComplete: () {
+            next();
+            onComplete != null ? onComplete() : null;
+          },
+        ),
+      );
+    });
   }
 
   @override
-  toAct(int act) {
-    super.toAct(act);
-    print("afterr act $act");
-    _act.text = act.toString();
-    _act_cover.add(
-      SequenceEffect(
-        [
-          ScaleEffect.to(Vector2.all(1.5), dur(0.1)),
-          ScaleEffect.to(Vector2.all(1), dur(0.1)),
-        ],
-      ),
-    );
+  toAct({required int act, Function? onComplete}) {
+    super.toAct(act: act);
+    task.add((next) {
+      _act.text = act.toString();
+      _act_cover.add(
+        SequenceEffect(
+          [
+            ScaleEffect.to(Vector2.all(1.5), dur(0.1)),
+            ScaleEffect.to(Vector2.all(1), dur(0.1)),
+          ],
+          onComplete: () {
+            next();
+            onComplete != null ? onComplete() : null;
+          },
+        ),
+      );
+    });
   }
 
   @override
