@@ -236,7 +236,7 @@ SequenceEffect createMoveEffect({
   Function? onComplete,
 }) {
   return SequenceEffect(
-    [MoveEffect.to(position, dur(0.16))],
+    [MoveEffect.to(position, dur(0.15))],
     onComplete: () => onComplete != null ? onComplete() : null,
   );
 }

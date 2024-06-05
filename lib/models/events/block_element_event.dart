@@ -26,7 +26,8 @@ class BlockElementEvent extends GameBlockEvent {
       var canElement = false;
       print("has block on ${key}");
 
-      if (checkBlockCanElement(leftBlock.type, rightBlock.type)) {
+      if (checkBlockCanElement(leftBlock.type, rightBlock.type) &&
+          leftBlock.move > 0) {
         canElement = true;
       }
 

@@ -161,6 +161,7 @@ extension ActionMixin on WorldScene {
           onComplete: () {
             block.removeFromParent();
             blockVos.remove(action.target);
+
             onEnd();
           },
         );

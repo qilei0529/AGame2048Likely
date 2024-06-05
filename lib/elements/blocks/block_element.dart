@@ -8,6 +8,7 @@ import 'package:flutter_game_2048_fight/models/system/block.dart';
 import 'package:flutter_game_2048_fight/models/system/board.dart';
 import 'package:flutter_game_2048_fight/models/util.dart';
 import 'package:flutter_game_2048_fight/scenes/game_scene.dart';
+import 'package:flutter_game_2048_fight/scenes/world_scene.dart';
 
 class BlockElementItemWidget extends BlockItem
     with HasGameReference<TheGameScene> {
@@ -80,11 +81,10 @@ class BlockElementItemWidget extends BlockItem
       cover.add(
         OpacityEffect.to(0, dur(0.1)),
       );
-
       body.add(
         SequenceEffect(
           [
-            ScaleEffect.to(Vector2.all(1.3), dur(0.1)),
+            ScaleEffect.to(Vector2.all(1.3), dur(0.08)),
             ScaleEffect.to(Vector2.all(1), dur(0.08)),
           ],
           onComplete: () {
@@ -93,10 +93,6 @@ class BlockElementItemWidget extends BlockItem
           },
         ),
       );
-      print("hass position --------> $pos");
-      if (pos != null) {
-        toMove(pos: pos);
-      }
     });
   }
 
