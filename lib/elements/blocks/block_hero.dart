@@ -83,41 +83,49 @@ class BlockHeroItemWidget extends BlockActiveItem
   @override
   toLife({required int life, Function? onComplete}) {
     super.toLife(life: life);
-    task.add((next) {
-      _life.text = life.toString();
-      _life_cover.add(
-        SequenceEffect(
-          [
-            ScaleEffect.to(Vector2.all(1.5), dur(0.1)),
-            ScaleEffect.to(Vector2.all(1), dur(0.1)),
-          ],
-          onComplete: () {
-            next();
-            onComplete != null ? onComplete() : null;
-          },
-        ),
-      );
-    });
+    _life.text = life.toString();
+    _life_cover.add(
+      SequenceEffect(
+        [
+          ScaleEffect.to(Vector2.all(1.5), dur(0.06)),
+          ScaleEffect.to(Vector2.all(1), dur(0.4)),
+        ],
+        onComplete: () {
+          onComplete != null ? onComplete() : null;
+        },
+      ),
+    );
+    // task.add((next) {});
   }
 
   @override
   toAct({required int act, Function? onComplete}) {
     super.toAct(act: act);
-    task.add((next) {
-      _act.text = act.toString();
-      _act_cover.add(
-        SequenceEffect(
-          [
-            ScaleEffect.to(Vector2.all(1.5), dur(0.1)),
-            ScaleEffect.to(Vector2.all(1), dur(0.1)),
-          ],
-          onComplete: () {
-            next();
-            onComplete != null ? onComplete() : null;
-          },
-        ),
-      );
-    });
+    _act.text = act.toString();
+    _act_cover.add(
+      SequenceEffect(
+        [
+          ScaleEffect.to(Vector2.all(1.5), dur(0.1)),
+          ScaleEffect.to(Vector2.all(1), dur(0.1)),
+        ],
+        onComplete: () {
+          onComplete != null ? onComplete() : null;
+        },
+      ),
+    );
+    // task.add((next) {});
+  }
+
+  @override
+  toInjure({int? life, Function? onComplete}) {
+    super.toInjure(
+      onComplete: () {
+        onComplete != null ? onComplete() : null;
+      },
+    );
+    if (life != null) {
+      _life.text = life.toString();
+    }
   }
 
   @override

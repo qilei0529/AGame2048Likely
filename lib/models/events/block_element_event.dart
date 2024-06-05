@@ -1,5 +1,4 @@
 import '../game_system.dart';
-import '../system/block.dart';
 import '../system/game.dart';
 import '../util.dart';
 
@@ -68,11 +67,12 @@ class BlockElementEvent extends GameBlockEvent {
 
         // do element
         rightBlock.isDead = true;
-        var deadAction = GameActionData(
+        var fadeAction = GameActionData(
           target: rightBlock.id,
           type: GameActionType.fade,
+          position: leftBlock.position,
         );
-        tempActions.add(deadAction);
+        tempActions.add(fadeAction);
 
         system.actions.addAll(tempActions);
         return true;

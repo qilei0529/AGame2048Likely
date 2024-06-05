@@ -24,16 +24,15 @@ class EffectEnemyDeadEvent extends GameBlockEvent {
       // when hero kill then heal 1
       // else loose heal
       if (fromBlock.type == BlockType.hero) {
-        var heal = 1;
-        fromBlock.life += heal;
-        var healAction = GameActionData(
-          target: fromBlock.id,
-          type: GameActionType.healHP,
-          life: fromBlock.life,
-          value: heal,
-        );
-        system.actions.add(healAction);
-      } else {
+        // var heal = 1;
+        // fromBlock.life += heal;
+        // var healAction = GameActionData(
+        //   target: fromBlock.id,
+        //   type: GameActionType.healHP,
+        //   life: fromBlock.life,
+        //   value: heal,
+        // );
+        // system.actions.add(healAction)
         reduceInjourAction(
           block: fromBlock,
           act: 1,

@@ -5,6 +5,7 @@ import 'package:flame/effects.dart';
 
 import 'package:flutter_game_2048_fight/elements/blocks/block_base.dart';
 import 'package:flutter_game_2048_fight/models/system/block.dart';
+import 'package:flutter_game_2048_fight/models/system/board.dart';
 import 'package:flutter_game_2048_fight/models/util.dart';
 import 'package:flutter_game_2048_fight/scenes/game_scene.dart';
 
@@ -74,7 +75,7 @@ class BlockElementItemWidget extends BlockItem
   }
 
   @override
-  toTrigger({Function? onComplete}) {
+  toTrigger({BoardPosition? pos, Function? onComplete}) {
     task.add((next) {
       cover.add(
         OpacityEffect.to(0, dur(0.1)),
@@ -92,6 +93,10 @@ class BlockElementItemWidget extends BlockItem
           },
         ),
       );
+      print("hass position --------> $pos");
+      if (pos != null) {
+        toMove(pos: pos);
+      }
     });
   }
 

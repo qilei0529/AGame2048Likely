@@ -74,6 +74,11 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     });
     blockVos.clear();
 
+    floorVos.forEach((key, value) {
+      value.removeFromParent();
+    });
+    floorVos.clear();
+
     initBlocks();
     updateAct();
     updateSta();

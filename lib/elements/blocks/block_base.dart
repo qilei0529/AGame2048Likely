@@ -81,7 +81,7 @@ class BlockItem extends BoardItemWidget {
   }
 
   @override
-  toTrigger({Function? onComplete}) {
+  toTrigger({BoardPosition? pos, Function? onComplete}) {
     onComplete != null ? onComplete() : null;
   }
 
@@ -189,7 +189,7 @@ class BlockActiveItem extends BlockItem {
     });
   }
 
-  toInjure({Function? onComplete}) {
+  toInjure({int? life, Function? onComplete}) {
     task.add((next) {
       var box = RectangleComponent(
         size: size,
