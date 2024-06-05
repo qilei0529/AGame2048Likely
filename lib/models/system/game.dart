@@ -230,6 +230,10 @@ enum GameEventType {
   move,
   // 块 事件
   block,
+  // 块 攻击 事件
+  attack,
+  // 块 死亡 事件
+  dead,
   // 地板 事件
   floor,
   // 冷却 事件

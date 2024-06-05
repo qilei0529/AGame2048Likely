@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import '../events/effect_hero_attack_event.dart';
+
 import '../events/block_hero_step_hurt_event.dart';
 import '../events/floor_green_event.dart';
 import '../events/floor_red_event.dart';
@@ -201,7 +203,10 @@ createBlockEvent({
 
   // add hero event
   if (block.type == BlockType.hero) {
+    // hero step hurt event
     block.events.add(BlockHeroStepHurtEvent(system: system));
+    // hero attack event
+    block.events.add(EffectHeroAttackEvent(system: system));
   }
   if (block.type == BlockType.enemy) {
     // var event = BlockEnemyExprollEvent(system: system);

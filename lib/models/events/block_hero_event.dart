@@ -1,14 +1,8 @@
-import 'dart:math';
-import 'package:flutter_game_2048_fight/models/events/effect_hero_attack_event.dart';
-
 import '../util.dart';
 
 import '../game_system.dart';
-import '../system/level.dart';
 import '../system/block.dart';
 import '../system/game.dart';
-
-import '../events/block_enemy_event.dart';
 
 class BlockHeroEvent extends GameBlockEvent {
   GameSystem system;
@@ -19,7 +13,6 @@ class BlockHeroEvent extends GameBlockEvent {
   @override
   action(payload) {
     var leftBlock = payload.block;
-    List<GameActionData> tempActions = [];
     if (leftBlock.type != BlockType.hero) {
       return false;
     }
@@ -28,8 +21,8 @@ class BlockHeroEvent extends GameBlockEvent {
     var attackPoisiton = point.addPosition(leftBlock.position);
 
     var vos = getBlockPosVos(blocks: system.blocks);
-
     var key = getBlockKey(attackPoisiton);
+
     BoardItem? rightBlock = vos[key];
     if (rightBlock != null) {
       // only check eneny
@@ -51,35 +44,34 @@ class BlockHeroEvent extends GameBlockEvent {
       }
 
       if (canAttack) {
+        // reduce attact
         // 判断 当前 游戏还有多少 act
-        var act = system.act;
-        if (act <= 0) {
-          // 如果没有 攻击力了 则用基础攻击力
-          act = leftBlock.act;
-        } else {
-          // 每次攻击少一点
-          system.act = max(act - 1, 0);
-        }
+        reduceAttackEffect(block: leftBlock, system: system);
+        // reduceInjourAction(
+        //   block: rightBlock,
+        //   act: act,
+        //   system: system,
+        // );
 
-        // turnAction
-        var attackAction = GameActionData(
-          target: leftBlock.id,
-          type: GameActionType.attack,
-          toTarget: rightBlock.id,
-          value: act,
-        );
-        tempActions.add(attackAction);
-
-        reduceInjourAction(
-          block: rightBlock,
-          act: act,
-          system: system,
-        );
-
-        system.actions.addAll(tempActions);
         return true;
       }
     }
     return null;
   }
+}
+
+reduceAttackEffect({
+  required BoardItem block,
+  required GameSystem system,
+  int? act,
+}) {
+  var events =
+      block.events.where((event) => event.type == GameEventType.attack);
+  // 获取 当前 block 的attack event
+  if (events.isNotEmpty) {
+    for (var event in events) {
+      event.action(GameBlockPayload(block));
+    }
+  }
+  // 处理 attack event
 }
