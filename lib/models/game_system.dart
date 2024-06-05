@@ -98,10 +98,10 @@ class GameSystem {
       BlockEnemyMixinEvent(system: this),
     ];
     eventMap[BlockType.heal] = [
-      BlockEnemyMixinEvent(system: this),
+      // BlockEnemyMixinEvent(system: this),
     ];
     eventMap[BlockType.element] = [
-      BlockEnemyMixinEvent(system: this),
+      // BlockEnemyMixinEvent(system: this),
     ];
 
     // 移动
@@ -109,6 +109,8 @@ class GameSystem {
       MovePointEvent(system: this),
       MoveForwardEvent(system: this),
     ];
+
+    // 回合事件
     loopEvents = [
       LoopStepEvent(system: this),
       LoopCreateEvent(system: this),
@@ -411,7 +413,6 @@ class GameSystem {
           .where((event) => event.type == GameEventType.floor)
           .toList();
       // has
-      print("floor events ============== $events");
       if (events.isNotEmpty) {
         // ignore: avoid_function_literals_in_foreach_calls
         events.forEach((item) {
@@ -432,7 +433,10 @@ List<BoardItem> getRangeBlocks(List<BoardItem> blocks, GamePoint point) {
   List<BoardItem> blocklist = [];
   // 获取 位置 map 地图
   for (var block in blocks) {
-    blocklist.add(block);
+    // not dead
+    if (!block.isDead) {
+      blocklist.add(block);
+    }
   }
   blocklist.sort((a, b) {
     var posA = a.position;

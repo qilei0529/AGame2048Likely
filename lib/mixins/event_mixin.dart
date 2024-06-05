@@ -36,18 +36,10 @@ extension ActionMixin on WorldScene {
 
     if (type == GameActionType.dead) {
       var block = blockVos[action.target];
-
-      var item = system.getBlock(action.target);
       if (block != null) {
         block.toDead(onComplete: () {
           block.removeFromParent();
           blockVos.remove(action.target);
-          if (item != null) {
-            system.removeBlock(item);
-            if (item.type == BlockType.hero) {
-              system.status = GameStatus.end;
-            }
-          }
           onEnd();
         });
       } else {
@@ -104,17 +96,19 @@ extension ActionMixin on WorldScene {
     // enemy
     if (type == GameActionType.absorbed) {
       var block = blockVos[action.target];
-      var item = system.getBlock(action.target);
-      if (block != null && item != null) {
-        // block.fa
-        block.toTrigger(onComplete: () {
+      if (block != null) {
+        if (block is BlockActiveItem) {
+          // block.fa
+          block.toAbsorb(onComplete: () {
+            block.removeFromParent();
+            blockVos.remove(action.target);
+            onEnd();
+          });
+        } else {
           block.removeFromParent();
-
-          // clean data
           blockVos.remove(action.target);
-          system.removeBlock(item);
           onEnd();
-        });
+        }
       } else {
         onEnd();
       }
@@ -159,13 +153,10 @@ extension ActionMixin on WorldScene {
     // element
     if (type == GameActionType.fade) {
       var block = blockVos[action.target];
-      var item = system.getBlock(action.target);
-      if (block != null && item != null) {
+      if (block != null) {
         block.toTrigger(onComplete: () {
           block.removeFromParent();
-          // clean data
-          floorVos.remove(action.target);
-          system.removeBlock(item);
+          blockVos.remove(action.target);
           onEnd();
         });
       } else {

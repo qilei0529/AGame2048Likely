@@ -4,10 +4,6 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_game_2048_fight/elements/blocks/block_base.dart';
-import 'package:flutter_game_2048_fight/elements/blocks/block_element.dart';
-import 'package:flutter_game_2048_fight/elements/blocks/block_enemy.dart';
-import 'package:flutter_game_2048_fight/elements/blocks/block_hero.dart';
-import 'package:flutter_game_2048_fight/elements/blocks/block_wall.dart';
 
 // minxins
 import 'package:flutter_game_2048_fight/mixins/event_mixin.dart';
@@ -276,10 +272,6 @@ class WorldScene extends World with HasGameReference<TheGameScene> {
     await runActions();
     system.runBlockEvents(point);
     await runActions();
-
-    // check effect
-    // system.runEffectEvents();
-    // await runActions();
 
     system.runMove2Events(point);
     await runActions();

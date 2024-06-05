@@ -31,7 +31,7 @@ class BlockItem extends BoardItemWidget {
   late final Component cover;
   late final Component body;
 
-  late Vector2 _face = Vector2(1, 1);
+  late Vector2 face = Vector2(1, 1);
 
   @override
   toBorn({Function? onComplete}) {
@@ -95,20 +95,18 @@ class BlockItem extends BoardItemWidget {
       {required GamePoint point,
       bool? needTurn = false,
       Function? onComplete}) {
-    this.point = point;
-
-    if (needTurn == true) {
-      if (point == GamePoint.right) {
-        _face = Vector2(-1, 1);
-      } else if (point == GamePoint.left) {
-        _face = Vector2(1, 1);
-      }
-    }
-
     task.add((next) {
+      this.point = point;
+      if (needTurn == true) {
+        if (point == GamePoint.right) {
+          face = Vector2(-1, 1);
+        } else if (point == GamePoint.left) {
+          face = Vector2(1, 1);
+        }
+      }
       body.add(
         SequenceEffect(
-          [ScaleEffect.to(_face, dur(0.04))],
+          [ScaleEffect.to(face, dur(0.04))],
           onComplete: () {
             next();
             onComplete != null ? onComplete() : null;
@@ -163,6 +161,30 @@ class BlockActiveItem extends BlockItem {
 
   toAct(int act) {
     this.act = act;
+  }
+
+  toAbsorb({Function? onComplete}) {
+    task.add((next) {
+      var box = RectangleComponent(
+        size: size,
+      );
+      box.setColor(Colors.blue);
+      box.add(
+        SequenceEffect(
+          [
+            OpacityEffect.to(0, dur(0)),
+            OpacityEffect.to(1, dur(0.05)),
+            OpacityEffect.to(0, dur(0.05)),
+          ],
+          onComplete: () {
+            box.removeFromParent();
+            next();
+            onComplete != null ? onComplete() : null;
+          },
+        ),
+      );
+      block.add(box);
+    });
   }
 
   toInjure({int? life, Function? onComplete}) {

@@ -11,6 +11,13 @@ class LoopStepEvent extends GameLoopEvent {
   action(payload) {
     system.step += 1;
 
+    // clean dean ones
+    system.blocks.forEach((block) {
+      if (block.isDead) {
+        system.removeBlock(block);
+      }
+    });
+
     return null;
   }
 }
