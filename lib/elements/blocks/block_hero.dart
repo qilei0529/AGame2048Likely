@@ -97,6 +97,7 @@ class BlockHeroItemWidget extends BlockActiveItem
   @override
   toAct(int act) {
     super.toAct(act);
+    print("afterr act $act");
     _act.text = act.toString();
     _act_cover.add(
       SequenceEffect(

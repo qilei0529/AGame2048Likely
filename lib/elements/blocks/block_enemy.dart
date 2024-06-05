@@ -104,11 +104,9 @@ class BlockEnemyItemWidget extends BlockActiveItem
   }
 
   @override
-  toInjure({int? life, Function? onComplete}) {
+  toInjure({Function? onComplete}) {
     super.toInjure(
-      life: life,
       onComplete: () {
-        _life.text = life.toString();
         onComplete != null ? onComplete() : null;
       },
     );

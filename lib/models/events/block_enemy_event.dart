@@ -1,9 +1,6 @@
 import 'dart:math';
 
-import 'package:flutter_game_2048_fight/models/events/effect_hero_attack_event.dart';
 import 'package:flutter_game_2048_fight/models/system/block.dart';
-import 'package:flutter_game_2048_fight/models/system/board.dart';
-import 'package:flutter_game_2048_fight/models/system/level.dart';
 
 import '../game_system.dart';
 import '../system/game.dart';
@@ -20,8 +17,6 @@ class BlockEnemyEvent extends GameBlockEvent {
 
     var vos = getBlockPosVos(blocks: system.blocks);
 
-    List<GameActionData> tempActions = [];
-
     // for (var leftBlock in blocks) {
     var point = leftBlock.point;
     // 获取 block 射程范围内 是否有 对象
@@ -31,7 +26,6 @@ class BlockEnemyEvent extends GameBlockEvent {
     var rightBlock = vos[key];
     if (rightBlock != null) {
       var canAttack = false;
-      print("has block on ${key}");
       if (rightBlock.isDead) {
         // oh it is dead
       } else if (checkBlockCanAttack(leftBlock.type, rightBlock.type)) {
@@ -42,28 +36,10 @@ class BlockEnemyEvent extends GameBlockEvent {
       }
 
       if (canAttack) {
-        // act from leftBlock
-        print("leftBlock act ---- ${leftBlock.act}");
-        var act = leftBlock.act;
-
-        // turnAction
-        var attackAction = GameActionData(
-          target: leftBlock.id,
-          type: GameActionType.attack,
-          toTarget: rightBlock.id,
-          value: act,
-          point: leftBlock.point,
-        );
-        tempActions.add(attackAction);
-
-        reduceInjourAction(
-          block: rightBlock,
-          act: act,
-          system: system,
-        );
+        reduceAttackEffect(block: leftBlock, system: system);
+        return true;
       }
     }
-    system.actions.addAll(tempActions);
     return null;
   }
 }
@@ -105,28 +81,17 @@ reduceDeadAction({
 }
 
 reduceAttackEffect({
-  required BoardPosition position,
+  required BoardItem block,
   required GameSystem system,
   int? act,
 }) {
-  // for add event to asign attack
-  // add attack event
-  var effectBlock = createEffectBlock();
-  // effect position
-  effectBlock.position = position;
-  // add attack event
-  var event = EffectHeroAttackEvent(system: system);
-  event.act = act ?? 1;
-  // bind parent
-  event.parent = effectBlock;
-  effectBlock.events.add(event);
-  // add to system
-  system.addEffect(effectBlock);
-
-  // turnAction
-  var effectAction = GameActionData(
-    target: effectBlock.id,
-    type: GameActionType.createEffect,
-  );
-  system.actions.add(effectAction);
+  var events =
+      block.events.where((event) => event.type == GameEventType.attack);
+  // 获取 当前 block 的attack event
+  if (events.isNotEmpty) {
+    for (var event in events) {
+      event.action(GameBlockPayload(block));
+    }
+  }
+  // 处理 attack event
 }

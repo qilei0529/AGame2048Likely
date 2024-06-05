@@ -2,6 +2,8 @@
 
 // step
 
+import 'package:flutter_game_2048_fight/models/events/loop_status_event.dart';
+
 import 'util.dart';
 
 import 'events/loop_create_event.dart';
@@ -114,6 +116,7 @@ class GameSystem {
     loopEvents = [
       LoopStepEvent(system: this),
       LoopCreateEvent(system: this),
+      LoopStatusEvent(system: this),
     ];
   }
 

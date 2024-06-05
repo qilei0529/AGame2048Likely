@@ -1,3 +1,5 @@
+import 'package:flutter_game_2048_fight/models/events/block_enemy_event.dart';
+
 import '../util.dart';
 
 import '../game_system.dart';
@@ -44,34 +46,10 @@ class BlockHeroEvent extends GameBlockEvent {
       }
 
       if (canAttack) {
-        // reduce attact
-        // 判断 当前 游戏还有多少 act
         reduceAttackEffect(block: leftBlock, system: system);
-        // reduceInjourAction(
-        //   block: rightBlock,
-        //   act: act,
-        //   system: system,
-        // );
-
         return true;
       }
     }
     return null;
   }
-}
-
-reduceAttackEffect({
-  required BoardItem block,
-  required GameSystem system,
-  int? act,
-}) {
-  var events =
-      block.events.where((event) => event.type == GameEventType.attack);
-  // 获取 当前 block 的attack event
-  if (events.isNotEmpty) {
-    for (var event in events) {
-      event.action(GameBlockPayload(block));
-    }
-  }
-  // 处理 attack event
 }

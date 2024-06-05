@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:flutter_game_2048_fight/models/events/effect_enemy_attack_event.dart';
+
 import '../events/effect_hero_attack_event.dart';
 
 import '../events/block_hero_step_hurt_event.dart';
@@ -209,6 +211,7 @@ createBlockEvent({
     block.events.add(EffectHeroAttackEvent(system: system));
   }
   if (block.type == BlockType.enemy) {
+    block.events.add(EffectEnemyAttackEvent(system: system));
     // var event = BlockEnemyExprollEvent(system: system);
     // var random = Random();
     // int maxCount = random.nextInt(3) + 2;

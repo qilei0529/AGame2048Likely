@@ -1,26 +1,24 @@
-import 'dart:math';
-
 import 'package:flutter_game_2048_fight/models/events/block_enemy_event.dart';
 import 'package:flutter_game_2048_fight/models/system/block.dart';
 
 import '../game_system.dart';
 import '../system/game.dart';
 
-class EffectHeroAttackEvent extends GameBlockEvent {
+class EffectEnemyAttackEvent extends GameBlockEvent {
   GameSystem system;
 
   late int act;
   late BoardItem parent;
 
   // Move
-  EffectHeroAttackEvent({required this.system}) {
+  EffectEnemyAttackEvent({required this.system}) {
     // 是有 攻击的时候有效
     type = GameEventType.attack;
   }
 
   @override
   action(payload) {
-    print("Effect hero attack --------- >");
+    print("Effect enemey attack --------- >");
     // 根据 效果的位置 去匹配 block
     var leftBlock = payload.block;
 
@@ -33,22 +31,8 @@ class EffectHeroAttackEvent extends GameBlockEvent {
     system.actions.add(attackAction);
 
     // 获取攻击
-    var act = system.act;
-    if (act <= 0) {
-      // 如果没有 攻击力了 则用基础攻击力
-      act = leftBlock.act;
-    } else {
-      // 每次攻击少一点
-      // TODO 可以 变成 event 推送
-      system.act = max(act - 1, 0);
-
-      var actAction = GameActionData(
-        target: leftBlock.id,
-        type: GameActionType.healACT,
-        value: system.act > 0 ? system.act : leftBlock.act,
-      );
-      system.actions.add(actAction);
-    }
+    var act = leftBlock.act;
+    // TODO 添加攻击特效
 
     var point = leftBlock.point;
     var attackPoisiton = point.addPosition(leftBlock.position);

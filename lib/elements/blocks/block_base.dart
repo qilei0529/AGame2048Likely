@@ -187,7 +187,7 @@ class BlockActiveItem extends BlockItem {
     });
   }
 
-  toInjure({int? life, Function? onComplete}) {
+  toInjure({Function? onComplete}) {
     task.add((next) {
       var box = RectangleComponent(
         size: size,

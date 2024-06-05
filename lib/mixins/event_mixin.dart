@@ -143,7 +143,10 @@ extension ActionMixin on WorldScene {
     if (type == GameActionType.injure) {
       var block = blockVos[action.target];
       if (block != null && block is BlockActiveItem) {
-        block.toInjure(life: action.life, onComplete: onEnd);
+        if (action.life != null) {
+          block.toLife(action.life!);
+        }
+        block.toInjure(onComplete: onEnd);
       } else {
         onEnd();
       }
