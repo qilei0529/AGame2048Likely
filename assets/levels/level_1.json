@@ -1,0 +1,99 @@
+{
+  "name": "level 1",
+  "sections": [
+    {
+      "title": "the level 1 floor 1",
+      "steps": [
+        {
+          "index": 1,
+          "blocks": [
+            {
+              "type": "Hero",
+              "code": "hero",
+              "position": [4, 5],
+              "life": 5,
+              "level": 1
+            },
+            {
+              "type": "Enemy",
+              "code": "enemy",
+              "position": [4, 1],
+              "life": 1,
+              "level": 1
+            },
+            {
+              "type": "Enemy",
+              "code": "enemy",
+              "position": [4, 2],
+              "life": 3,
+              "level": 1
+            },
+            {
+              "type": "Block",
+              "code": "rock",
+              "life": 5,
+              "level": 1
+            },
+            {
+              "type": "Element",
+              "code": "element",
+              "life": 4,
+              "level": 1
+            },
+            {
+              "type": "Weapon",
+              "code": "weapon",
+              "life": 3,
+              "level": 1
+            },
+            {
+              "type": "Heal",
+              "code": "heal",
+              "life": 3,
+              "level": 1
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "blocks": [
+            {
+              "type": "Door",
+              "code": "door",
+              "life": 2,
+              "level": 1
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "title": "the level 1 floor 2",
+      "steps": [
+        {
+          "index": 1,
+          "blocks": [
+            {
+              "type": "Enemy",
+              "code": "enemy",
+              "life": 1,
+              "level": 1
+            }
+          ]
+        },
+        {
+          "index": 10,
+          "blocks": [
+            {
+              "type": "Door",
+              "code": "door",
+              "life": 2,
+              "level": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

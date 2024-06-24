@@ -1,0 +1,16 @@
+<TextureAtlas imagePath="sheet.png">
+	<SubTexture name="cover_rock" x="480" y="0" width="120" height="120"/>
+	<SubTexture name="cover_enemy" x="480" y="0" width="120" height="120"/>
+	<SubTexture name="cover_element" x="120" y="0" width="120" height="120"/>
+	<SubTexture name="cover_hero" x="0" y="0" width="120" height="120"/>
+	<SubTexture name="bg_life" x="0" y="140" width="44" height="44"/>
+	<SubTexture name="bg_act" x="60" y="140" width="44" height="44"/>
+	<SubTexture name="bg_element_1" x="140" y="140" width="40" height="40"/>
+	<SubTexture name="bg_element_2" x="190" y="140" width="40" height="40"/>
+	<SubTexture name="bg_level_v1" x="0" y="200" width="40" height="40"/>
+	<SubTexture name="bg_level_v2" x="60" y="200" width="40" height="40"/>
+	<SubTexture name="bg_level_v3" x="120" y="200" width="40" height="40"/>
+	<SubTexture name="bg_level_m1" x="180" y="200" width="40" height="40"/>
+	<SubTexture name="bg_level_m2" x="240" y="200" width="40" height="40"/>
+	<SubTexture name="bg_level_m3" x="300" y="200" width="40" height="40"/>
+</TextureAtlas>
