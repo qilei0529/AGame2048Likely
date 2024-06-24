@@ -88,7 +88,7 @@ class BlockHeroItemWidget extends BlockActiveItem
       SequenceEffect(
         [
           ScaleEffect.to(Vector2.all(1.5), dur(0.06)),
-          ScaleEffect.to(Vector2.all(1), dur(0.4)),
+          ScaleEffect.to(Vector2.all(1), dur(0.04)),
         ],
         onComplete: () {
           onComplete != null ? onComplete() : null;

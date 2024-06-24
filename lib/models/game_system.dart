@@ -225,8 +225,12 @@ class GameSystem {
 
   gameRestart() {
     status = GameStatus.start;
+
     // clean blocks
     _blockVos.clear();
+    _floorVos.clear();
+    _effectVos.clear();
+
     // clean actions
     actions.clear();
 
